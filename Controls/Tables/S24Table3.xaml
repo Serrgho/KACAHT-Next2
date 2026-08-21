@@ -1,0 +1,118 @@
+﻿<UserControl x:Class="Kas.S24Table3"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             mc:Ignorable="d">
+	<UserControl.Resources>
+		<Style x:Key="CellBorder" TargetType="Border">
+			<Setter Property="BorderBrush" Value="Black"/>
+			<Setter Property="BorderThickness" Value="0.5"/>
+			<Setter Property="Background" Value="White"/>
+		</Style>
+		<Style x:Key="HeaderBorder" TargetType="Border" BasedOn="{StaticResource CellBorder}">
+			<Setter Property="Background" Value="#FFEEEEEE"/>
+		</Style>
+		<Style x:Key="TotalBorder" TargetType="Border" BasedOn="{StaticResource CellBorder}">
+			<Setter Property="Background" Value="#FFDDDDDD"/>
+		</Style>
+		<Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="TextAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Padding" Value="3,1"/>
+			<Setter Property="TextWrapping" Value="Wrap"/>
+			<!-- ← вот это добавили -->
+		</Style>
+		<Style x:Key="CellStyle" TargetType="TextBlock">
+			<Setter Property="TextAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Padding" Value="3,1"/>
+		</Style>
+	</UserControl.Resources>
+
+	<StackPanel>
+		<TextBlock x:Name="LblCaption" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center" Margin="0,0,0,5"/>
+
+		<Grid x:Name="MainGrid">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="130"/>
+				<ColumnDefinition Width="70"/>
+				<ColumnDefinition Width="70"/>
+				<ColumnDefinition Width="70"/>
+				<ColumnDefinition Width="80"/>
+				<ColumnDefinition Width="80"/>
+				<ColumnDefinition Width="70"/>
+				<ColumnDefinition Width="70"/>
+				<ColumnDefinition Width="70"/>
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+
+			<!-- ШАПКА: 2 строки -->
+			<Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Депо"/>
+			</Border>
+			<Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="В расследовании"/>
+			</Border>
+			<Border Grid.Row="0" Grid.Column="4" Grid.RowSpan="2" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Более 3-х суток" />
+			</Border>
+			<Border Grid.Row="0" Grid.Column="5" Grid.RowSpan="2" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Более 10 суток" />
+			</Border>
+			<Border Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="3" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Учтено за депо"/>
+			</Border>
+
+			<Border Grid.Row="1" Grid.Column="1" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="1,2 кат"/>
+			</Border>
+			<Border Grid.Row="1" Grid.Column="2" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="3 кат"/>
+			</Border>
+			<Border Grid.Row="1" Grid.Column="3" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="1-3 кат"/>
+			</Border>
+			<Border Grid.Row="1" Grid.Column="6" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="1,2 кат"/>
+			</Border>
+			<Border Grid.Row="1" Grid.Column="7" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="3 кат"/>
+			</Border>
+			<Border Grid.Row="1" Grid.Column="8" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="1-3 кат"/>
+			</Border>
+
+			<!-- КОЛОНКА ДЕПО -->
+			<Border Grid.Row="2" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+				<TextBlock x:Name="LblDep1" Style="{StaticResource HeaderTextStyle}"/>
+			</Border>
+			<Border Grid.Row="3" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+				<TextBlock x:Name="LblDep2" Style="{StaticResource HeaderTextStyle}"/>
+			</Border>
+			<Border Grid.Row="4" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+				<TextBlock x:Name="LblDep3" Style="{StaticResource HeaderTextStyle}"/>
+			</Border>
+			<Border Grid.Row="5" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+				<TextBlock x:Name="LblDep4" Style="{StaticResource HeaderTextStyle}"/>
+			</Border>
+			<Border Grid.Row="6" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+				<TextBlock x:Name="LblDep5" Style="{StaticResource HeaderTextStyle}"/>
+			</Border>
+			<Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TotalBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Всего"/>
+			</Border>
+		</Grid>
+	</StackPanel>
+</UserControl>

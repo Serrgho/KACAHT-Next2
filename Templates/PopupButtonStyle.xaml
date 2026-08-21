@@ -1,0 +1,125 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <Style x:Key="PopupStyleButton" TargetType="Button">
+        <Setter Property="Width" Value="auto"/>
+        <Setter Property="Background" Value="{StaticResource AppBackBrush}"/>
+        <Setter Property="BorderBrush" Value="Gray"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="2"/>
+        <Setter Property="Margin" Value="3"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="4"
+                    Padding="{TemplateBinding Padding}">
+                        <!-- Тень -->
+                        <Border.Effect>
+                            <DropShadowEffect Color="{StaticResource ShadowColor}" BlurRadius="5" ShadowDepth="2" Opacity="0.7"/>
+                        </Border.Effect>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <!-- При наведении -->
+        <Style.Triggers>
+			
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource ButtonOverBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+
+	<Style x:Key="PopupStyleButtonGreen" BasedOn="{StaticResource PopupStyleButton}" TargetType="Button">
+		<Setter Property="Background" Value="#FF5DAD5A"/>
+		<Setter Property="Foreground" Value="SaddleBrown"/>
+		<Style.Triggers>
+			<Trigger Property="IsMouseOver" Value="True">
+				<Setter Property="Background" Value="#FF438541"/>
+				<Setter Property="Foreground" Value="LightGoldenrodYellow"/>
+
+				
+			</Trigger>
+		</Style.Triggers>
+	</Style>
+	<Style x:Key="PopupStyleButtonOrange" BasedOn="{StaticResource PopupStyleButton}" TargetType="Button">
+		<Setter Property="Background" Value="DarkOrange"/>
+		<Setter Property="Foreground" Value="LightGoldenrodYellow"/>
+		<Style.Triggers>
+			<Trigger Property="IsMouseOver" Value="True">
+				
+				<Setter Property="Foreground" Value="Yellow"/>
+
+
+			</Trigger>
+		</Style.Triggers>
+	</Style>
+
+	<Style x:Key="PopupStyleButtonWithVisibility" BasedOn="{StaticResource PopupStyleButton}" TargetType="Button">
+        <!-- Добавляем новое свойство для управления видимостью -->
+        <Setter Property="Visibility" Value="Collapsed"/>
+        <Style.Triggers>
+            <!-- Триггер для IsSingleMode -->
+            <DataTrigger Binding="{Binding IsSingleMode, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                <Setter Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+
+
+    <Style x:Key="StyleCloseButton" TargetType="Button">
+        <Setter Property="Width" Value="auto"/>
+        <Setter Property="Background" Value="{StaticResource SplitterBrush}" />
+        <Setter Property="BorderBrush" Value="Gray"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="2"/>
+        <Setter Property="Margin" Value="3"/>
+        <Setter Property="Foreground" Value="LightYellow"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Cursor" Value="Hand"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4"
+                            Padding="{TemplateBinding Padding}">
+                        <!-- Тень -->
+                        <Border.Effect>
+                            <DropShadowEffect Color="{StaticResource ShadowColor}" BlurRadius="5" ShadowDepth="2" Opacity="0.7"/>
+                        </Border.Effect>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <!-- При наведении -->
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource ScrolBarBrush}" />
+                <Setter Property="Foreground" Value="DarkRed"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+
+
+
+
+
+
+</ResourceDictionary>

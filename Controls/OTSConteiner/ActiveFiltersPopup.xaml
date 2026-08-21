@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="Kas.ActiveFiltersPopup"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="400">
+    <Border Background="{StaticResource AppBackBrush}"  BorderBrush="{StaticResource SplitterBrush}" BorderThickness="4" Padding="2" Width="600" MaxHeight="500" CornerRadius="5">
+        <ScrollViewer>
+            <ScrollViewer.Resources>
+                <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}"/>
+            </ScrollViewer.Resources>
+            <StackPanel x:Name="FiltersPanel" Margin="10">
+                <!-- Сюда будут добавляться TextBlock с описанием фильтров -->
+                <!-- Стили для заголовков и обычных строк -->
+                <StackPanel.Resources>
+                    <!-- Стиль для заголовков (например, "Активные фильтры 0-уровня:") -->
+                    <Style x:Key="HeaderStyle" TargetType="TextBlock">
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="Foreground" Value="DarkBlue"/>
+                        <!-- Можно использовать StaticResource AppTextBrush если определён -->
+                        <Setter Property="FontSize" Value="14"/>
+                        <Setter Property="Margin" Value="0,5,0,2"/>
+                    </Style>
+                    <!-- Стиль для обычных строк (например, "  - Kat: 1, 2") -->
+                    <Style x:Key="ItemStyle" TargetType="TextBlock">
+                        <Setter Property="FontWeight" Value="Normal"/>
+                        <Setter Property="Foreground" Value="Black"/>
+                        <!-- Можно использовать StaticResource AppTextBrush если определён -->
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="Margin" Value="20,0,0,2"/>
+                        <!-- Отступ для вложенных элементов -->
+                        <Setter Property="TextWrapping" Value="Wrap"/>
+                    </Style>
+                    <!-- Стиль для "Нет активных фильтров" -->
+                    <Style x:Key="NoFiltersStyle" TargetType="TextBlock">
+                        <Setter Property="FontStyle" Value="Italic"/>
+                        <Setter Property="Foreground" Value="Gray"/>
+                        <!-- Можно использовать StaticResource AppTextBrush если определён -->
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="Margin" Value="10,0,0,2"/>
+                    </Style>
+                </StackPanel.Resources>
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</UserControl>

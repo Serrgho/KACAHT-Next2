@@ -1,0 +1,357 @@
+﻿<Window x:Class="Kas.GenReportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+        WindowStartupLocation="CenterOwner"
+        Title="GenReportWindow" MinHeight="800" MinWidth="1600">
+
+
+	<Grid Background="{StaticResource AppBackBrush}">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<!-- Верхняя панель -->
+		<Border Grid.Row="0" Margin="5,5,5,2" Padding="8,4">
+			<DockPanel>
+				<StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+					<TextBlock Text="📊 Генер. отчет КАСАНТ" 
+                               FontSize="14" FontWeight="SemiBold" 
+                               Foreground="DarkSlateGray" VerticalAlignment="Center"/>
+					<TextBlock x:Name="txtRowCount" 
+                               Margin="20,0,0,0" 
+                               Foreground="DarkSlateGray" 
+                               VerticalAlignment="Center"
+                               Text="Записей: 0"/>
+				</StackPanel>
+
+				<StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+					<Button x:Name="btnCopyIds" Content="📋 Скопировать №№"	
+							Style="{StaticResource PopupStyleButton}" 
+							Click="btnCopyIds_Click"/>
+				</StackPanel>
+			</DockPanel>
+		</Border>
+
+		<!-- Панель поиска -->
+		<Border Grid.Row="1" Margin="5,2,5,2" Padding="8,4">
+			<DockPanel>
+				<TextBlock Text="🔍 Поиск:" VerticalAlignment="Center" Margin="0,0,8,0"
+                           Foreground="DarkSlateGray" FontWeight="SemiBold"/>
+				<Button x:Name="btnClearSearch" Content="✕" 
+                DockPanel.Dock="Right"
+                Width="26" Height="22"
+                Margin="4,0,0,0"
+                Padding="0"
+                ToolTip="Сбросить поиск"
+                Click="btnClearSearch_Click"
+                Visibility="Collapsed">
+					<Button.Style>
+						<Style TargetType="Button">
+							<Setter Property="Background" Value="Transparent"/>
+							<Setter Property="BorderBrush" Value="#FFB0B0B0"/>
+							<Setter Property="BorderThickness" Value="1"/>
+							<Setter Property="Foreground" Value="#FF666666"/>
+							<Setter Property="Cursor" Value="Hand"/>
+							<Setter Property="FontSize" Value="11"/>
+							<Setter Property="FontWeight" Value="Bold"/>
+							<Setter Property="Template">
+								<Setter.Value>
+									<ControlTemplate TargetType="Button">
+										<Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="3">
+											<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+										</Border>
+										<ControlTemplate.Triggers>
+											<Trigger Property="IsMouseOver" Value="True">
+												<Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+												<Setter Property="Foreground" Value="Red"/>
+											</Trigger>
+										</ControlTemplate.Triggers>
+									</ControlTemplate>
+								</Setter.Value>
+							</Setter>
+						</Style>
+					</Button.Style>
+				</Button>
+				<TextBox x:Name="txtSearch" 
+                         Padding="4,2"
+                         TextChanged="txtSearch_TextChanged"/>
+			</DockPanel>
+		</Border>
+
+		 
+		<DataGrid x:Name="dgReport" Grid.Row="2"
+		  FrozenColumnCount="8"
+		  
+          SelectionUnit="Cell"
+          SelectionMode="Extended"
+          AutoGenerateColumns="False"
+          CanUserAddRows="False"
+          CanUserDeleteRows="False"
+          IsReadOnly="True"
+          GridLinesVisibility="Horizontal"
+          Background="Transparent"
+          RowBackground="Transparent"
+          AlternatingRowBackground="#D7DEA9"
+          FontSize="12"
+          FontFamily="Segoe UI"
+          BorderThickness="0"
+          Margin="5,0,5,5"
+          HeadersVisibility="Column"
+          MouseDoubleClick="dgReport_MouseDoubleClick">
+
+			<DataGrid.Resources>
+				<Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
+
+				<!-- Базовый стиль для DataGridCell -->
+				<Style TargetType="DataGridCell">
+					<Setter Property="Padding" Value="4,2"/>
+					<Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+					<Style.Triggers>
+						<Trigger Property="IsSelected" Value="True">
+							<Setter Property="Background" Value="{StaticResource SplitterBrush}"/>
+							<Setter Property="Foreground" Value="{StaticResource AppBackBrush}"/>
+							<Setter Property="FontWeight" Value="SemiBold"/>
+						</Trigger>
+					</Style.Triggers>
+				</Style>
+
+				<!-- 🔑 БАЗОВЫЙ СТИЛЬ для всех TextBlock в ячейках -->
+				<Style x:Key="BaseCellStyle" TargetType="TextBlock">
+					<Setter Property="TextWrapping" Value="NoWrap"/>
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="HorizontalAlignment" Value="Center"/>
+					<Setter Property="Padding" Value="4,2"/>
+				</Style>
+
+				<!-- Стиль для текстовых колонок (с переносом) -->
+				<Style x:Key="TextCellStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseCellStyle}">
+					<Setter Property="TextWrapping" Value="Wrap"/>
+				</Style>
+
+				<!-- Стиль для числовых колонок (жирный) -->
+				<Style x:Key="NumericCellStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseCellStyle}">
+					<Setter Property="FontWeight" Value="SemiBold"/>
+				</Style>
+
+				<!-- Стиль для П/Ч (красный жирный) -->
+				<Style x:Key="PChCellStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseCellStyle}">
+					<Setter Property="FontWeight" Value="Bold"/>
+					<Setter Property="Foreground" Value="#FFCC0000"/>
+				</Style>
+
+				<!-- Стиль для ОТС-колонок (левый край + перенос + верх) -->
+				<Style x:Key="OtsCellStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseCellStyle}">
+					<Setter Property="TextWrapping" Value="Wrap"/>
+					<Setter Property="HorizontalAlignment" Value="Stretch"/>
+					<Setter Property="VerticalAlignment" Value="Center"/>
+				</Style>
+
+				<!-- 🔹 Стили для границ групп поездов -->
+				<!-- Левая граница (для первой колонки группы) -->
+				<Style x:Key="GroupBorderLeftStyle" TargetType="Border">
+					<Setter Property="Padding" Value="8,2,4,2"/>
+					<Setter Property="BorderBrush" Value="{StaticResource ScrolBarBrush}"/>
+					<Setter Property="BorderThickness" Value="2,0,0,0"/>
+				</Style>
+
+				<!-- Правая граница (для последней колонки группы) -->
+				<Style x:Key="GroupBorderRightStyle" TargetType="Border">
+					<Setter Property="Padding" Value="4,2,8,2"/>
+					<Setter Property="BorderBrush" Value="{StaticResource ScrolBarBrush}"/>
+					<Setter Property="BorderThickness" Value="0,0,2,0"/>
+				</Style>
+
+				<!-- Стиль текста внутри левой границы (числовой) -->
+				<Style x:Key="GroupLeftTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseCellStyle}">
+					<Setter Property="FontWeight" Value="SemiBold"/>
+				</Style>
+
+				<!-- Стиль текста внутри правой границы (текстовый с переносом) -->
+				<Style x:Key="GroupRightTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TextCellStyle}">
+					<Setter Property="FontSize" Value="13"/>
+				</Style>
+
+				<!-- Стиль заголовков -->
+				<Style TargetType="DataGridColumnHeader">
+					<Setter Property="Padding" Value="6,4"/>
+					<Setter Property="FontSize" Value="13"/>
+					<Setter Property="FontWeight" Value="SemiBold"/>
+					<Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="HorizontalContentAlignment" Value="Center"/>
+					<Setter Property="BorderBrush" Value="{StaticResource ScrolBarBrush}"/>
+					<Setter Property="BorderThickness" Value="0,0,1,1"/>
+				</Style>
+			</DataGrid.Resources>
+
+			<DataGrid.Columns>
+				<!-- № -->
+				<DataGridTextColumn Header="№" Binding="{Binding RowNumber}" Width="40">
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock" BasedOn="{StaticResource BaseCellStyle}">
+							<Setter Property="Foreground" Value="Gray"/>
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+
+				<!-- Категория -->
+				<DataGridTextColumn Header="Кат." Binding="{Binding Category}" Width="45">
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock" BasedOn="{StaticResource BaseCellStyle}">
+							<Setter Property="FontWeight" Value="SemiBold"/>
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+
+				<!-- ID отказа -->
+				<DataGridTextColumn Header="ID отказа" Binding="{Binding ViolId}" Width="90"
+                            ElementStyle="{StaticResource BaseCellStyle}"/>
+
+				<!-- Начало / Окончание / Длит. — все базовые -->
+				<DataGridTextColumn Header="Начало" Binding="{Binding StartTime}" Width="110"
+                            ElementStyle="{StaticResource BaseCellStyle}"/>
+				<!--<DataGridTextColumn Header="Окончание" Binding="{Binding EndTime}" Width="110"
+                            ElementStyle="{StaticResource BaseCellStyle}"/>
+				<DataGridTextColumn Header="Длит." Binding="{Binding Duration}" Width="70"
+                            ElementStyle="{StaticResource BaseCellStyle}"/>-->
+
+				<!-- Дорога / Место / Ответственный / Виновный — текст с переносом -->
+				<DataGridTextColumn Header="Дорога" Binding="{Binding Road}" Width="130"
+                            ElementStyle="{StaticResource TextCellStyle}"/>
+				<DataGridTemplateColumn Header="Место отказа" Width="250"  MinWidth="150" MaxWidth="400" ClipboardContentBinding="{Binding MestoOTS_TXT}">
+					<!-- 🔑 Ключ к копированию -->
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<!-- 🔑 Ключ к стилям: растягиваем контент и задаем правильные отступы -->
+							<ContentControl Content="{Binding MestoOTS_TXT, Converter={StaticResource PlaceFormatterConverter}}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Center"
+                            Padding="4,2" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTextColumn Header="Ответственный" Binding="{Binding Investigator}" Width="150"
+                            ElementStyle="{StaticResource TextCellStyle}"/>
+				<DataGridTextColumn Header="Виновный" Binding="{Binding GuiltyDepot}" Width="180"
+                            ElementStyle="{StaticResource TextCellStyle}"/>
+				<DataGridTextColumn Header="Окончание" Binding="{Binding EndTime}" Width="110"
+            ElementStyle="{StaticResource BaseCellStyle}"/>
+				<DataGridTextColumn Header="Длит." Binding="{Binding Duration}" Width="70"
+            ElementStyle="{StaticResource BaseCellStyle}"/>
+				<!-- П/Ч — красный жирный -->
+				<DataGridTextColumn Header="П/Ч" Binding="{Binding PChTotal, StringFormat={}{0:0.00}}" Width="70"
+                            ElementStyle="{StaticResource PChCellStyle}"/>
+
+				<!-- Всего поездов -->
+				<DataGridTextColumn Header="Всего" Binding="{Binding TotalTrains}" Width="60"
+                            ElementStyle="{StaticResource NumericCellStyle}"/>
+
+				<!-- ===== ГРУЗОВЫЕ ===== -->
+				<DataGridTemplateColumn Header="Груз. (кол-во)" Width="100">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Border Style="{StaticResource GroupBorderLeftStyle}">
+								<TextBlock Text="{Binding GrCount}" 
+                           Style="{StaticResource GroupLeftTextStyle}"/>
+							</Border>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+
+				<DataGridTextColumn Header="Груз. (п/ч)" Binding="{Binding GrPCh, StringFormat={}{0:0.00}}" 
+                    Width="80" ElementStyle="{StaticResource NumericCellStyle}"/>
+
+				<DataGridTemplateColumn Header="Груз. №" Width="150">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Border Style="{StaticResource GroupBorderRightStyle}">
+								<TextBlock Text="{Binding GrNumbers}" 
+                           Style="{StaticResource GroupRightTextStyle}"/>
+							</Border>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+
+				<!-- ===== ПАССАЖИРСКИЕ ===== -->
+				<DataGridTemplateColumn Header="Пасс. (кол-во)" Width="100">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Border Style="{StaticResource GroupBorderLeftStyle}">
+								<TextBlock Text="{Binding PasCount}" 
+                           Style="{StaticResource GroupLeftTextStyle}"/>
+							</Border>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+
+				<DataGridTextColumn Header="Пасс. (п/ч)" Binding="{Binding PasPCh, StringFormat={}{0:0.00}}" 
+                    Width="80" ElementStyle="{StaticResource NumericCellStyle}"/>
+
+				<DataGridTemplateColumn Header="Пасс. №" Width="150">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Border Style="{StaticResource GroupBorderRightStyle}">
+								<TextBlock Text="{Binding PasNumbers}" 
+                           Style="{StaticResource GroupRightTextStyle}"
+                           Foreground="#FFCC0000"/>
+							</Border>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+
+				<!-- ===== ПРИГОРОДНЫЕ ===== -->
+				<DataGridTemplateColumn Header="Приг. (кол-во)" Width="100">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Border Style="{StaticResource GroupBorderLeftStyle}">
+								<TextBlock Text="{Binding PrigCount}" 
+                           Style="{StaticResource GroupLeftTextStyle}"/>
+							</Border>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+
+				<DataGridTextColumn Header="Приг. (п/ч)" Binding="{Binding PrigPCh, StringFormat={}{0:0.00}}" 
+                    Width="80" ElementStyle="{StaticResource NumericCellStyle}"/>
+
+				<DataGridTemplateColumn Header="Приг. №" Width="150">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Border Style="{StaticResource GroupBorderRightStyle}">
+								<TextBlock Text="{Binding PrigNumbers}" 
+                           Style="{StaticResource GroupRightTextStyle}"
+                           Foreground="#FFCC0000"/>
+							</Border>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+
+				<!-- ОТС-1/2/3 — левый край + перенос + верх -->
+				<DataGridTextColumn Header="ОТС-1 уровень" Binding="{Binding OTSLev1}" Width="180"
+                            ElementStyle="{StaticResource OtsCellStyle}"/>
+				<DataGridTextColumn Header="ОТС-2 уровень" Binding="{Binding OTSLev2}" Width="150"
+                            ElementStyle="{StaticResource OtsCellStyle}"/>
+				<DataGridTextColumn Header="ОТС-3 уровень" Binding="{Binding OTSLev3}" Width="200"
+                            ElementStyle="{StaticResource OtsCellStyle}"/>
+			</DataGrid.Columns>
+		</DataGrid>
+		<!-- Нижняя панель (статус) -->
+		<Border Grid.Row="3" Margin="5,2,5,5" Padding="8,4">
+			<TextBlock x:Name="txtStatus" Text="Готово" FontSize="12" 
+                       Foreground="DarkSlateGray"/>
+		</Border>
+	</Grid>
+
+
+	
+</Window>

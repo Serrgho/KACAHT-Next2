@@ -1,0 +1,92 @@
+﻿<UserControl x:Class="Kas.NumericFilterPopup"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             mc:Ignorable="d">
+    
+    <UserControl.Resources>
+        <!-- Стиль ListBoxItem — как вы указали -->
+        <Style TargetType="{x:Type ListBoxItem}">
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="17"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <Border x:Name="Border"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter 
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Margin="0" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!--<Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SplitterBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>-->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border x:Name="RootBorder"
+            Background="{StaticResource AppBackBrush}"
+            BorderBrush="{StaticResource SplitterBrush}"
+            BorderThickness="2"
+            CornerRadius="8"
+            Padding="1">
+
+        <StackPanel Orientation="Vertical"
+                    HorizontalAlignment="Center"
+                    Margin="2"
+                    Width="50">
+
+            <Border Background="Transparent"
+                    BorderBrush="{StaticResource SplitterBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="2">
+                <TextBox x:Name="ValueBox"
+                         VerticalContentAlignment="Center"
+                         HorizontalContentAlignment="Right"
+                         FontSize="12"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         Width="40"
+                         Height="auto"
+                         Padding="2"
+                         PreviewTextInput="ValueBox_PreviewTextInput"/>
+            </Border>
+
+            <!-- Items на ListBox -->
+            <ListBox x:Name="OperatorListBox"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     PreviewMouseLeftButtonDown="OperatorListBox_PreviewMouseLeftButtonDown">
+                <ListBoxItem Tag="="   Content="="/>
+                <ListBoxItem Tag="&lt;&gt;" Content="≠"/>
+                <ListBoxItem Tag="&gt;" Content=">"/>
+                <ListBoxItem Tag="&gt;=" Content="≥"/>
+                <ListBoxItem Tag="&lt;" Content="&lt;"/>
+                <ListBoxItem Tag="&lt;=" Content="≤"/>
+            </ListBox>
+        </StackPanel>
+    </Border>
+
+
+</UserControl>

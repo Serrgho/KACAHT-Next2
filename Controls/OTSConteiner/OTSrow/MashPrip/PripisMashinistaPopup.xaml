@@ -1,0 +1,57 @@
+﻿<UserControl x:Class="Kas.PripisMashinistaPopup"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+			 mc:Ignorable="d" 
+             Width="700">
+    <Border  Background="{StaticResource AppBackBrush}"
+        CornerRadius="8"
+        BorderBrush="{StaticResource SplitterBrush}"
+        BorderThickness="4">
+        <Grid Margin="8 2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Заголовок -->
+            <TextBlock Grid.Row="0" Text="Выбор  машиниста" 
+                       FontWeight="Bold" FontSize="16"
+                       HorizontalAlignment="Center" Margin="5"/>
+
+            <!-- Фамилия -->
+            <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,10">
+				<TextBlock Text="текущее значение:" 
+						   FontWeight="SemiBold" FontStyle="Italic" HorizontalAlignment="Center" 
+						   FontSize="12"/>
+				<TextBlock Text="{Binding MashPripTXT, FallbackValue='***'}" 
+						   FontWeight="Bold" TextAlignment="Center" FontSize="12"    
+						   TextWrapping="Wrap"/>
+				<Border BorderBrush="{StaticResource SplitterBrush}" BorderThickness="1" CornerRadius="3" Padding="2">
+                     <TextBox x:Name="SurnameTextBox"  FontSize="15" BorderThickness="0"
+                          TextChanged="Input_TextChanged" Background="Transparent" VerticalAlignment="Center"/>
+                </Border>
+			</StackPanel>
+
+            <!-- Вкладки с приписками -->
+            <TabControl x:Name="AssignmentTabControl" Grid.Row="2" 
+                        Margin="0,0,0,15" ItemContainerStyle="{StaticResource TabItemRes}" Background="Transparent" />
+
+            <!-- Кнопки -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" 
+                        HorizontalAlignment="Right" Background="Transparent">
+                <Button x:Name="OkButton" Content="ОК" Click="OkButton_Click"
+                        Style="{StaticResource PopupStyleButton}"
+                        Width="80" Height="30" Margin="0,0,10,0"
+                        IsDefault="True" IsEnabled="False"/>
+                <Button x:Name="CancelButton" Content="Отмена" Click="CancelButton_Click"
+                        Style="{StaticResource PopupStyleButton}"
+                        Width="80" Height="30" IsCancel="True"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

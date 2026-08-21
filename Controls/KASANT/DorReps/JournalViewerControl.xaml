@@ -1,0 +1,183 @@
+﻿<UserControl x:Class="Kas.JournalViewerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+			 
+             mc:Ignorable="d"
+			 d:DesignHeight="600" d:DesignWidth="1150">
+	<UserControl.Resources>
+		<local:StatusToStringConverter x:Key="StatusConverter"/>
+		
+	</UserControl.Resources>
+    <Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<!-- 📊 Заголовок со статистикой -->
+		<Grid Grid.Row="0" Margin="5,5,5,2" Background="{StaticResource AppBackBrush}">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="auto"/>
+			</Grid.ColumnDefinitions>
+			<TextBlock Grid.Column="0" x:Name="txtStats" FontSize="13" FontWeight="SemiBold" Foreground="DarkSlateGray" VerticalAlignment="Center" Margin="5,0"/>
+			<Button Grid.Column="1" x:Name="btnCopyViolIds" 
+						Style="{StaticResource PopupStyleButton}"
+                        Content="📋 Скопировать №№ ОТС"
+						Click="BtnCopyViolIds_Click"/>
+		</Grid>
+
+		
+		<!-- 📋 Таблица -->
+		<DataGrid x:Name="dgJournal" Grid.Row="2"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  IsReadOnly="True"
+                  GridLinesVisibility="Horizontal"
+                  Background="Transparent"
+                  RowBackground="Transparent"
+                  AlternatingRowBackground="#23FFFFFF"
+                  FontSize="12"
+                  FontFamily="Segoe UI"
+                  BorderThickness="0"
+                  Margin="5,0,5,5"
+                  SelectionUnit="Cell"
+                  SelectionMode="Extended"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  ScrollViewer.CanContentScroll="False"
+				  
+                  MouseDoubleClick="DgJournal_MouseDoubleClick"
+                  PreviewKeyDown="DgJournal_PreviewKeyDown">
+
+			<DataGrid.Resources>
+
+				<Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
+				
+				<!-- 🔹 Стиль для ячеек: переопределяем стандартное синее выделение -->
+				<Style x:Key="BaseCellStyle" TargetType="DataGridCell">
+					<Setter Property="Padding" Value="4,2"/>
+					<!-- Убираем пунктирную рамку фокуса, чтобы не мешала вашему стилю -->
+					<Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+
+					<Style.Triggers>
+						<!-- Состояние: Ячейка выделена -->
+						<Trigger Property="IsSelected" Value="True">
+							<!-- Фон выделения -->
+							<Setter Property="Background" Value="{StaticResource SplitterBrush}"/>
+							<!-- Цвет текста при выделении -->
+							<Setter Property="Foreground" Value="{StaticResource AppBackBrush}"/>
+							<Setter Property="FontWeight" Value="SemiBold" />
+							<!-- Убираем стандартную обводку (если есть) -->
+							<Setter Property="BorderBrush" Value="{StaticResource SplitterBrush}"/>
+							<!--<Setter Property="BorderThickness" Value="0"/>-->
+						</Trigger>
+						
+					</Style.Triggers>
+				</Style>
+
+				<!-- Стиль для переноса текста в ячейках (оставляем без изменений) -->
+				<Style TargetType="TextBlock" x:Key="CellWrapStyle">
+					<Setter Property="TextWrapping" Value="Wrap"/>
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="HorizontalAlignment" Value="Stretch"/>
+					<Setter Property="Padding" Value="4,2"/>
+					<Setter Property="TextAlignment" Value="Center"/>
+				</Style>
+
+				<!-- Стиль заголовков (оставляем без изменений) -->
+				<Style TargetType="DataGridColumnHeader">
+					<Setter Property="Padding" Value="4,2"/>
+					<Setter Property="FontSize" Value="13"/>
+					<Setter Property="FontWeight" Value="SemiBold"/>
+					<Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="HorizontalContentAlignment" Value="Center"/>
+				</Style>
+
+				
+				<Style x:Key="TextGlowStyle" TargetType="TextBlock" BasedOn="{StaticResource CellWrapStyle}">
+					<Style.Triggers>
+						<!-- Находим родительскую ячейку и проверяем наведение на неё -->
+						<DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+							<Setter Property="Cursor" Value="Hand"/>
+							<Setter Property="Effect">
+								<Setter.Value>
+									<DropShadowEffect BlurRadius="4" 
+                                      ShadowDepth="2" 
+                                      Direction="270" 
+                                      Color="{StaticResource SplitterColor}" 
+                                      Opacity="0.9"/>
+								</Setter.Value>
+							</Setter>
+							<!-- Можно добавить жирность, чтобы усилить эффект кнопки -->
+							<Setter Property="FontWeight" Value="SemiBold"/>
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+
+			</DataGrid.Resources>
+
+			<DataGrid.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="📋 Копировать выделенное" Click="MenuItem_Copy_Click"/>
+				</ContextMenu>
+			</DataGrid.ContextMenu>
+
+			<DataGrid.Columns>
+
+				<DataGridTextColumn Header="№ отказа" Binding="{Binding ViolId}" MinWidth="60" Width="0.7*" CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource TextGlowStyle}" />
+				
+				<DataGridTextColumn Header="АСУ" Binding="{Binding ASU}" MinWidth="60" Width="0.7*" CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource CellWrapStyle}"/>
+				
+				<DataGridTextColumn Header="Кат." Binding="{Binding Category}" MinWidth="60" CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource CellWrapStyle}"/>
+
+				<DataGridTextColumn Header="Начало" Binding="{Binding StartTime, StringFormat=dd.MM.yy HH:mm}" MinWidth="60" Width="0.5*"  CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource CellWrapStyle}"/>
+				
+				<DataGridTextColumn Header="Статус" Binding="{Binding Status, Converter={StaticResource StatusConverter}}" Width="1.3*" CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource CellWrapStyle}"/>
+				
+				<DataGridTextColumn Header="Откуда" Binding="{Binding FromDept}" MinWidth="60" Width="0.9*" CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource CellWrapStyle}"/>
+				<DataGridTextColumn Header="Куда" Binding="{Binding ToDept}" MinWidth="60" Width="0.9*" CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource CellWrapStyle}"/>
+				
+				
+				  <!--==================================-->
+
+				<DataGridTemplateColumn Header="Место отказа" Width="250"  MinWidth="150" MaxWidth="400" ClipboardContentBinding="{Binding MestoOTS_TXT}" CellStyle="{StaticResource BaseCellStyle}">
+					
+					<!-- 🔑 Ключ к копированию -->
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<!-- 🔑 Ключ к стилям: растягиваем контент и задаем правильные отступы -->
+							<ContentControl Content="{Binding MestoOTS_TXT, Converter={StaticResource PlaceFormatterConverter}}"
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Center"
+            Padding="4,2" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<!--<DataGridTemplateColumn Header="Место отказа" MinWidth="60" Width="1.3*" CellStyle="{StaticResource BaseCellStyle}">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							--><!-- ContentControl корректно отображает UIElement, возвращённый конвертером --><!--
+							<ContentControl Content="{Binding Location, Converter={StaticResource PlaceFormatterConverter}}"
+											HorizontalContentAlignment="Stretch"
+											VerticalContentAlignment="Center"
+											Padding="0"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>-->
+				
+				<DataGridTextColumn Header="Тех. средство" Binding="{Binding Equipment}" MinWidth="60" Width="1.7*" CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource CellWrapStyle}"/>
+				
+				 <DataGridTextColumn Header="Поезда" Binding="{Binding TrainCount}" Width="Auto" CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource CellWrapStyle}"/>
+				
+				<!--<DataGridTextColumn Header="Дубликаты" Binding="{Binding DuplicatesCount}" Width="Auto" CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource CellWrapStyle}"/>-->
+			</DataGrid.Columns>
+		</DataGrid>
+	</Grid>
+</UserControl>

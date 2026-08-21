@@ -1,0 +1,92 @@
+﻿<UserControl x:Class="Kas.NumOTSEditBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+              Background="Transparent"
+             TextOptions.TextFormattingMode="Display"
+             TextOptions.TextRenderingMode="ClearType"
+             UseLayoutRounding="True"
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="350">
+	<UserControl.Resources>
+		<Style x:Key="BaseStyle" TargetType="TextBlock">
+			<Setter Property="Height" Value="24"/>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="FontSize" Value="16"/>
+			<Setter Property="FontWeight" Value="SemiBold"/>
+			<Setter Property="TextAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Foreground" Value="{StaticResource SplitterBrush}"/>
+		</Style>
+		<Style x:Key="Clearr" TargetType="TextBlock" BasedOn="{StaticResource BaseStyle}">
+			<Setter Property="Width" Value="24"/>
+			<Setter Property="Margin" Value="1 0"/>
+			<Setter Property="Cursor" Value="Hand"/>
+			<Style.Triggers>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Property="Foreground" Value="Red"/>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+		<Style x:Key="Coppy" TargetType="TextBlock" BasedOn="{StaticResource BaseStyle}">
+			<Setter Property="Width" Value="Auto"/>
+			<Setter Property="Margin" Value="1 0"/>
+			<Style.Triggers>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Property="Foreground" Value="DarkGreen"/>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</UserControl.Resources>
+
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="Auto"/>
+		</Grid.ColumnDefinitions>
+
+		<TextBlock x:Name="BtnCopy" 
+                   Grid.Column="0"
+                   ToolTip="Копировать"
+				   FontSize="17"
+                   Style="{StaticResource Coppy}"
+                   Text="📋"
+                   MouseUp="BtnCopy_MouseUp"/>
+
+		<TextBlock x:Name="BtnClear" 
+                   Grid.Column="1"
+                   ToolTip="Очистить"
+				   FontSize="17"
+                   Style="{StaticResource Clearr}"
+                   Text="✕"
+                   MouseUp="BtnClear_MouseUp"/>
+
+		<TextBox x:Name="PART_TextBox"
+                 Grid.Column="2"
+                 BorderThickness="0"
+                 MaxHeight="50"
+                 Foreground="Red"
+                 FontSize="15"
+                 SelectionBrush="{StaticResource SplitterBrush}"
+                 Background="Transparent"
+                 TextWrapping="Wrap"
+                 AcceptsReturn="False"
+                 VerticalScrollBarVisibility="Hidden"
+                 PreviewTextInput="PART_TextBox_PreviewTextInput"
+                 PreviewKeyDown="PART_TextBox_PreviewKeyDown"
+                 TextChanged="PART_TextBox_TextChanged"
+                 DataObject.Pasting="PART_TextBox_Pasting"
+                 VerticalContentAlignment="Center"/>
+
+		<TextBlock x:Name="Stat"
+                   Grid.Column="3"
+                   Text="{Binding Count, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"
+                   Style="{StaticResource BaseStyle}"
+				   Visibility="Collapsed"
+                   Margin="3 0"/>
+	</Grid>
+</UserControl>

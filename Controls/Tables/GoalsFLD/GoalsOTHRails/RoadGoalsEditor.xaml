@@ -1,0 +1,100 @@
+﻿<UserControl x:Class="Kas.RoadGoalsEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             mc:Ignorable="d"
+             MinWidth="500"
+             Background="{StaticResource AppBackBrush}">
+	<UserControl.Resources>
+		<local:ZeroToEmptyConverterSng x:Key="ZeroTextSng"/>
+		<local:ZeroToEmptyConverter x:Key="ZeroTextInt"/>
+		<Style x:Key="GoalTextBoxStyle" TargetType="TextBox">
+			<Setter Property="Margin" Value="2"/>
+			<Setter Property="HorizontalAlignment" Value="Center"/>
+			<Setter Property="Width" Value="80"/>
+			<Setter Property="Padding" Value="3,2"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="FontSize" Value="15"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="TextAlignment" Value="Center"/>
+			<Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+			<EventSetter Event="PreviewMouseLeftButtonDown" Handler="TextBox_SelectAll_OnPreviewMouseLeftButtonDown"/>
+			<EventSetter Event="GotKeyboardFocus" Handler="TextBox_GotKeyboardFocus"/>
+		</Style>
+	</UserControl.Resources>
+
+	<Grid Margin="10">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<!-- Выбор года и месяца -->
+		<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+			<TextBlock Text="Год:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+			<ComboBox x:Name="CmbYear" Style="{StaticResource MyCombo}" Width="80" Margin="0,0,20,0"/>
+			<TextBlock Text="Месяц:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+			<ComboBox x:Name="CmbMonth" Style="{StaticResource MyCombo}" Width="80"/>
+			<Button x:Name="BtnLoad" Content="Перезагрузить" Click="BtnLoad_Click"
+                    Style="{StaticResource PopupStyleButton}" Margin="20,0,0,0" Width="110"/>
+			<Button x:Name="BtnPaste" Content="Вставить из буфера" Click="BtnPaste_Click"
+                    Style="{StaticResource PopupStyleButtonGreen}" Margin="20,0,0,0" Width="130"/>
+		</StackPanel>
+
+		<!-- Таблица ввода: 3 дороги × 4 колонки -->
+		<Grid Grid.Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="90"/>
+				<ColumnDefinition Width="90"/>
+				<ColumnDefinition Width="90"/>
+				<ColumnDefinition Width="90"/>
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+
+			<!-- Заголовки -->
+			<TextBlock Grid.Row="0" Grid.Column="0" Text="Дорога" FontWeight="Bold" Padding="5"/>
+			<TextBlock Grid.Row="0" Grid.Column="1" Text="ОТС цель" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
+			<TextBlock Grid.Row="0" Grid.Column="2" Text="ОТС факт" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
+			<TextBlock Grid.Row="0" Grid.Column="3" Text="П/Ч цель" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
+			<TextBlock Grid.Row="0" Grid.Column="4" Text="П/Ч факт" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
+
+			<!-- ВСЖД -->
+			<TextBlock Grid.Row="1" Grid.Column="0" Text="ВСЖД" VerticalAlignment="Center" Padding="5"/>
+			<TextBox Grid.Row="1" Grid.Column="1" Text="{Binding VsjdOtsGoal, Converter={StaticResource ZeroTextInt}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="1" Grid.Column="2" Text="{Binding VsjdOtsFact, Converter={StaticResource ZeroTextInt}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="1" Grid.Column="3" Text="{Binding VsjdHoursGoal, Converter={StaticResource ZeroTextSng}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="1" Grid.Column="4" Text="{Binding VsjdHoursFact, Converter={StaticResource ZeroTextSng}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+
+			<!-- ЗАБЖД -->
+			<TextBlock Grid.Row="2" Grid.Column="0" Text="ЗАБЖД" VerticalAlignment="Center" Padding="5"/>
+			<TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ZabdOtsGoal, Converter={StaticResource ZeroTextInt}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="2" Grid.Column="2" Text="{Binding ZabdOtsFact, Converter={StaticResource ZeroTextInt}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="2" Grid.Column="3" Text="{Binding ZabdHoursGoal, Converter={StaticResource ZeroTextSng}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="2" Grid.Column="4" Text="{Binding ZabdHoursFact, Converter={StaticResource ZeroTextSng}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+
+			<!-- ДВЖД -->
+			<TextBlock Grid.Row="3" Grid.Column="0" Text="ДВЖД" VerticalAlignment="Center" Padding="5"/>
+			<TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DvdOtsGoal, Converter={StaticResource ZeroTextInt}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="3" Grid.Column="2" Text="{Binding DvdOtsFact, Converter={StaticResource ZeroTextInt}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="3" Grid.Column="3" Text="{Binding DvdHoursGoal, Converter={StaticResource ZeroTextSng}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="3" Grid.Column="4" Text="{Binding DvdHoursFact, Converter={StaticResource ZeroTextSng}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+		</Grid>
+
+		<!-- Кнопки -->
+		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+			<Button Name="BtnClearAll" Content="Очистить всё" Style="{StaticResource PopupStyleButton}" Click="BtnClearAll_Click" Margin="0,0,10,0"/>
+			<Button Content="Сохранить" Click="BtnSave_Click" Style="{StaticResource PopupStyleButton}" Width="100" Margin="0,0,10,0" IsDefault="True"/>
+		</StackPanel>
+	</Grid>
+</UserControl>

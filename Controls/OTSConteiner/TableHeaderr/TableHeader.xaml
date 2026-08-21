@@ -1,0 +1,231 @@
+﻿<UserControl x:Class="Kas.TableHeader"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             Background="Transparent">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+    </UserControl.Resources>
+
+
+    <!--Создадим соглашение: имя FilterIndicator в XAML будет формироваться как {PropertyName}Indicator.
+Например, для Tag="Kat" — x:Name="KatIndicator", для Tag="Seria" — x:Name="SeriaIndicator" и т.д.
+    вписывается в !!! TableHeader . NEW !!!
+                в !!! ClearAllFilters() !!!      
+                в !!! OtkazFilterConfig в GetDisplaySelector !!! 
+                в !!! TableHeader в BuildStringPredicate !!!  -->
+
+    <local:UniversalGrid Background="{StaticResource ScrolBarBrush}">
+
+        <Border Grid.Column="0" Style="{StaticResource FiltrTBlock}"  MouseLeftButtonUp="TextBlock_PreviewMouseDown">
+            <TextBlock  Text="❌" Foreground="DarkRed"/>
+        </Border>
+        
+        
+            <!--<TextBlock Grid.Column="1" Text="Помечен" />-->
+        <Border  Grid.Column="1" Style="{StaticResource FiltrTBlock}"
+         MouseLeftButtonUp="OnHeaderMouseDown"
+         MouseRightButtonUp="OnHeaderRightClick" 
+         local:FilterProperties.FieldType="Boolean"
+         local:FilterProperties.FilterLevel="Main"
+         Tag="Marked">
+            <Grid>
+                <TextBlock Text="☑" />
+                <local:FilterIndicator x:Name="MarkedIndicator"
+                               PropertyName="Marked"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Top"
+                               Margin="0,-2,-2,0"/>
+            </Grid>
+        </Border>
+
+
+        <Border  Grid.Column="2" Style="{StaticResource FiltrTBlock}"
+                 MouseLeftButtonUp="OnHeaderMouseDown"
+                 MouseRightButtonUp="OnHeaderRightClick" 
+                 local:FilterProperties.FieldType="String"
+                 local:FilterProperties.FilterLevel="Main"
+                 Tag="Kat">
+            <Grid>   
+                <TextBlock Text="Кат." />
+                <local:FilterIndicator x:Name="KatIndicator"
+                                       PropertyName="Kat"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Top"
+                                       Margin="0,-2,-2,0"/>
+            </Grid>   
+        </Border>
+        
+        <Border Grid.Column="3" Style="{StaticResource FiltrTBlock}"
+                MouseLeftButtonUp="OnHeaderMouseDown"
+                MouseRightButtonUp="OnHeaderRightClick"
+                local:FilterProperties.FieldType="Date"
+                local:FilterProperties.FilterLevel="Main"
+                Tag="Nach">
+                <Grid >  
+                    <TextBlock Text="Начало" />
+                    <local:FilterIndicator x:Name="NachIndicator"
+                                           PropertyName="Nach"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Top"
+                                           Margin="0,-2,-2,0"/>
+                </Grid>
+        </Border>
+
+        <Border Grid.Column="4" Style="{StaticResource FiltrTBlock}"
+        MouseLeftButtonUp="OnHeaderMouseDown"
+        MouseRightButtonUp="OnHeaderRightClick"
+        local:FilterProperties.FieldType="String"
+        local:FilterProperties.FilterLevel="Main"
+        Tag="DaysOnRassled">
+            <Grid >
+                <TextBlock Text="Дней в расслед" />
+                <local:FilterIndicator x:Name="DaysOnRassledIndicator"
+                               PropertyName="DaysOnRassled"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Top"
+                               Margin="0,-2,-2,0"/>
+            </Grid>
+        </Border>
+
+        <!--сюда дату поступления-->
+        <Border Grid.Column="5" Style="{StaticResource FiltrTBlock}"
+        MouseLeftButtonUp="OnHeaderMouseDown"
+        MouseRightButtonUp="OnHeaderRightClick"
+        local:FilterProperties.FieldType="Date"
+        local:FilterProperties.FilterLevel="Main"
+        Tag="Postup">
+            <Grid >
+                <TextBlock Text="Поступил" />
+                <local:FilterIndicator x:Name="PostupIndicator"
+                               PropertyName="Postup"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Top"
+                               Margin="0,-2,-2,0"/>
+            </Grid>
+        </Border>
+
+
+		<Border Grid.Column="6" Style="{StaticResource FiltrTBlock}"
+                MouseLeftButtonUp="OnHeaderMouseDown" 
+                MouseRightButtonUp="OnHeaderRightClick"
+                local:FilterProperties.FieldType="Date"
+                local:FilterProperties.FilterLevel="Main"
+                Tag="VernulsaOTS">
+			<Grid >
+				<TextBlock Text="Вернулся" />
+				<local:FilterIndicator  x:Name="VernulsaOTSIndicator"
+                                        PropertyName="VernulsaOTS" 
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top" 
+                                        Margin="0,-2,-2,0"/>
+			</Grid>
+		</Border>
+
+
+
+
+
+		<Border Grid.Column="7" Style="{StaticResource FiltrTBlock}"
+                MouseLeftButtonUp="OnHeaderMouseDown"
+                MouseRightButtonUp="OnHeaderRightClick"
+                local:FilterProperties.FieldType="String"
+                local:FilterProperties.FilterLevel="Main"
+                Tag="Istochnik">
+                <Grid >
+                    <TextBlock Text="От кого" />
+                    <local:FilterIndicator x:Name="IstochnikIndicator"
+                                           PropertyName="Istochnik"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Top"
+                                           Margin="0,-2,-2,0"/>
+                </Grid>
+            </Border>
+                
+        <Border Grid.Column="8" Style="{StaticResource FiltrTBlock}"
+                MouseLeftButtonUp="OnHeaderMouseDown"
+                MouseRightButtonUp="OnHeaderRightClick"
+                local:FilterProperties.FieldType="String"
+                local:FilterProperties.FilterLevel="Main"
+                     Tag="KtoZakryl">
+                <Grid >
+                    <TextBlock Text="Кто рассл." />
+                    <local:FilterIndicator x:Name="KtoZakrylIndicator"
+                                           PropertyName="KtoZakryl"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Top"
+                                           Margin="0,-2,-2,0"/>
+                </Grid>
+        </Border>
+        
+        
+
+        <TextBlock Grid.Column="9" Text="Место отказа"/>
+
+
+
+        <!--<TextBlock Grid.Column="8" Text="Локомотив/Бригада" />-->
+
+
+
+        <TextBlock Grid.Column="10" Text="Описание" />
+
+
+
+        <TextBlock Grid.Column="11" Text="Оборудование" />
+
+
+
+
+       
+
+        <TextBlock Grid.Column="12" Text="Пробеги" />
+        
+         <Border Grid.Column="13" Style="{StaticResource FiltrTBlock}"
+                MouseLeftButtonUp="OnHeaderMouseDown"
+                MouseRightButtonUp="OnHeaderRightClick"
+                local:FilterProperties.FieldType="String"
+                local:FilterProperties.FilterLevel="Main"
+                Tag="Zakem_TXT">
+            <Grid >
+                <TextBlock Text="Отнесен на ..." />
+                <!--было Za K em_TXTIndicator вместо Za k em_TXTIndicator - и индикатор не отображался
+                хотя фильтр работал и сбрасывался-->
+                <local:FilterIndicator x:Name="Zakem_TXTIndicator"
+                                   PropertyName="Zakem_TXT"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Top"
+                                   Margin="0,-2,-2,0"/>
+            </Grid>
+        </Border>
+
+
+        
+
+        <!--<TextBlock Grid.Column="14" Text="Признаки" />-->
+
+
+
+        <Border Grid.Column="15" Style="{StaticResource FiltrTBlock}"
+        MouseLeftButtonUp="OnHeaderMouseDown"
+        MouseRightButtonUp="OnHeaderRightClick"
+        local:FilterProperties.FieldType="String"
+        local:FilterProperties.FilterLevel="Main"
+        Tag="UpdateNotes">
+            <Grid >
+                <TextBlock Text="Действия" />
+                <local:FilterIndicator x:Name="UpdateNotesIndicator"
+                               PropertyName="UpdateNotes"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Top"
+                               Margin="0,-2,-2,0"/>
+            </Grid>
+        </Border>
+       
+    </local:UniversalGrid>
+   
+</UserControl>

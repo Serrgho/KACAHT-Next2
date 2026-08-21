@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="Kas.SingleCalendarControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+                         
+             mc:Ignorable="d">
+
+    <Popup Name="CalendarPopup"
+           HorizontalOffset="0"
+           VerticalOffset="3"
+           PopupAnimation="Scroll"
+           StaysOpen="False"
+           Closed="CalendarPopup_Closed"
+           PlacementTarget="{Binding}"
+           Placement="Bottom"
+           AllowsTransparency="True" Cursor="">
+
+        <!--PlacementTarget="{Binding ElementName=MaiWinn}"-->
+        
+        <!--обертка для прозрачности-->
+        <Border Background="Transparent">
+
+            <!--и дальше содержимое-->
+            <Border 
+                Background="{StaticResource AppBackBrush}"
+                BorderBrush="{StaticResource SplitterBrush}"
+                BorderThickness="4"
+                CornerRadius="24"
+                Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition  Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                        <local:CalendarControl x:Name="MyCalendar0" ParPop="{Binding ElementName=CalendarPopup}"  Margin="2 2 10 2" IsSingleMode="False"/>
+                        
+                    </StackPanel>
+                   
+                </Grid>
+            </Border>
+        </Border>
+
+    </Popup>
+</UserControl>

@@ -1,0 +1,77 @@
+﻿<Window x:Class="Kas.FrmChangedIds"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+        Title="ИЗМЕНЕН № ОТС" 
+        Width="300"
+		Background="{StaticResource AppBackBrush}"
+        WindowStartupLocation="CenterScreen"
+        SizeToContent="Height">
+	<Window.Resources>
+		<Style TargetType="DataGridColumnHeader">
+			<Setter Property="Padding" Value="4,2"/>
+			<Setter Property="FontSize" Value="13"/>
+			<Setter Property="FontWeight" Value="SemiBold"/>
+			<Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style x:Key="BaseCellStyle" TargetType="DataGridCell">
+			<Setter Property="Padding" Value="4,2"/>
+			<Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+			<Setter Property="Background" Value="{StaticResource AppBackBrush}"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+
+			<Style.Triggers>
+				<Trigger Property="IsSelected" Value="True">
+					<Setter Property="Background" Value="{StaticResource SplitterBrush}"/>
+					<Setter Property="Foreground" Value="{StaticResource AppBackBrush}"/>
+					<Setter Property="FontWeight" Value="SemiBold" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+
+		<!-- Стиль для текста в ячейках -->
+		<Style x:Key="CenterTextStyle" TargetType="TextBlock">
+			<Setter Property="TextAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+		</Style>
+	</Window.Resources>
+
+	<Grid Margin="10">
+		<DataGrid x:Name="dgvIds" 
+              CellStyle="{StaticResource BaseCellStyle}"
+              Background="{StaticResource AppBackBrush}"
+              RowBackground="{StaticResource AppBackBrush}"
+              AlternatingRowBackground="{StaticResource AppBackBrush}"
+              BorderThickness="0"
+              AutoGenerateColumns="False" 
+              IsReadOnly="True" 
+              SelectionMode="Single" 
+              SelectionUnit="FullRow"
+              CanUserAddRows="False"
+              CanUserDeleteRows="False"
+              MouseUp="DataGrid_MouseUp">
+
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Старый ID" Binding="{Binding OldId}" Width="*" ElementStyle="{StaticResource CenterTextStyle}"/>
+				<DataGridTextColumn Header="Новый ID" Binding="{Binding NewId}" Width="*" ElementStyle="{StaticResource CenterTextStyle}"/>
+
+				<DataGridTemplateColumn Header="Действие" Width="Auto">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Button Content="OK"
+                                Style="{StaticResource PopupStyleButton}"
+								IsEnabled="{Binding IsReady}"
+                                Click="Button_Click"
+                                Margin="2"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+			</DataGrid.Columns>
+		</DataGrid>
+	</Grid>
+	
+</Window>

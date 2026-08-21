@@ -1,0 +1,91 @@
+﻿<UserControl x:Class="Kas.KasJournalParamControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+			 xmlns:properties="clr-namespace:KACAHT_Next2.My"
+			 Background="{StaticResource AppBackBrush}"
+             mc:Ignorable="d" 
+             >
+    <Expander x:Name="expSetting" 
+					  Header="🌐  Отчеты" 
+					  Background="{StaticResource ScrolBarBrush}"
+					  Foreground="DarkBlue"
+					  FontWeight="Bold"	
+					  FontSize="15"
+					  BorderThickness="3"
+					  
+					  BorderBrush="{StaticResource SplitterBrush}" 
+					  IsExpanded="True"
+					  HorizontalContentAlignment="Stretch">
+
+        <StackPanel Orientation="Vertical">
+
+            <Border Margin="2" BorderBrush="{StaticResource SplitterBrush}" BorderThickness="2" Padding="2" CornerRadius="4">
+                <StackPanel Orientation="Vertical">
+                    <local:KasJournalParamControl0 x:Name="ParamPeriodCTL"	/>
+                    <local:KasJournalParamControl1 x:Name="ParamTimeCTL"	/>
+                </StackPanel>
+            </Border>
+
+
+
+
+
+            <WrapPanel Orientation="Horizontal">
+
+                <Button  x:Name="btnLoadOnlineJournal" Foreground="DarkRed" Content="🌐Показ. журнал ОТС" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadOnlineJournal_Click" Width="auto"/>
+
+                <Button  x:Name="btnLoadInvestigationReport" Foreground="DarkRed" Content="🌐4 отчет - ТАБЛИЦА" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadInvestigationReport_Click" Width="auto"/>
+
+                <Button  x:Name="btnLoadOnlineSLDJournal" Foreground="DarkRed" Content="🌐КАС АНТ СЛД-ПФБ" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadOnlineSLDJournal_Click" Width="auto"/>
+
+                <Button  x:Name="btnLoadOverdueJournal" Content="🌐С наруш срока" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnLoadOverdueJournal_Click" Width="auto"/>
+
+                <Button  x:Name="btnLoadDangerousJournal"  Content="🌐Опасные ОТС" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnLoadDangerousJournal_Click" Width="auto"/>
+
+				<Button  x:Name="btnCorpViolationJournal"  Content="🌐Корп наруш" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnCorpViolationJournal_Click" Width="auto"/>
+
+				<Button  x:Name="btnEvents"  Content="🌐События" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnEvents_Click" Width="auto"/>
+
+				
+            </WrapPanel>
+
+            <Expander x:Name="expExperimental" 
+					  Header="🔢  Экспериментальные кнопки" 
+					  Background="{StaticResource ScrolBarBrush}"
+					  Foreground="Black"
+					  FontWeight="Bold"
+					  FontSize="15"
+					  BorderThickness="3" 
+					  BorderBrush="{StaticResource SplitterBrush}" 
+					  d:IsExpanded="True"
+					  IsExpanded="False"
+					  d:Visibility="Visible"
+					  Visibility="{Binding Source={x:Static properties:MySettings.Default}, Path=ShowExperimentalButtons, Converter={StaticResource BoolToVisConverter}}"
+					  HorizontalContentAlignment="Stretch">
+                <WrapPanel x:Name="TopRibbon2"  Orientation="Horizontal" Background="{StaticResource ScrolBarBrush}" VerticalAlignment="Center">
+					
+					<!--<Button  x:Name="btnS24Show" Content="📝 Справка 24" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnS24Show_Click" Width="auto" />
+					<Button  x:Name="btnS24T2Show" Content="📝 Справка по комплексам" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnS24T2Show_Click" Width="auto" />-->
+
+					<!--тестовые невидимые кнопки-->
+					<Button  x:Name="BtnTest_WithoutPeriod2"  Content="2" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="BtnTest_WithoutPeriod2_Click" Width="auto" Visibility="Collapsed"/>
+					<Button  x:Name="btnLoadOfflineJournal" Content="📁журнал ОТС из файла" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadOfflineJournal_Click" Width="auto" Visibility="Collapsed"/>
+					<!--<Button  x:Name="btnLoadInvestigationTest"  Content="📄4 отчет - ТАБЛИЦА RND" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadInvestigationTest_Click" Width="auto" Visibility="Collapsed"/>-->
+					<Button  x:Name="btnLoadInvestigationFile"  Content="📁4 отчет - ТАБЛИЦА ФАЙЛ" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadInvestigationFile_Click" Width="auto" Visibility="Collapsed"/>
+					<Button  x:Name="btnLoadDepotWeb"  Content="🌐Отчет по депо (Из сети)" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadDepotWeb_Click" Width="auto" Visibility="Collapsed"/>
+					<Button  x:Name="btnLoadSLDWeb"  Content="🌐Отчет по СЛД (Из сети)" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadSLDWeb_Click" Width="auto" Visibility="Collapsed"/>
+					<Button  x:Name="btnLoadDepotFile"  Content="📂Отчет по депо/СЛД (Из файла)" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadDepotFile_Click" Width="auto" Visibility="Collapsed"/>
+
+
+					<!--=============================-->
+					
+                </WrapPanel>
+
+            </Expander>
+        </StackPanel>
+
+    </Expander>
+</UserControl>

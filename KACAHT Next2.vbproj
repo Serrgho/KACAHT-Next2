@@ -1,0 +1,192 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>
+    <RootNamespace>KACAHT_Next2</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <UseWindowsForms>True</UseWindowsForms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <RegisterForComInterop>True</RegisterForComInterop>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <RegisterForComInterop>True</RegisterForComInterop>
+    <DefineDebug>False</DefineDebug>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Classes_Modules\CalendarHelper.vb" />
+    <Compile Remove="Classes_Modules\OtherModules\RandOTSDataModule.vb" />
+    <Compile Remove="Classes_Modules\Otkaz\DateJsonConverter.vb" />
+    <Compile Remove="Controls\CalendarControlll\CalendarPopupControl.xaml.vb" />
+    <Compile Remove="Controls\CalendarControlll\SingleCalendarConteinerPop.xaml.vb" />
+    <Compile Remove="Controls\KASANT\CenterReps\JournalViewerRestControl.xaml.vb" />
+    <Compile Remove="Controls\KASANT\CenterReps\KasAntRestLoader.vb" />
+    <Compile Remove="Controls\OTSConteiner\OTSrow\LocationTextBlock.vb" />
+    <Compile Remove="Controls\OTSConteiner\StringToHeightConverter.vb" />
+    <Compile Remove="Controls\OTSConteiner\TableHeaderr\FiltrBox.xaml.vb" />
+    <Compile Remove="Controls\OTSConteiner\UniversalGrid.xaml.vb" />
+    <Compile Remove="Controls\Tables\TableCellControl.xaml.vb" />
+    <Compile Remove="Controls\Tables\TableContainerControl.xaml.vb" />
+    <Compile Remove="WindowElements\IsSavedWin.xaml.vb" />
+    <Compile Remove="WindowElements\PeriodWindow.xaml.vb" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Icons\deflt.png" />
+    <None Remove="Icons\doc.png" />
+    <None Remove="Icons\excel.png" />
+    <None Remove="Icons\image-files.png" />
+    <None Remove="Icons\img.png" />
+    <None Remove="Icons\pdf.png" />
+    <None Remove="Icons\word.png" />
+    <None Remove="Window\MainWin\Gears.png" />
+    <None Remove="Новый текстовый документ.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="Controls\CalendarControlll\CalendarPopupControl.xaml" />
+    <Page Remove="Controls\CalendarControlll\SingleCalendarConteinerPop.xaml" />
+    <Page Remove="Controls\KASANT\CenterReps\JournalViewerRestControl.xaml" />
+    <Page Remove="Controls\OTSConteiner\TableHeaderr\FiltrBox.xaml" />
+    <Page Remove="Controls\OTSConteiner\UniversalGrid.xaml" />
+    <Page Remove="Controls\Tables\TableCellControl.xaml" />
+    <Page Remove="Controls\Tables\TableContainerControl.xaml" />
+    <Page Remove="Templates\PopUpsControlsResources.xaml" />
+    <Page Remove="WindowElements\IsSavedWin.xaml" />
+    <Page Remove="WindowElements\PeriodWindow.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Icons\deflt.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\pdf.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <COMReference Include="Microsoft.Office.Interop.Word">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>4</VersionMinor>
+      <VersionMajor>8</VersionMajor>
+      <Guid>00020905-0000-0000-c000-000000000046</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="Microsoft.Office.Interop.Excel">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>6</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>00020813-0000-0000-c000-000000000046</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+
+  
+
+  
+
+  
+
+  <ItemGroup>
+    <Import Include="System.Windows" />
+    <Import Include="System.Windows.Controls" />
+    <Import Include="System.Windows.Data" />
+    <Import Include="System.Windows.Documents" />
+    <Import Include="System.Windows.Input" />
+    <Import Include="System.Windows.Media" />
+    <Import Include="System.Windows.Media.Imaging" />
+    <Import Include="System.Windows.Navigation" />
+    <Import Include="System.Windows.Shapes" />
+  </ItemGroup>
+
+  <ItemGroup>
+    
+    <Resource Include="favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    
+    <Resource Include="Fonts\LCD5x8HRU.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    
+    <Resource Include="Icons\doc.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    
+    <Resource Include="Icons\excel.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\Gears.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\image-files.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\img.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\pdf1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\txtfile.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\word.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\xlsfile.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="My Project\Settings.Designer.vb">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="My Project\Settings.settings">
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="EPPlus" Version="8.6.3" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+    <PackageReference Include="MiniPdf" Version="0.38.5" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  
+
+  <ItemGroup>
+    <ProjectReference Include="..\Zmeyka_KAS\Zmeyka.vbproj" />
+  </ItemGroup>
+
+  
+
+  
+
+</Project>

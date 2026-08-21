@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="Kas.ExperimentalButtonsCTL"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             xmlns:properties="clr-namespace:KACAHT_Next2.My"
+             mc:Ignorable="d">
+	<Expander x:Name="expExperimental" 
+						  Header="🔢  Экспериментальные кнопки" 
+						  Background="{StaticResource ScrolBarBrush}"
+						  Foreground="Black"
+						  FontWeight="Bold"
+						  FontSize="15"
+						  BorderThickness="3"
+						 
+						  BorderBrush="{StaticResource SplitterBrush}" 
+						  d:IsExpanded="True"
+						  IsExpanded="False"
+						  d:Visibility="Visible"
+						  Visibility="{Binding Source={x:Static properties:MySettings.Default}, Path=ShowExperimentalButtons, Converter={StaticResource BoolToVisConverter}}"
+						  HorizontalContentAlignment="Stretch">
+
+		<!--Visibility="{Binding Source={x:Static ExpEXPERIMENTALVisToggle.isChecked}}"-->
+		<WrapPanel x:Name="TopRibbon2"  Orientation="Horizontal" Background="{StaticResource ScrolBarBrush}" VerticalAlignment="Center">
+
+
+			<Button x:Name="BtnKAS_ANT" Style="{StaticResource PopupStyleButton}" Click="BtnKAS_ANT_Click">Карточка отказа</Button>
+
+			<Button x:Name="BtnAddFromKASANT" Style="{StaticResource PopupStyleButton}" Click="BtnAddFromKASANT_Click">4 отчет EXCEL</Button>
+			<Button x:Name="BtnAddJRNLFile" Style="{StaticResource PopupStyleButton}" Click="BtnAddJRNLFile_Click">📁 4 отчет ЖУРНАЛ из файла</Button>
+
+			<Button x:Name="BtnGenOtch" Style="{StaticResource PopupStyleButton}" Click="BtnGenOtch_Click">🌐📁Ген отчет в список ОТС</Button>
+			<Button x:Name="BtnNewReport" Style="{StaticResource PopupStyleButton}" Click="BtnNewReport_Click">📁генОтчет в окошке из файла</Button>
+			<Button x:Name="BtnNewNetReport" Style="{StaticResource PopupStyleButton}" Click="BtnNewNetReport_Click">🌐генОтчет в окошке из СЕТИ</Button>
+			<Button x:Name="BtnHtmlReport" Style="{StaticResource PopupStyleButton}" Click="BtnHtmlReport_Click">📄ГенОтчет тест токенов из файла</Button>
+			<Button  x:Name="BtnZmeyka" Style="{StaticResource PopupStyleButtonOrange}" Margin="4 2 5 2" Click="BtnZmeyka_Click">🐍 ZZZ</Button>
+			<Button  x:Name="BtnSmoke" Style="{StaticResource PopupStyleButtonOrange}" Margin="4 2 5 2" Click="BtnSmoke_Click">🚬 ---</Button>
+			<Button  x:Name="BtnSmokeSettings" Style="{StaticResource PopupStyleButtonOrange}" Margin="4 2 5 2" Click="BtnSmokeSettings_Click">🚬 ⚙️</Button>
+
+		</WrapPanel>
+	</Expander>
+</UserControl>

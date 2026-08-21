@@ -1,0 +1,296 @@
+﻿<UserControl x:Class="Kas.OTSInfoCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             d:DataContext="{d:DesignInstance Type=local:Otkaz}"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+
+
+    <UserControl.Resources>
+        <Style x:Key="Key1" TargetType="Border">
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="BorderBrush" Value="Gray"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderThickness" Value="4"/>
+                    <!--<Setter Property="Padding" Value="3,2,3,2"/>-->
+                    <Setter Property="Padding" Value="2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+
+        <Style TargetType="TextBlock" x:Key="SectionHeader">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Margin" Value="0,10,0,5"/>
+        </Style>
+        <Style TargetType="Border" x:Key="SectionBox">
+            <Setter Property="BorderBrush" Value="#AAAAAA"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="0,5"/>
+        </Style>
+
+    </UserControl.Resources>
+
+
+    <Border BorderBrush="Gray" BorderThickness="1" Padding="8" Background="WhiteSmoke">
+        <!--<ScrollViewer VerticalScrollBarVisibility="Auto">-->
+            <Grid>
+                
+                 <!--Общий контейнер--> 
+                <Border BorderThickness="2" BorderBrush="Black" Background="{StaticResource AppBackBrush}" Padding="10">
+                     <!--ВОТ ЗДЕСЬ ДОБАВЛЯЕМ RowDefinitions--> 
+                    <Grid>
+                         <!--1. Определяем строки--> 
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                             <!--Заголовок с кнопкой--> 
+                            <RowDefinition Height="Auto"/>
+                             <!--Основные данные--> 
+                            <RowDefinition Height="Auto"/>
+                             <!--Доп. поля (если есть)--> 
+                            <RowDefinition Height="*"/>
+                             <!--Остальной контент--> 
+                        </Grid.RowDefinitions>
+
+                         <!--2. Заголовок с кнопкой (первая строка)--> 
+                        <Border x:Name="StatusBorder" Grid.Row="0" 
+                           Background="#515151" 
+                           Padding="10,5" 
+                           CornerRadius="5,5,0,0">
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+                                 <!--Текст статуса--> 
+                                <TextBlock Grid.Column="0" x:Name="LastAction" 
+                                      Text="{Binding OTSCar_Zagolovok}" 
+                                      Foreground="White" 
+                                      FontWeight="Bold"
+                                      VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect ShadowDepth="0" BlurRadius="2" Color="White" Opacity="0.7"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+
+
+                                <Border Grid.Column="1" x:Name="CloseButtonBorder"
+                                        CornerRadius="12"
+                                        Style="{StaticResource Key1}"
+                                        PreviewMouseDown="CloseButtonBorder_PreviewMouseLeftButtonDown">
+                                    
+                                    <TextBlock x:Name="CloseBUTBlock" Text="✕"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontWeight="Bold"
+                                               Foreground="Black"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                         <!--3. Основные данные (вторая строка)--> 
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.5*"/>
+                                <ColumnDefinition Width="0.5*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <local:FieldRow Grid.Column="0" Grid.Row="0" Txt="ОТС № " Valu="{Binding Id}" HorizontalAlignment="Left"/>
+                            <local:FieldRow Grid.Column="0" Grid.Row="1" Txt="Категория" Valu="{Binding Kat}" HorizontalAlignment="Left"/>
+                            <local:FieldRow Grid.Column="0" Grid.Row="2" Txt="Дорога" Valu="{Binding MestoOTS_Dor}" HorizontalAlignment="Left"/>
+                            <local:FieldRow Grid.Column="0" Grid.Row="3" Txt="Место" Valu="{Binding MestoOTS}" HorizontalAlignment="Left"/>
+
+                            <local:FieldRow Grid.Column="1" Grid.Row="0" Txt="Начало" Valu="{Binding Nach, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" HorizontalAlignment="Left"/>
+                            <local:FieldRow Grid.Column="1" Grid.Row="1" Txt="Потери" Valu="{Binding PCh, StringFormat='{}{0:F2} ч.'}" HorizontalAlignment="Left"/>
+                            <local:FieldRow Grid.Column="1" Grid.Row="2" Txt="Расследование" Valu="{Binding KtoZakryl}" HorizontalAlignment="Left"/>
+                            <local:FieldRow Grid.Column="1" Grid.Row="3" Txt="Отнесен на" Valu="{Binding ZaKem}" HorizontalAlignment="Left"/>
+                        </Grid>
+
+                         <!--4. Дополнительные поля (третья строка - если нужно)--> 
+                         <!--<Grid Grid.Row="2"> ... </Grid>--> 
+
+                         <!--5. Остальной контент с прокруткой (четвертая строка)--> 
+                        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
+                            <ScrollViewer.Resources>
+                                <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
+                            </ScrollViewer.Resources>
+                        <!--Сюда можно добавить остальные секции карточки:
+                             - Локомотив
+                             - Характер/Причина  
+                             - Последствия
+                             - Виновные и т.д.--> 
+                            <StackPanel>
+                                 <!--Пример секции--> 
+                                <Border BorderBrush="#AAAAAA" BorderThickness="1" Padding="10" Margin="0,0,0,10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <local:FieldRow x:Name="LokField" Grid.Column="0" Txt="Локомотив:" Valu="{Binding SerLokPripLokTXT}" HorizontalAlignment="Left" PreviewMouseUp="LokField_PreviewMouseUp"/>
+                                        <local:FieldRow x:Name="MashField" Grid.Column="1" Txt="Машинист:" Valu="{Binding MashPripTXT}" HorizontalAlignment="Right" PreviewMouseUp="MashField_PreviewMouseUp"/>
+                                    </Grid>
+                                </Border>
+                                <GroupBox Header="Отказавшее оборудование" BorderBrush="#AAAAAA" Foreground="DarkGreen" FontWeight="DemiBold" BorderThickness="1" Padding="10" Margin="0,0,0,10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <local:FieldRow Grid.Column="0" Txt="Уровень 1" Valu="{Binding MyKlasLev1}" HorizontalAlignment="Left"/>
+                                        <local:FieldRow Grid.Column="1" Txt="Уровень 2" Valu="{Binding MyKlasLev2}" HorizontalAlignment="Center"/>
+                                        <local:FieldRow x:Name="MyKlasLev3Field" Grid.Column="2" Txt="Уровень 3" Valu="{Binding MyKlasLev3}" HorizontalAlignment="Right" PreviewMouseUp="MyKlasLev3Field_PreviewMouseUp"/>
+                                    </Grid>
+                                </GroupBox>
+                                <GroupBox Header="Отказавшее оборудование КАС АНТ" BorderBrush="#AAAAAA" Foreground="DarkGreen" FontWeight="DemiBold" BorderThickness="1" Padding="10" Margin="0,0,0,10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <local:FieldRow Grid.Column="0" Txt="Уровень 1" Valu="{Binding OTSLev1}" HorizontalAlignment="Left"/>
+                                        <local:FieldRow Grid.Column="1" Txt="Уровень 2" Valu="{Binding OTSLev2}" HorizontalAlignment="Center"/>
+                                        <local:FieldRow Grid.Column="2" Txt="Уровень 3" Valu="{Binding OTSLev3}" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                </GroupBox>
+                                <local:HistoryEditor HistoryEntries="{Binding History}"
+                                                     SelectedEntry="{Binding SelectedHistoryEntry, Mode=TwoWay}"/>
+
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+        <!--</ScrollViewer>-->
+        
+        
+        
+    </Border>
+
+</UserControl>
+
+
+
+
+    <!--<ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            --><!-- Заголовок отказа --><!--
+            <TextBlock FontWeight="Bold" FontSize="16" Foreground="DarkGreen">
+                Отказ #14185892 был передан ЗАБ, ТЧЭ-6 пользователем Апрельков Иван Сергеевич 12.12.2025 в 10:49
+            </TextBlock>
+
+            --><!-- Категории --><!--
+            <TextBlock Foreground="Red" FontSize="14">
+                Категория отказа, согласно распоряжению 1052р - <Run FontWeight="Bold">2</Run>
+            </TextBlock>
+            <TextBlock Foreground="Red" FontSize="14">
+                Категория отказа, согласно распоряжению 1915р - <Run FontStyle="Italic">2</Run>
+            </TextBlock>
+
+            --><!-- Кнопки --><!--
+            <StackPanel Orientation="Horizontal" Margin="0,10">
+                <Button Content="Печать отказа" Padding="10,5"/>
+                <Button Content="Справка об ущербе" Padding="10,5" Margin="5,0"/>
+                <Button Content="Справка НКИ" Padding="10,5" Margin="5,0"/>
+                <Button Content="Справка НФ" Padding="10,5" Margin="5,0"/>
+            </StackPanel>
+
+            --><!-- Чекбокс истории --><!--
+            <CheckBox x:Name="ShowHistoryCheckBox" Content="показывать историю отказа"
+                      IsChecked="True" Margin="0,5"/>
+
+            --><!-- Место --><!--
+            <Border Style="{StaticResource SectionBox}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SectionHeader}">Место</TextBlock>
+                    <TextBlock TextWrapping="Wrap">
+                        Забайкальская, <LineBreak/>
+                        РЕГ-1, <Run FontWeight="Bold">УКУРЕЙ - ЧЕРНЫШЕВСК-ЗАБ</Run>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            --><!-- Время --><!--
+            <Border Style="{StaticResource SectionBox}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SectionHeader}">Время</TextBlock>
+                    <Grid Margin="10,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        --><!-- Заголовки --><!--
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Начало" HorizontalAlignment="Center" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Устранение" HorizontalAlignment="Center" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Продолжительность" HorizontalAlignment="Center" FontWeight="Bold"/>
+
+                        --><!-- Данные --><!--
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="10.12.25 20:45" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="10.12.25 21:16" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="31 мин." HorizontalAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            --><!-- Характер --><!--
+            <Border Style="{StaticResource SectionBox}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SectionHeader}">Характер</TextBlock>
+                    <TextBlock TextWrapping="Wrap" Margin="0,5">
+                        Тип пометки - сбойная, цвет - ярко-красный, время создания - 10.12.2025 21:26, код рабочего места - 11400094<LineBreak/>
+                        Причина ГИД 128: неисправность локомотива на станциях и в пути следования
+                    </TextBlock>
+
+                    <Grid Margin="0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Отказавшее тех. средство" HorizontalAlignment="Center" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Проявление отказа" HorizontalAlignment="Center" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Комментарий" HorizontalAlignment="Center" FontWeight="Bold"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Электрооборудование силовой цепи, вспомогательных цепей и цепей управления локомотива"
+                                   TextWrapping="Wrap" Margin="5"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="Неисправность электрооборудования локомотива"
+                                   TextWrapping="Wrap" Margin="5"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="не включается гв на головной секции.|&lt;NLok=1319 SLok=253&gt;"
+                                   TextWrapping="Wrap" Margin="5"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            --><!-- ...остальные секции: Причина, Последствия, Виновные и т.д. — по такому же принципу --><!--
+        </StackPanel>
+    </ScrollViewer>-->
+
+

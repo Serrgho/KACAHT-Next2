@@ -1,0 +1,102 @@
+﻿<UserControl x:Class="Kas.FilterPopup"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             mc:Ignorable="d" 
+             d:DesignHeight="200" d:DesignWidth="120">
+    <UserControl.Resources>
+        <!-- Стиль для элементов ListBox (для FilterPopup.xaml) -->
+        <Style TargetType="{x:Type ListBoxItem}">
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <Border x:Name="Border"
+                                
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter 
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Margin="0" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SplitterBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    
+    
+    
+    <Border x:Name="RootBorder"
+            Background="{StaticResource AppBackBrush}"
+            BorderBrush="{StaticResource SplitterBrush}"
+            BorderThickness="2"
+            CornerRadius="8"
+            Padding="1">
+        <Grid Margin="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <!-- ListBox -->
+                <RowDefinition Height="Auto"/>
+                <!-- Кнопка КОПИРОВАТЬ -->
+                <RowDefinition Height="Auto"/>
+                <!-- Кнопка ОК -->
+            </Grid.RowDefinitions>
+            
+            <ListBox Grid.Row="0" x:Name="FilterListBox"
+                     SelectionMode="Multiple"
+                     Background="{StaticResource AppBackBrush}"
+                     BorderThickness="0"
+                     VirtualizingStackPanel.IsVirtualizing="True"            
+                     MaxHeight="250"
+                     Padding="4"
+                     PreviewMouseDown="FilterListBox_PreviewMouseDown">
+                <ListBox.Resources>
+                    <!-- 👇 Подключаем ваш уже существующий стиль -->
+                    <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
+                </ListBox.Resources>
+            </ListBox>
+            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                <!-- Новая кнопка КОПИРОВАТЬ -->
+            <Button  x:Name="CopyButton"
+                    
+                    Style="{StaticResource PopupStyleButton}"
+                    Content="🗒️"
+                    Margin="2"
+                    Click="CopyButton_Click_SelectedOnly"/>
+
+                <Button  x:Name="CopyAsText"
+                         Style="{StaticResource PopupStyleButton}"
+                         Content="📰"
+                         Margin="2"
+                         Click="CopyAsText_Click"/>
+            </StackPanel>
+            
+
+            <Button Grid.Row="2" x:Name="OkButt"
+                    Style="{StaticResource PopupStyleButton}"
+                    Content="Фильтровать"
+                    Margin="1"
+                    IsDefault="True" 
+                    Click="OkButt_Click"/>
+        </Grid>
+    </Border>
+</UserControl>

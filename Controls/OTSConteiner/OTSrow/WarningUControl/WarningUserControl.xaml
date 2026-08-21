@@ -1,0 +1,174 @@
+﻿<UserControl x:Class="Kas.WarningUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             d:DataContext="{d:DesignInstance Type=local:Otkaz}"
+             mc:Ignorable="d">
+    
+    <WrapPanel VerticalAlignment="Center" Margin="2">
+
+        <Border Background="DarkGreen" BorderBrush="LightYellow" BorderThickness="1" CornerRadius="4" Padding="2" Margin="1" d:Visibility="Visible">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsKorrect}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="✅" Foreground="LightYellow" TextAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="{Binding KorrectValTxt}" Foreground="LightYellow" TextAlignment="Justify"    VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </Grid>
+        </Border>
+
+		<Border Background="Darkred" BorderBrush="LightYellow" BorderThickness="1" CornerRadius="4" Padding="2" Margin="1" d:Visibility="Visible">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ISSobyt}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="⚠️" Foreground="LightYellow" TextAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="Событие" Foreground="LightYellow" TextAlignment="Justify"    VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </Grid>
+        </Border>
+
+
+		<Border Background="Darkred" BorderBrush="LightYellow" BorderThickness="1" CornerRadius="4" Padding="2" Margin="1" d:Visibility="Visible">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ISKorp}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="⚠️" Foreground="LightYellow" TextAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="Корп. наруш" Foreground="LightYellow" TextAlignment="Justify"    VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </Grid>
+        </Border>
+
+
+
+		<Border Background="Transparent" BorderBrush="Black" BorderThickness="1" CornerRadius="4" Padding="2" Margin="1" d:Visibility="Visible">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding NarushSroka}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="⚠️" Foreground="Red" TextAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="Принят с наруш" Foreground="Black" TextAlignment="Justify"    VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </Grid>
+        </Border>
+
+
+
+		<Border Background="Transparent" BorderBrush="Black" BorderThickness="1" CornerRadius="4" Padding="2" Margin="1" d:Visibility="Visible">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ISDanger}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="⚠️" Foreground="Red" TextAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="Опас ОТС" Foreground="Black" TextAlignment="Justify"    VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </Grid>
+        </Border>
+
+
+
+
+		<Border   Background="Transparent" BorderBrush="Black" BorderThickness="1" CornerRadius="4" Padding="2" Margin="1" d:Visibility="Visible">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding AlienSLD}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding AlienSLD}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="⚠️" Foreground="Red" TextAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="{Binding AlienSLD, StringFormat='за {0}'}" Foreground="Darkred" FontWeight="SemiBold" TextAlignment="Justify" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="160"/>
+            </Grid>
+        </Border>
+
+
+
+		<Border x:Name="OkazPom" Background="Transparent" BorderBrush="Black" BorderThickness="1" CornerRadius="4" Padding="2" Margin="1" d:Visibility="Visible">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding OkaPom}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="⚠️" Foreground="Red" TextAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="Оказ. помощи" Foreground="Black" TextAlignment="Justify"
+                VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </Grid>
+        </Border>
+
+    </WrapPanel>
+</UserControl>

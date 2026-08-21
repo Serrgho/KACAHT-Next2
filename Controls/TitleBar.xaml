@@ -1,0 +1,87 @@
+﻿<UserControl x:Class="Kas.TitleBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             
+             mc:Ignorable="d" Loaded="OnLoaded">
+    
+    <Border x:Name="MainBorder" Height="33" CornerRadius="8 8 0 0" Style="{StaticResource HeaderStyle}"  MouseLeftButtonDown="TBAR_MouseLeftButtonDown" Margin="0">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <Image x:Name="TBarIcon" Grid.Column="0" Source="/Icons/favicon.ico" Stretch="Fill"/>
+
+            <!-- Название приложения -->
+            <TextBlock x:Name="WinTitle" Grid.Column="1"
+                       Margin="2"
+                       Padding="10 3 3 0"
+                       Height="auto"
+                       Width="auto"
+                       Text="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Title}"
+                       Style="{StaticResource HeaderTextStyle}"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center" >
+                
+                <!--Ancestor — это тип RelativeSource, который используется для поиска предка (родительского элемента) в визуальном дереве WPF. Визуальное дерево — это иерархия элементов управления, которые составляют ваш интерфейс-->
+                
+                <!--{Binding RelativeSource={RelativeSource AncestorType=ТипЭлемента}, Path=СвойствоЭлемента}-->
+                
+                <!--Мы используем {RelativeSource AncestorType=Window}, чтобы найти родительский элемент типа Window (в данном случае это само окно).Это позволяет получить доступ к свойствам окна, таким как Title.-->
+        
+                <!--Здесь мы говорим: "Найди ближайший элемент типа Window в визуальном дереве и привяжи текст к его свойству Title".-->
+                
+                <!--<Button Content="Click Me">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Background}">
+                                    <ContentPresenter />
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>-->
+                
+                <!--Позволяет указать, какой именно предок нужен, если в визуальном дереве несколько элементов одного типа.
+                Например: AncestorLevel=1: Ближайший предок. 
+                AncestorLevel=2: Предок второго уровня и т.д.-->
+                
+                
+            </TextBlock>
+
+            <!--<Border Grid.Column="2" Background="Transparent" Height="auto">
+               
+                <Label x:Name="InfoBlock"
+                       FontSize="15"
+                       FontFamily="Calibri"
+                       Width="auto"
+                       VerticalAlignment="Stretch"
+                       VerticalContentAlignment="Center"
+                       HorizontalContentAlignment="Center"
+                       Foreground="Yellow"
+                       Content="{Binding InfoText, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}" />
+            </Border>-->
+
+
+            <!-- Кнопки управления -->
+            <Button Grid.Column="3" x:Name="MinBu"  Style="{StaticResource MinButtonStyle}" PreviewMouseDown="Minimize_Click" VerticalContentAlignment="Bottom">
+                <Path Data="M0,0 L10,0" Stroke="White" StrokeThickness="2" HorizontalAlignment="Center" />
+            </Button>
+
+            <Button Grid.Column="4"  x:Name="MaxBu"  Style="{StaticResource MaxButtonStyle}" PreviewMouseDown="Maximize_Click">
+                <Path Data="M0,0 L15,0 L15,15 L0,15 Z" Stroke="White" StrokeThickness="2" />
+            </Button>
+
+            <Button Grid.Column="5"  x:Name="ClosBu"  Style="{StaticResource CloseButtonStyle}" PreviewMouseDown="Close_Click">
+                <Path Data="M0,0 L15,15 M15,0 L0,15" Stroke="White" StrokeThickness="2" />
+            </Button>
+        </Grid>
+    </Border>
+</UserControl>

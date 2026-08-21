@@ -1,0 +1,207 @@
+﻿<Window x:Class="Kas.PeriodWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+        mc:Ignorable="d"
+        Loaded="DTPicker_Loaded"
+        x:Name="DTPicker"
+        
+        Title="PeriodWindow" >
+
+    <Window.Resources>
+        <!-- Стиль для выделения выбранной даты --><!--
+        <Style x:Key="SelectedDayButtonStyle" TargetType="Label">
+            <Setter Property="Background" Value="{StaticResource SplitterBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+
+
+        --><!-- Стиль для рабочего дня недели --><!--
+        <Style x:Key="DayWeekButtonStyle" TargetType="Label">
+            <Setter Property="Background" Value="{StaticResource SplitterBrush}" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+        --><!-- Стиль для выходного дня недели --><!--
+        <Style x:Key="WeekEndButtonStyle" TargetType="Label">
+            <Setter Property="Background" Value="{StaticResource SplitterBrush}" />
+            <Setter Property="Foreground" Value="red" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+
+        --><!-- Стиль для даты вне границ текущего месяца --><!--
+        <Style x:Key="GrayDayButtonStyle" TargetType="Label">
+            <Setter Property="Background" Value="{StaticResource ScrolBarBrush}" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+
+        --><!-- Стиль для обычной даты --><!--
+        <Style x:Key="DayButtonStyle" TargetType="Label">
+            <Setter Property="Background" Value="{StaticResource AppBackBrush}" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+
+        --><!-- Стиль для кнопки влево --><!--
+
+        <Style x:Key="LeftButtonStyle" TargetType="Label">
+            <Setter Property="Background" Value="{StaticResource AppBackBrush}" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>-->
+
+    </Window.Resources>
+
+    <Border MaxWidth="300" Height="auto" Background="{StaticResource AppBackBrush}">
+       <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <!-- Заголовок -->
+        
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="50"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" x:Name="PrevMNTArrow"
+                    
+                    Background="{StaticResource AppBackBrush}"
+                    BorderBrush="{StaticResource SplitterBrush}"
+                    BorderThickness="1"
+                    CornerRadius="2,0,0,2"
+                    MouseDown="PrevMNTArrow_MouseDown"
+                    Padding="2">
+                <Path x:Name="ArrowLeft"
+                      Grid.Column="1"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      Fill="{StaticResource SplitterBrush}"
+                      Data="M 0 0 L 4 4 L 8 0 Z" RenderTransformOrigin="0.5,0.5" Height="14" Stretch="Fill" Width="13" >
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="90"/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                </Border>
+            
+            <!-- Выбор месяца -->
+                <ComboBox Grid.Column="1" x:Name="MonthSelector" 
+                      Width="120" 
+                      Style="{StaticResource MyCombo}"
+                      SelectionChanged="MonthSelector_SelectionChanged"/>
+           
+            <!-- Отображение года -->
+                <ComboBox Grid.Column="2" x:Name="YearLabel"
+                      Style="{StaticResource MyCombo}"
+                      SelectionChanged="YearLabel_SelectionChanged"/>
+
+                <Border Grid.Column="3"
+                        x:Name="NextMNTArrow"
+                        
+                        Background="{StaticResource AppBackBrush}"
+                        BorderBrush="{StaticResource SplitterBrush}"
+                        BorderThickness="1"
+                        CornerRadius="0,2,2,0"
+                        MouseDown="NextMNTArrow_MouseDown"
+                        Padding="2">
+                    <Path x:Name="ArrowRight"
+                          Grid.Column="1"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Fill="{StaticResource SplitterBrush}"
+                          Data="M 0 0 L 4 4 L 8 0 Z"
+                          RenderTransformOrigin="0.5,0.5" Height="14" Stretch="Fill" Width="13" >
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="270"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                    </Path>
+                </Border>
+            </Grid>
+        <!--MaxWidth="274" MaxHeight="218"-->
+        <!-- Сетка дней -->
+        <UniformGrid Grid.Row="1" x:Name="DaysGrid" Rows="7" Columns="7"   Background="{StaticResource AppBackBrush}">
+            <!-- Дни недели -->
+            <TextBlock Text="Пн" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Text="Вт" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Text="Ср" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Text="Чт" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Text="Пт" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Text="Сб" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Text="Вс" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </UniformGrid>
+
+        <!-- Кнопка "Сегодня" -->
+
+        <Grid Grid.Row="2" Background="{StaticResource AppBackBrush}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock  Grid.Column="0"
+                            x:Name="TodayButton"
+                            Text="Сегодня:... "
+                            TextAlignment="Left"
+                            Margin="3"
+                            FontSize="12"
+                            FontWeight="Bold"
+                            Foreground="{StaticResource SplitterBrush}"
+                            Background="Transparent"
+                            PreviewMouseDown="TodayButton_PreviewMouseDown"/>
+
+                <TextBlock  Grid.Column="1"
+                            x:Name="SelecteddayButton"
+                            Text="Выбрано:... "
+                            TextAlignment="Right"
+                            Margin="3"
+                            FontSize="12"
+                            FontWeight="Bold"
+                            Foreground="{StaticResource SplitterBrush}"
+                            Background="Transparent"/>
+            </Grid>
+       </Grid>
+    </Border>
+    
+</Window>

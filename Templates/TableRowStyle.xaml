@@ -1,0 +1,140 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                    xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+   
+
+    <!-- Определяем стиль для Border -->
+    <Style x:Key="UpperBorderStyle" TargetType="Border">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        
+        <Style.Triggers>
+            <!-- Триггер для MouseOver -->
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource  UpperBorderBrush}" />
+                <Setter Property="BorderThickness" Value="5 0"/>
+                
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--специальный контейнер для первой колонки:-->
+    <Style x:Key="Colum0" TargetType="Path">
+        <Setter Property="Fill" Value="Transparent" />
+        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="StrokeThickness" Value="2" />
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Style.Triggers>
+            <!-- Триггер для Pointed = True -->
+            <DataTrigger Binding="{Binding Pointed}" Value="True">
+                <Setter Property="Fill" Value="{StaticResource AppBackBrush}" />
+                <Setter Property="Stroke" Value="red" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+       <!-- Стиль для ContentControl с датой и временем -->
+    <Style x:Key="DateContentControlStyle" TargetType="ContentControl">
+        <Setter Property="ContentStringFormat" Value="{}{0:dd.MM.yyyy HH:mm}" />
+        <Setter Property="Foreground" Value="Black" />
+        <Setter Property="FontWeight" Value="Normal" /> 
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <!--FontWeight="{TemplateBinding FontWeight}"-->
+            <Setter.Value>
+                <ControlTemplate TargetType="ContentControl">
+                    <Border Background="Transparent"
+                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                        <TextBlock Foreground="{TemplateBinding Foreground}"
+                                  FontWeight="{TemplateBinding FontWeight}"
+                                   
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center">
+                         <!-- Добавляем стиль с триггерами -->
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" 
+                                        Value="{Binding Path=Content, 
+                                                        RelativeSource={RelativeSource TemplatedParent},                                      StringFormat='{}{0:dd.MM.yyyy} {0:HH:mm}'}" />
+                                    <Style.Triggers>
+                                        <!-- Триггер для null -->
+                                        <DataTrigger Binding="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
+                                            <Setter Property="Text" Value="--- --" />
+                                        </DataTrigger>
+                                        
+                                        
+                                         <!-- Триггер для отображения только даты -->
+                                        <DataTrigger Binding="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}" Value="False">
+                                            <Setter Property="Text" 
+                                                    Value="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}, StringFormat='{}{0:dd.MM.yyyy}'}" />
+                                        </DataTrigger>
+                                        
+                                        <!-- Триггер для минимальной даты -->
+                                        <!--надо добавить в начало
+                                        xmlns:sys="clr-namespace:System;assembly=mscorlib" 
+                                        для использования sys:DateTime.MinValue-->
+                                        <DataTrigger Binding="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Static sys:DateTime.MinValue}">
+                                            <Setter Property="Text" Value="--- --" />
+                                        </DataTrigger>
+
+                                       
+
+
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Стиль для даты с днём недели и временем -->
+    <Style x:Key="DateWithWeekdayContentControlStyle" TargetType="ContentControl">
+        <Setter Property="Foreground" Value="Black" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContentControl">
+                    <Border Background="Transparent"
+                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                        <TextBlock Foreground="{TemplateBinding Foreground}"
+                               FontWeight="{TemplateBinding FontWeight}"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" 
+                                        Value="{Binding Path=Content, 
+                                                        RelativeSource={RelativeSource TemplatedParent}, 
+                                                        StringFormat='{}{0:dddd}, {0:dd.MM.yyyy}'}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
+                                            <Setter Property="Text" Value="--- --" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Static sys:DateTime.MinValue}">
+                                            <Setter Property="Text" Value="--- --" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

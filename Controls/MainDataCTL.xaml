@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="Kas.MainDataCTL"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             mc:Ignorable="d">
+    <Expander x:Name="expDataWork" 
+			Header="🌐📁📝  Работа с данными" 
+			Background="{StaticResource ScrolBarBrush}"
+			Foreground="DarkBlue"
+			FontWeight="Bold"	
+			FontSize="15"
+			BorderThickness="3"
+			BorderBrush="{StaticResource SplitterBrush}"
+			IsExpanded="True"
+			HorizontalContentAlignment="Stretch">
+
+        <WrapPanel x:Name="TopRibbon"  Orientation="Horizontal" Background="{StaticResource ScrolBarBrush}" VerticalAlignment="Center">
+			
+			<Button x:Name="LoadData" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="LoadData_Click">📁Импорт Excel</Button>
+            <Button x:Name="BtnAddFromJRNL"  Style="{StaticResource PopupStyleButtonGreen}"  Click="BtnAddFromJRNL_Click" Content="🌐Синхр. список ОТС"/>
+
+            <Button x:Name="LoadDataFromJSON" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="LoadDataFromJSON_Click">📁Загрузить данные</Button>
+            <Button x:Name="AppendDataToJSON" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="AppendDataToJSON_Click">📝Добавить данные к файлу</Button>
+
+            <Button x:Name="SaveDataToJSON" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="SaveDataToJSON_Click">📝Сохранить данные</Button>
+			<Button x:Name="ResetToOTSList" Style="{StaticResource PopupStyleButton}" Click="ResetToOTSList_Click">🔙 Вернуться в основной список</Button>
+			<Button x:Name="BtnShowInExplorer" Style="{StaticResource PopupStyleButton}" Click="BtnShowInExplorer_Click">Показать папку с данными</Button>
+        </WrapPanel>
+
+    </Expander>
+</UserControl>

@@ -1,0 +1,793 @@
+﻿<UserControl x:Class="Kas.S24Table2"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             mc:Ignorable="d">
+	<UserControl.Resources>
+		<Style x:Key="CellBorder" TargetType="Border">
+			<Setter Property="BorderBrush" Value="Black"/>
+			<Setter Property="BorderThickness" Value="0.5"/>
+			<Setter Property="Background" Value="White"/>
+		</Style>
+		<Style x:Key="HeaderBorder" TargetType="Border" BasedOn="{StaticResource CellBorder}">
+			<Setter Property="Background" Value="#FFEEEEEE"/>
+		</Style>
+		<Style x:Key="TotalBorder" TargetType="Border" BasedOn="{StaticResource CellBorder}">
+			<Setter Property="Background" Value="#FFDDDDDD"/>
+		</Style>
+		<Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="TextAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Padding" Value="3,1"/>
+		</Style>
+		<Style x:Key="CellStyle" TargetType="TextBlock">
+			<Setter Property="TextAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Padding" Value="3,1"/>
+		</Style>
+		<Style x:Key="LeftTextStyle" TargetType="TextBlock">
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Padding" Value="4,2"/>
+		</Style>
+	</UserControl.Resources>
+
+	<StackPanel>
+		<TextBlock x:Name="LblCaption" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center" Margin="0,0,0,5"/>
+
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition Width="25"/>
+				<ColumnDefinition Width="Auto"/>
+			</Grid.ColumnDefinitions>
+
+			<!-- ЛЕВАЯ ЧАСТЬ: Таблица ТЧЭ -->
+			<Grid Grid.Row="0" Grid.Column="0" x:Name="MainGrid">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="150"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+				</Grid.ColumnDefinitions>
+
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					
+				</Grid.RowDefinitions>
+
+				<!-- СТРОКА 0: Верхние заголовки -->
+				<Border Grid.Row="0" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="1 кат"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="2 кат"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="5" Grid.ColumnSpan="2" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="3 кат"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="7" Grid.ColumnSpan="2" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Всего"/>
+				</Border>
+
+				<!-- СТРОКА 1: Подзаголовки -->
+				<Border Grid.Row="1" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="ТЧЭ"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="1" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="ОТС"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="2" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Часы"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="3" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="ОТС"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="4" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Часы"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="5" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="ОТС"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="6" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Часы"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="7" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="ОТС"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="8" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Часы"/>
+				</Border>
+
+				<!-- СТРОКИ 2-6: ТЧЭ данные -->
+				<Border Grid.Row="2" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblTche1" Style="{StaticResource HeaderTextStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R2C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R2C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R2C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R2C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="5" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R2C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="6" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R2C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="7" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R2C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="8" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R2C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<!-- ТЧЭ 2 -->
+				<Border Grid.Row="3" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblTche2" Style="{StaticResource HeaderTextStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R3C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R3C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R3C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R3C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="5" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R3C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="6" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R3C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="7" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R3C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="8" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R3C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<!-- ТЧЭ 3 -->
+				<Border Grid.Row="4" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblTche3" Style="{StaticResource HeaderTextStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R4C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R4C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R4C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R4C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="5" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R4C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="6" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R4C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="7" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R4C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="8" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R4C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<!-- ТЧЭ 5 -->
+				<Border Grid.Row="5" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblTche5" Style="{StaticResource HeaderTextStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R5C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R5C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R5C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R5C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="5" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R5C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="6" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R5C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="7" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R5C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="8" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R5C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<!-- ТЧЭ 7 -->
+				<Border Grid.Row="6" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblTche7" Style="{StaticResource HeaderTextStyle}"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R6C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R6C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R6C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R6C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="5" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R6C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="6" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R6C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="7" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R6C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="8" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R6C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<!-- Дирекция Т (итоговая) -->
+				<Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="LblTotal" Style="{StaticResource HeaderTextStyle}" Text="Дирекция Т"/>
+				</Border>
+				<Border Grid.Row="7" Grid.Column="1" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R7C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="7" Grid.Column="2" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R7C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="7" Grid.Column="3" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R7C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="7" Grid.Column="4" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R7C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="7" Grid.Column="5" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R7C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="7" Grid.Column="6" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R7C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="7" Grid.Column="7" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R7C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="7" Grid.Column="8" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R7C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				
+			</Grid>
+
+			<!-- ПРАВАЯ ПАНЕЛЬ -->
+			<Grid Grid.Row="0" Grid.Column="2" x:Name="RightPanel">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
+
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					
+				</Grid.RowDefinitions>
+
+				<!-- с учетом плана передачи -->
+				<!-- ▼▼▼ месячный блок: сворачивается ЦЕЛИКОМ одной строкой ▼▼▼ -->
+				<StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" x:Name="MonthBlock">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="с учетом плана передачи на др дороги"/>
+					<StackPanel Orientation="Horizontal">
+						<TextBlock x:Name="MonthHoursLab" Style="{StaticResource LeftTextStyle}" Text="месяц часы"/>
+						<!--<TextBlock Style="{StaticResource LeftTextStyle}" Text="месяц часы"/>-->
+						<TextBlock Style="{StaticResource CellStyle}" x:Name="TxtMonthHoursCur"/>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Style="{StaticResource LeftTextStyle}" Text="ТГ ост"/>
+						<TextBlock Style="{StaticResource CellStyle}" x:Name="TxtMonthHoursDiff"/>
+
+						<TextBlock x:Name="PgLab" Style="{StaticResource LeftTextStyle}" Text="П.Г."/>
+						<!--<TextBlock Style="{StaticResource LeftTextStyle}" Text="П.Г."/>-->
+						<TextBlock Style="{StaticResource CellStyle}" x:Name="TxtMonthHoursPrev"/>
+					</StackPanel>
+				</StackPanel>
+				<!-- ▲▲▲ ▲▲▲ -->
+				<!-- с начала года -->
+				<TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" Style="{StaticResource HeaderTextStyle}" Text="с нач года часы"/>
+
+				<TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource HeaderTextStyle}" x:Name="TxtYtdMonthCur"/>
+				<TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource HeaderTextStyle}" x:Name="TxtYtdMonthPrev"/>
+
+				<TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource LeftTextStyle}" Text="часы"/>
+				<TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtYtdHoursCur"/>
+				<TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtYtdHoursPrev"/>
+
+				<TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource LeftTextStyle}" Text="ТГ ост"/>
+				<TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtYtdHoursDiff"/>
+		 			
+	   				
+			</Grid>
+
+
+
+
+
+
+
+			<Grid Grid.Row="1" Grid.Column="0" x:Name="IzmGrid" Margin="0,10,0,0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="150"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+					<ColumnDefinition Width="105"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+				</Grid.RowDefinitions>
+
+				<!-- Шапка -->
+				<Border Grid.Row="0" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblDiff1" Style="{StaticResource HeaderTextStyle}"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R9C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R9C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R9C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R9C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="5" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R9C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="6" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R9C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="7" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R9C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="8" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R9C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<Border Grid.Row="1" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblDiff2" Style="{StaticResource HeaderTextStyle}"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R10C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R10C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R10C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R10C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="5" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R10C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="6" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R10C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="7" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R10C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="8" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R10C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<Border Grid.Row="2" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblDiff3" Style="{StaticResource HeaderTextStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R11C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R11C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R11C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R11C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="5" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R11C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="6" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R11C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="7" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R11C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="8" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R11C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<Border Grid.Row="3" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblDiff5" Style="{StaticResource HeaderTextStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R12C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R12C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R12C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R12C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="5" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R12C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="6" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R12C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="7" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R12C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="8" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R12C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<Border Grid.Row="4" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblDiff7" Style="{StaticResource HeaderTextStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R13C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R13C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R13C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R13C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="5" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R13C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="6" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R13C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="7" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R13C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="8" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="R13C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<Border Grid.Row="5" Grid.Column="0" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="LblDiffTotal" Style="{StaticResource HeaderTextStyle}" Text="Дирекция Т"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="1" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R14C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="2" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R14C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="3" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R14C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="4" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R14C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="5" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R14C5" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="6" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R14C6" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="7" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R14C7" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="8" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="R14C8" Style="{StaticResource CellStyle}"/>
+				</Border>
+			</Grid>
+
+
+			<Grid Grid.Row="1" Grid.Column="2" x:Name="IzmRightGrid" Margin="0,2,0,0" VerticalAlignment="Bottom">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+
+				</Grid.RowDefinitions>
+
+				<TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LeftTextStyle}" x:Name="TxtOtsMonthPrev"/>
+				<TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtOtsMonthPrevVal"/>
+				<TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource LeftTextStyle}" x:Name="TxtOtsMonthGoal"/>
+				<TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtOtsMonthGoalVal"/>
+				
+				<TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource LeftTextStyle}" x:Name="TxtOtsYtdPrev"/>
+				<TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtOtsYtdPrevVal"/>
+				<TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource LeftTextStyle}" x:Name="TxtOtsYtdGoal"/>
+				<TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtOtsYtdGoalVal"/>
+
+				<!--<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LeftTextStyle}" Text="Цель часы (месяц)"/>
+				<TextBox Grid.Row="2" Grid.Column="1" Width="80" Margin="2"/>
+				<TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource LeftTextStyle}" Text="Цель часы (год)"/>
+				<TextBox Grid.Row="2" Grid.Column="3" Width="80" Margin="2"/>-->
+
+				<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LeftTextStyle}" Text="Цель часы (месяц)"/>
+				<TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtHoursMonthGoalVal"/>
+				<TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource LeftTextStyle}" Text="Цель часы (год)"/>
+				<TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtHoursYtdGoalVal"/>
+
+
+			</Grid>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			<!-- ================= ПЛАН КОРРЕКТИРОВКИ ================= -->
+			<Grid Grid.Row="2" Grid.Column="0" x:Name="PlanGrid" Margin="0,10,0,0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="150"/>
+					<ColumnDefinition Width="160"/>
+					<ColumnDefinition Width="200"/>
+					<ColumnDefinition Width="200"/>
+					<ColumnDefinition Width="120"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+				</Grid.RowDefinitions>
+
+				<!-- Шапка -->
+				<Border Grid.Row="0" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="План корректировки"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="1" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="на другую дорогу (ОТС/ЧАС)" TextWrapping="Wrap"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="2" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="в технологическое нарушение (ОТС/ЧАС)" TextWrapping="Wrap"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="3" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="корректировка времени (ОТС/ЧАС)" TextWrapping="Wrap"/>
+				</Border>
+				<Border Grid.Row="0" Grid.Column="4" Style="{StaticResource HeaderBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="всего (ОТС/ЧАС)" TextWrapping="Wrap"/>
+				</Border>
+
+				<!-- ТЧЭ 1 -->
+				<Border Grid.Row="1" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblPlanR1" Style="{StaticResource HeaderTextStyle}" Text="Боготол"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR1C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR1C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR1C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="1" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR1C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<!-- ТЧЭ 2 -->
+				<Border Grid.Row="2" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblPlanR2" Style="{StaticResource HeaderTextStyle}" Text="Красноярск"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR2C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR2C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR2C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="2" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR2C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<!-- ТЧЭ 3 -->
+				<Border Grid.Row="3" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblPlanR3" Style="{StaticResource HeaderTextStyle}" Text="Иланская"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR3C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR3C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR3C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="3" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR3C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<!-- ТЧЭ 5 -->
+				<Border Grid.Row="4" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblPlanR4" Style="{StaticResource HeaderTextStyle}" Text="Ачинск"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR4C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR4C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR4C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="4" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR4C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<!-- ТЧЭ 7 -->
+				<Border Grid.Row="5" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+					<TextBlock x:Name="LblPlanR5" Style="{StaticResource HeaderTextStyle}" Text="Абакан"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="1" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR5C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="2" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR5C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="3" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR5C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="5" Grid.Column="4" Style="{StaticResource CellBorder}">
+					<TextBlock x:Name="PlanR5C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+
+				<!-- Всего -->
+				<Border Grid.Row="6" Grid.Column="0" Style="{StaticResource TotalBorder}">
+					<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Всего:"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="1" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="PlanR6C1" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="2" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="PlanR6C2" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="3" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="PlanR6C3" Style="{StaticResource CellStyle}"/>
+				</Border>
+				<Border Grid.Row="6" Grid.Column="4" Style="{StaticResource TotalBorder}">
+					<TextBlock x:Name="PlanR6C4" Style="{StaticResource CellStyle}"/>
+				</Border>
+			</Grid>
+
+
+			<Grid Grid.Row="2" Grid.Column="2" x:Name="OtherRailsGrid" Margin="0,2,0,0" VerticalAlignment="Bottom">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+				</Grid.RowDefinitions>
+
+				<!-- дороги -->
+				<TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource HeaderTextStyle}" Text="ВСЖД"/>
+				<TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource HeaderTextStyle}" Text="ЗАБЖД"/>
+				<TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource HeaderTextStyle}" Text="ДВЖД"/>
+
+				<TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="ОТС цель"/>
+				<TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadVsjdCelOts"/>
+				<TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadZabdCelOts"/>
+				<TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadDvdCelOts"/>
+
+				<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="ОТС факт"/>
+				<TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadVsjd"/>
+				<TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadZabd"/>
+				<TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadDvd"/>
+
+				<TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="П/Ч цель"/>
+				<TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadVsjdCelPch"/>
+				<TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadZabdCelPch"/>
+				<TextBlock Grid.Row="3" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadDvdCelPch"/>
+
+				<TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="П/Ч факт"/>
+				<TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadHoursVsjd"/>
+				<TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadHoursZabd"/>
+				<TextBlock Grid.Row="4" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadHoursDvd"/>
+			</Grid>
+
+		</Grid>
+		
+
+	</StackPanel>
+</UserControl>

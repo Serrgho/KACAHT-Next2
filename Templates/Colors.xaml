@@ -1,0 +1,135 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="AppBackColor">#EAF2B9</Color>
+    <Color x:Key="AppBorderColor">#000000</Color>
+    <Color x:Key="AppBackOverColor">#2580BF</Color>
+    <Color x:Key="PointBallColor">red</Color>
+    <Color x:Key="UpperBorderColor">darkgray</Color>
+    <Color x:Key="ScrolBarColor">#C1C488</Color>
+    <Color x:Key="ButtonOverColor">#BCB731</Color>
+    <Color x:Key="ShadowColor">#FFC8C6C6</Color>
+    <Color x:Key="SplitterColor">#FF8E9065</Color>
+
+    <SolidColorBrush x:Key="AppBackBrush" Color="{StaticResource AppBackColor}"/>
+    <SolidColorBrush x:Key="AppBorderBrush" Color="{StaticResource AppBorderColor}" />
+    <SolidColorBrush x:Key="AppBackOverBrush" Color="{StaticResource AppBackOverColor}"/>
+    <SolidColorBrush x:Key="PointBallBrush" Color="{StaticResource PointBallColor}"/>
+    <SolidColorBrush x:Key="UpperBorderBrush" Color="{StaticResource UpperBorderColor}" />
+    <SolidColorBrush x:Key="ScrolBarBrush" Color="{StaticResource ScrolBarColor}"/>
+    <SolidColorBrush x:Key="ButtonOverBrush" Color="{StaticResource ButtonOverColor}"/>
+    <SolidColorBrush x:Key="ShadowBrush" Color="{StaticResource ShadowColor}"/>
+    <SolidColorBrush x:Key="SplitterBrush" Color="{StaticResource SplitterColor}"/>
+
+    <!--для MSGBOXX-->
+
+    <Color x:Key="TitleColor">#FF54B524</Color>
+    <Color x:Key="MessageColor">#FFEEEEEE</Color>
+    <Color x:Key="BackgroundColor">#b4252526</Color>
+    <Color x:Key="BorderColor">#FF252526</Color>
+    
+    <SolidColorBrush x:Key="TitleBrush" Color="{StaticResource TitleColor}"/>
+    <SolidColorBrush x:Key="MessageBrush" Color="{StaticResource MessageColor}"/>
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+
+    <!--====================================================================================================-->
+    
+    <Color x:Key="SLDBackColor">#948B54</Color>
+    <Color x:Key="LocoRemBackColor">#92D050</Color>
+    <Color x:Key="LocoStroyBackColor">#00B0F0</Color>
+    <Color x:Key="DublicatBackColor">#A29F9F</Color>
+    <Color x:Key="TechnologyBackColor">#007F46</Color>
+    <Color x:Key="TCHBackColor">#FF9999</Color>
+    <Color x:Key="TRBackColor">#FFC000</Color>
+    <Color x:Key="ProchBackColor">#99CCFF</Color>
+
+
+    <SolidColorBrush x:Key="SLDBackBrush" Color="{StaticResource SLDBackColor}"/>
+    <SolidColorBrush x:Key="LocoRemBackBrush" Color="{StaticResource LocoRemBackColor}"/>
+    <SolidColorBrush x:Key="LocoStroyBackBrush" Color="{StaticResource LocoStroyBackColor}"/>
+    <SolidColorBrush x:Key="DublicatBackBrush" Color="{StaticResource DublicatBackColor}"/>
+    <SolidColorBrush x:Key="TechnologyBackBrush" Color="{StaticResource TechnologyBackColor}"/>
+    <SolidColorBrush x:Key="TCHBackBrush" Color="{StaticResource TCHBackColor}"/>
+    <SolidColorBrush x:Key="TRBackBrush" Color="{StaticResource TRBackColor}"/>
+    <SolidColorBrush x:Key="ProchBackBrush" Color="{StaticResource ProchBackColor}"/>
+
+
+
+
+    <!--<DropShadowEffect x:Key="DefaultShadowEffect" Color="Black" ShadowDepth="2" Opacity="0.6" BlurRadius="4"/>
+    <DropShadowEffect x:Key="HoverShadowEffect" Color="Black" ShadowDepth="3" Opacity="0.8" BlurRadius="6"/>-->
+
+
+    <!--Control colors.-->
+    <Color x:Key="WindowColor">#FFE8EDF9</Color>
+    <Color x:Key="ContentAreaColorLight">#FFC5CBF9</Color>
+    <Color x:Key="ContentAreaColorDark">#FF7381F9</Color>
+
+    <Color x:Key="DisabledControlLightColor">#FFE8EDF9</Color>
+    <Color x:Key="DisabledControlDarkColor">#FFC5CBF9</Color>
+    <Color x:Key="DisabledForegroundColor">#FF888888</Color>
+
+    <Color x:Key="SelectedBackgroundColor">#FFC5CBF9</Color>
+    <Color x:Key="SelectedUnfocusedColor">#FFDDDDDD</Color>
+
+    <Color x:Key="ControlLightColor">White</Color>
+    <Color x:Key="ControlMediumColor">#FF7381F9</Color>
+    <Color x:Key="ControlDarkColor">#FF211AA9</Color>
+
+    <Color x:Key="ControlMouseOverColor">#FF3843C4</Color>
+    <Color x:Key="ControlPressedColor">#FF211AA9</Color>
+
+
+    <Color x:Key="GlyphColor">#FF444444</Color>
+    <Color x:Key="GlyphMouseOver">sc#1, 0.004391443, 0.002428215, 0.242281124</Color>
+
+    <!--Border colors-->
+    <Color x:Key="BorderLightColor">#FFCCCCCC</Color>
+    <Color x:Key="BorderMediumColor">#FF888888</Color>
+    <Color x:Key="BorderDarkColor">#FF444444</Color>
+
+    <Color x:Key="PressedBorderLightColor">#FF888888</Color>
+    <Color x:Key="PressedBorderDarkColor">#FF444444</Color>
+
+    <Color x:Key="DisabledBorderLightColor">#FFAAAAAA</Color>
+    <Color x:Key="DisabledBorderDarkColor">#FF888888</Color>
+
+    <Color x:Key="DefaultBorderBrushDarkColor">Black</Color>
+
+    <!--Control-specific resources.-->
+    <Color x:Key="HeaderTopColor">#FFC5CBF9</Color>
+    <Color x:Key="DatagridCurrentCellBorderColor">Black</Color>
+    <Color x:Key="SliderTrackDarkColor">#FFC5CBF9</Color>
+
+    <Color x:Key="NavButtonFrameColor">#FF3843C4</Color>
+
+    <LinearGradientBrush x:Key="MenuPopupBrush"
+                     EndPoint="0.5,1"
+                     StartPoint="0.5,0">
+        <GradientStop Color="{DynamicResource ControlLightColor}"
+                Offset="0" />
+        <GradientStop Color="{DynamicResource ControlMediumColor}"
+                Offset="0.5" />
+        <GradientStop Color="{DynamicResource ControlLightColor}"
+                Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="ProgressBarIndicatorAnimatedFill"
+                     StartPoint="0,0"
+                     EndPoint="1,0">
+        <LinearGradientBrush.GradientStops>
+            <GradientStopCollection>
+                <GradientStop Color="#000000FF"
+                    Offset="0" />
+                <GradientStop Color="#600000FF"
+                    Offset="0.4" />
+                <GradientStop Color="#600000FF"
+                    Offset="0.6" />
+                <GradientStop Color="#000000FF"
+                    Offset="1" />
+            </GradientStopCollection>
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+
+
+</ResourceDictionary>

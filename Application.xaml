@@ -1,0 +1,26 @@
+﻿<Application x:Class="Application"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--<ResourceDictionary Source="templates/TitleBarStyle.xaml"/>-->
+                <ResourceDictionary Source="templates/Colors.xaml"/>
+                <ResourceDictionary Source="templates/TableRowStyle.xaml"/>
+                <ResourceDictionary Source="/Templates/OTSContrStyles.xaml"/>
+                <ResourceDictionary Source="/Templates/PopupButtonStyle.xaml"/>
+                <ResourceDictionary Source="/Templates/StylesForControls.xaml"/>
+                <ResourceDictionary Source="/Templates/Heeader.xaml"/>
+
+            </ResourceDictionary.MergedDictionaries>
+            <!-- Регистрация конвертера -->
+            <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+            <local:NullToBoolConverter x:Key="NullToBoolConverter"/>
+            <local:MileageToVisibilityConverter x:Key="MileageToVisibilityConverter"/>
+			<local:PlaceInfoFormatterConverter x:Key="PlaceFormatterConverter"/>
+        </ResourceDictionary>
+    </Application.Resources>
+
+</Application>

@@ -1,0 +1,198 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Определяем стиль для StackPanel-Border -->
+    <Style x:Key="OTSBorderStyle" TargetType="Border">
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Margin" Value="2 3"/>
+        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="Background" Value="{StaticResource AppBackBrush}"/>
+<!--"{StaticResource AppBackBrush}"--> 
+        <Style.Triggers>
+            <!-- Триггер для MouseOver -->
+            <!--<Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource  UpperBorderBrush}" />
+            </Trigger>-->
+        </Style.Triggers>
+    </Style>
+
+    <!--==============================================================================================-->
+
+    <!-- 1. Шаблон элемента Истории (DataTemplate) -->
+    <DataTemplate x:Key="HistoryItemTemplate">
+        <DockPanel LastChildFill="True"
+                   TextElement.Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}">
+            <!-- Дата слева -->
+            <TextBlock x:Name="DateText"
+                       DockPanel.Dock="Left"
+                       Text="{Binding EventDate, StringFormat='dd.MM.yyyy'}"
+                       MinWidth="70"
+                       Margin="0,0,15,0"
+                       VerticalAlignment="Top"/>
+            <!-- Описание -->
+            <TextBlock x:Name="DescText"
+                       Text="{Binding Description}"
+                       TextWrapping="Wrap"
+                       VerticalAlignment="Top"/>
+        </DockPanel>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding ShowDate}" Value="False">
+                <Setter TargetName="DateText" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <!-- 2. Стиль контейнера элемента (ListBoxItem) -->
+    <!-- ⚠️ EventSetter лучше убрать отсюда, см. пояснение ниже -->
+    <Style x:Key="HistoryListBoxItemStyle" TargetType="ListBoxItem">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Padding" Value="4 1"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+		
+		<Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter TextElement.Foreground="{TemplateBinding Foreground}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="Black"/>
+                <!-- Убедитесь, что ScrolBarBrush доступен в этом словаре или в App.xaml -->
+                <Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding Path=DataContext.IsViolet, RelativeSource={RelativeSource FindAncestor, AncestorType=Grid}}" Value="True">
+                <Setter Property="Foreground" Value="White"/>
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding IsRed}" Value="true">
+                <Setter Property="Foreground" Value="Red"/>
+				
+			</DataTrigger>
+			<DataTrigger Binding="{Binding IsMoused}" Value="True">
+				<Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+			</DataTrigger>
+			<Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- 3. Общий стиль для самого ListBox, который связывает всё вместе -->
+    <Style x:Key="HistoryListBoxStyle" TargetType="ListBox">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+
+        <!-- Подключаем наши ресурсы -->
+        <Setter Property="ItemTemplate" Value="{StaticResource HistoryItemTemplate}"/>
+        <Setter Property="ItemContainerStyle" Value="{StaticResource HistoryListBoxItemStyle}"/>
+    </Style>
+
+	<Style x:Key="PlanListBoxItemStyle" TargetType="ListBoxItem" BasedOn="{StaticResource HistoryListBoxItemStyle}">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="FontWeight" Value="DemiBold"/>
+		<Style.Triggers>
+			<DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+				
+				<Setter Property="BorderBrush" Value="Black"/>
+				<Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+			</DataTrigger>
+
+			<DataTrigger Binding="{Binding Path=DataContext.IsViolet, RelativeSource={RelativeSource FindAncestor, AncestorType=Grid}}" Value="True">
+				<Setter Property="Foreground" Value="White"/>
+			</DataTrigger>
+
+			<!-- ВАЖНО: Value="True" с большой буквы! -->
+			<DataTrigger Binding="{Binding IsGreen}" Value="True">
+				<Setter Property="Foreground" Value="DarkGreen"/>
+				
+			</DataTrigger>
+
+			<Trigger Property="IsMouseOver" Value="True">
+				<Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+			</Trigger>
+		</Style.Triggers>
+	</Style>
+
+
+
+	<!--==============================================================================================-->
+
+    <!--VioletText-Box-->
+
+
+    <Style x:Key="ViolTBox" TargetType="TextBlock">
+        <!-- Базовый цвет -->
+        <Setter Property="Foreground" Value="Black" />
+        <Style.Triggers>
+            <!-- если IsViolet = True → белый текст -->
+            <DataTrigger Binding="{Binding IsViolet}" Value="True">
+                <Setter Property="Foreground" Value="White" />
+            </DataTrigger>
+			<Trigger Property="IsMouseOver" Value="True">
+				<Setter Property="Effect">
+					<Setter.Value>
+						<DropShadowEffect BlurRadius="8" ShadowDepth="2" Opacity="0.4" Color="Black"/>
+					</Setter.Value>
+				</Setter>
+			</Trigger>
+		</Style.Triggers>
+    </Style>
+
+    <Style x:Key="RedTBox" TargetType="TextBlock">
+        <!-- Базовый цвет -->
+        <Setter Property="Foreground" Value="Black" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsViolet}" Value="True">
+                <Setter Property="Foreground" Value="White" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding MashPripTXT_IsRed}" Value="True">
+                <Setter Property="Foreground" Value="Red" />
+            </DataTrigger>
+			<Trigger Property="IsMouseOver" Value="True">
+				<Setter Property="Effect">
+					<Setter.Value>
+						<DropShadowEffect BlurRadius="8" ShadowDepth="2" Opacity="0.4" Color="Black"/>
+					</Setter.Value>
+				</Setter>
+			</Trigger>
+		</Style.Triggers>
+    </Style>
+
+
+    <!--==============================================================================================-->
+
+    <!--Violet Border-->
+
+
+    <Style x:Key="ViolBord" TargetType="Border">
+        <!-- Базовый стиль -->
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Black" />
+        <!--<Setter Property="BorderThickness" Value="0.5" />-->
+        <!-- ЕДИНСТВЕННЫЙ триггер на вычисляемое свойство IsViolet -->
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsViolet}" Value="True">
+                <Setter Property="Background" Value="Purple" />
+                <Setter Property="BorderBrush" Value="White" />
+                <!--<Setter Property="BorderThickness" Value="1" />-->
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

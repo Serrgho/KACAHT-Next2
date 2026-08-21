@@ -1,0 +1,531 @@
+﻿<UserControl x:Class="Kas.ActionsUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             d:DataContext="{d:DesignInstance Type=local:Otkaz}"
+             Unloaded="UserControl_Unloaded"
+             mc:Ignorable="d" 
+             d:DesignWidth="120">
+    <UserControl.Resources>
+        <!-- Конвертер для видимости -->
+        
+        <local:NotesToVisibilityConverter x:Key="NotesToVis" />
+        <local:DiffTextConverter x:Key="DiffTextConverter"/>
+        
+        <Style x:Key="CustomToolTipStyle" TargetType="ToolTip">
+            <Setter Property="Background" Value="{StaticResource ScrolBarBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource SplitterBrush}" />
+            <Setter Property="BorderThickness" Value="3" />
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="4"
+                        Padding="{TemplateBinding Padding}">
+                            <ContentPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        
+        
+        <Style x:Key="BaseNoteItemStyle" TargetType="Border">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="2" />
+            <Setter Property="Margin" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Black" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect 
+                Color="Black"
+                Opacity="0.2"
+                BlurRadius="6"
+                ShadowDepth="1"
+                Direction="315" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        
+        <Style x:Key="NoteItemStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource BaseNoteItemStyle}">
+            <Setter Property="Background" Value="{StaticResource SLDBackBrush}" />
+            
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="Red" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ActionNoteItemStyle"
+       TargetType="Border"
+       BasedOn="{StaticResource BaseNoteItemStyle}">
+            <Setter Property="Background" Value="Transparent" />
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="Red" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+
+        <!-- Стиль для текста -->
+        <Style x:Key="NoteTextStyle" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="Black" />
+        </Style>
+
+
+        <Style x:Key="ClearNotesItemStyle" TargetType="Border" BasedOn="{StaticResource BaseNoteItemStyle}">
+            <Setter Property="Background" Value="LightGreen" />
+            <Setter Property="Visibility" Value="Visible" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding UpdateNotes}" Value="">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+		<Style x:Key="ChangeIDNoteItemStyle"
+       TargetType="Border"
+       BasedOn="{StaticResource BaseNoteItemStyle}">
+			<Setter Property="Background" Value="red" />
+            <Style.Triggers>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Property="BorderBrush" Value="LightYellow" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+		<!-- Стиль для текста -->
+		<Style x:Key="ChangeIDNoteTextStyle" TargetType="TextBlock">
+			<Setter Property="TextAlignment" Value="Center" />
+			<Setter Property="VerticalAlignment" Value="Center" />
+			<Setter Property="TextWrapping" Value="Wrap" />
+			<Setter Property="Foreground" Value="LightYellow" />
+		</Style>
+
+	</UserControl.Resources>
+
+
+
+   
+
+    <StackPanel VerticalAlignment="Center" Orientation="Vertical">
+
+       
+
+        <!--Очистка всех Info элементов-->
+        <Border x:Name="ClearNotesItem"
+               PreviewMouseUp="ClearNotesItem_PreviewMouseUp" 
+         Style="{StaticResource ClearNotesItemStyle}"         >
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>                    
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="🧹" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="ClearNotesTB" Grid.Column="1" Text="Очистить" Style="{StaticResource NoteTextStyle}"/>
+            </Grid>
+        </Border>
+
+        <!--Существующий отказ OK (Информационно)--> 
+        <Border x:Name="OKOTSItem" 
+                Style="{StaticResource BaseNoteItemStyle}"
+                Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='OK'}"
+                Tag="{Binding Text, ElementName=OKTB}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="✅" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="OKTB" Grid.Column="1" Text="OK" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="RemOKOTSItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=OKTB}"/>
+            </Grid>
+        </Border>
+
+        <!--Изменение места ОТС (информационно)-->
+        <Border x:Name="PlaceChangeItem"
+				MouseLeftButtonUp="PlaceChangeItem_MouseLeftButtonUp"
+        Style="{StaticResource BaseNoteItemStyle}"
+        Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='Испр '}"
+        
+        ToolTipService.InitialShowDelay="0"
+        ToolTipService.Placement="Left"
+        ToolTipService.HorizontalOffset="-6"
+        
+        Tag="Испр. место ОТС">
+            <Border.ToolTip>
+                <ToolTip  Style="{StaticResource CustomToolTipStyle}">
+                    <StackPanel>
+                        <ContentControl Content="{Binding Converter={StaticResource DiffTextConverter}}" />
+                    </StackPanel>
+                </ToolTip>
+            </Border.ToolTip>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="📍" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock Grid.Column="1" x:Name="PlaceChangeTB" Text="Испр место ОТС" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="RemPlaceChangeItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=PlaceChangeTB}"/>
+            </Grid>
+        </Border>
+
+        <!--Вернулся??-->
+        <Border x:Name="ReturnedItem" 
+        Style="{StaticResource ActionNoteItemStyle}"
+        Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='Вернулся'}"
+        MouseUp="NoteItem_MouseDown"
+        Tag="{Binding Text, ElementName=ReturnedTB}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="↩️" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="ReturnedTB" Grid.Column="1" Text="Вернулся" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="RemReturnedItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=ReturnedTB}"/>
+            </Grid>
+        </Border>
+
+
+
+
+        <!--Новый отказ +++-->
+        <Border x:Name="IsNewOTSItem" 
+        Style="{StaticResource ActionNoteItemStyle}"
+        Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='Дата поступления'}"
+        MouseUp="NoteItem_MouseDown"
+        Tag="{Binding Text, ElementName=NewOTSTB}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="⚠️" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="NewOTSTB" Grid.Column="1" Text="Дата поступления" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="RemIsNewOTSItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=NewOTSTB}"/>
+            </Grid>
+        </Border>
+
+
+        <!--Восстановлен?-->
+        <Border x:Name="RestoredItem" 
+        Style="{StaticResource ActionNoteItemStyle}"
+        Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='Восстановлен'}"
+        MouseUp="NoteItem_MouseDown"
+        Tag="{Binding Text, ElementName=RestoredTB}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="🔄" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="RestoredTB" Grid.Column="1" Text="Восстановлен" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="RemRestoredItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=RestoredTB}"/>
+            </Grid>
+        </Border>
+
+
+        <!--??? (отсутствует в отчете)-->
+        <Border x:Name="QuestionMarksItem" 
+         Style="{StaticResource ActionNoteItemStyle}"
+         Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='???'}"
+         MouseUp="NoteItem_MouseDown"
+         Tag="{Binding Text, ElementName=QuestionMarksTB}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="❓" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="QuestionMarksTB" Grid.Column="1" Text="???" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="RemQuestionMarksItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=QuestionMarksTB}"/>
+            </Grid>
+        </Border>
+
+
+        <!--Ручной ввод (автоматически не меняет значение)--> 
+        <Border x:Name="ManualInputItem" 
+                MouseUp="NoteItem_MouseDown"
+                Style="{StaticResource ActionNoteItemStyle}"
+                Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='ручной ввод'}"
+                Tag="{Binding Text, ElementName=ManualInputTB}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="✏️" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="ManualInputTB" Grid.Column="1" Text="Ручной ввод" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="RemManualInputItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=ManualInputTB}"/>
+            </Grid>
+        </Border>
+
+
+        <!--Источник!-->
+        <Border x:Name="IstocnikItem" 
+                Style="{StaticResource ActionNoteItemStyle}"
+                Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='От кого ОТС'}"
+                MouseUp="NoteItem_MouseDown"
+                Tag="{Binding Text, ElementName=IstocnikTB}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="📊" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="IstocnikTB" Grid.Column="1" Text="От кого ОТС" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="RemIstocnikItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=IstocnikTB}"/>
+            </Grid>
+        </Border>
+
+       
+
+         <!--Сохранен??--> 
+        <Border x:Name="SavedItem" 
+                Style="{StaticResource ActionNoteItemStyle}"
+                Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='Сохранен'}"
+                MouseUp="NoteItem_MouseDown"
+                Tag="{Binding Text, ElementName=SavedTB}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="💾" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="SavedTB" Grid.Column="1" Text="Сохранен" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="RemSavedItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=SavedTB}"/>
+            </Grid>
+        </Border>
+
+         <!--Закрыт??--> 
+        <Border x:Name="ClosedItem" 
+                Style="{StaticResource ActionNoteItemStyle}"
+                Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='уже закрыт'}"
+                MouseUp="NoteItem_MouseDown"
+                Tag="{Binding Text, ElementName=ClosedTB}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="🔒" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="ClosedTB" Grid.Column="1" Text="Уже закрыт" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock x:Name="RemClosedItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=ClosedTB}"/>
+            </Grid>
+        </Border>
+
+         <!--Изменение депо--> 
+        <Border x:Name="DepoChangeItem" 
+                Style="{StaticResource ActionNoteItemStyle}"
+                Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='за '}"
+                MouseUp="NoteItem_MouseDown"
+                Tag="Изменение депо">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="🏭" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock Grid.Column="1" x:Name="DepoChangeTB" Text="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='за '}"
+                          Style="{StaticResource NoteTextStyle}"
+                          TextTrimming="CharacterEllipsis"
+                          MaxWidth="150" Cursor=""/>
+                <TextBlock x:Name="RemDepoChangeItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=DepoChangeTB}"/>
+            </Grid>
+        </Border>
+
+         <!--Изменение категории (автоматически не меняется)--> 
+        <Border x:Name="CategoryChangeItem" 
+                Style="{StaticResource ActionNoteItemStyle}"
+                Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='кат '}"
+                MouseUp="NoteItem_MouseDown"
+                Tag="Изменение категории">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="🔢" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock Grid.Column="1" x:Name="CategoryChangeTB" Text="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='кат '}"
+                          Style="{StaticResource NoteTextStyle}"
+                          TextTrimming="CharacterEllipsis"/>
+                <TextBlock x:Name="RemCategoryChangeItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=CategoryChangeTB}"/>
+            </Grid>
+        </Border>
+
+
+		<!--Изменение категории (автоматически не меняется)-->
+		<Border x:Name="PCHChangeItem" 
+        Style="{StaticResource ActionNoteItemStyle}"
+        Background="#FF7BB3E4"
+        Visibility="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='п/ч '}"
+        MouseUp="NoteItem_MouseDown"
+        Tag="Изменение п/ч">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="20"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="20"/>
+				</Grid.ColumnDefinitions>
+				<TextBlock Grid.Column="0" Text="🕐" Style="{StaticResource NoteTextStyle}"/>
+				<TextBlock Grid.Column="1" x:Name="PCHChangeTB" Text="{Binding UpdateNotes, Converter={StaticResource NotesToVis}, ConverterParameter='п/ч '}"
+                  Style="{StaticResource NoteTextStyle}"
+                  TextTrimming="CharacterEllipsis"/>
+				<TextBlock x:Name="RemPCHChangeItem" Grid.Column="2" Text="❌" Style="{StaticResource NoteTextStyle}" PreviewMouseUp="DeleteItem" Tag="{Binding Text, ElementName=PCHChangeTB}"/>
+			</Grid>
+		</Border>
+
+
+
+
+
+		<!--========== ПУСТЫЕ ПОЛЯ (через DataTrigger) ==========--> 
+         <!--Нет серии локомотива--> 
+        <Border x:Name="NoSerLokItem"
+                MouseUp="EmptyFieldItem_MouseDown"
+                Tag="Нет серии локомотива">
+
+            <Border.Style>
+                <Style TargetType="Border" BasedOn="{StaticResource NoteItemStyle}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SerLokExact}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding SerLokExact}" Value="">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="🚃" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock Grid.Column="1" Text="Локомотив!" Style="{StaticResource NoteTextStyle}"/>
+                
+            </Grid>
+        </Border>
+        
+       
+
+
+        <!--Не указан машинист!-->
+        <Border x:Name="NoMashItem" 
+                MouseUp="EmptyFieldItem_MouseDown"
+                Tag="Не указана фамилия машиниста"
+                Cursor="Hand"
+                Style="{StaticResource NoteItemStyle}"
+                Visibility="{Binding NeedMashViz}">
+            <!-- Вся магия здесь -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="👤" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock Grid.Column="1" Text="Машинист!" Style="{StaticResource NoteTextStyle}"/>
+            </Grid>
+        </Border>
+
+  <!--Нет оборудования Ур.1--> 
+        <Border x:Name="NoMyKlasLev1Item"
+                MouseUp="EmptyFieldItem_MouseDown"
+                Tag="Нет оборудования Ур.3" Cursor="Hand">
+
+            <Border.Style>
+                <Style TargetType="Border" BasedOn="{StaticResource NoteItemStyle}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding MyKlasLev3}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding MyKlasLev3}" Value="">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                   
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="⚙️" Style="{StaticResource NoteTextStyle}"/>
+                <TextBlock Grid.Column="1" Text="Оборуд Ур.3" Style="{StaticResource NoteTextStyle}"/>
+            </Grid>
+        </Border>
+
+
+		<!--Изменен № ОТС-->
+		<Border x:Name="ChangeIdItem"
+              MouseUp="EmptyFieldItem_MouseDown"
+              Tag="ИзмНомОТС" Cursor="Hand">
+
+			<Border.Style>
+				<Style TargetType="Border" BasedOn="{StaticResource ChangeIDNoteItemStyle}">
+					<Setter Property="Visibility" Value="Visible"/>
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding NewId}" Value="{x:Null}">
+							<Setter Property="Visibility" Value="Collapsed"/>
+						</DataTrigger>
+						<DataTrigger Binding="{Binding NewId}" Value="">
+							<Setter Property="Visibility" Value="Collapsed"/>
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</Border.Style>
+
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="20"/>
+					<ColumnDefinition Width="*"/>
+
+				</Grid.ColumnDefinitions>
+				<TextBlock Grid.Column="0" Text="⚠️" Style="{StaticResource ChangeIDNoteTextStyle}"/>
+				<TextBlock Grid.Column="1" x:Name="IDChangeTB" Text="!!!Изменен № ОТС" Style="{StaticResource ChangeIDNoteTextStyle}"/>
+			</Grid>
+		</Border>
+
+
+
+	</StackPanel>
+</UserControl>

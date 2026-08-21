@@ -1,0 +1,58 @@
+﻿<UserControl x:Class="Kas.UstanowkiCTL"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+			 xmlns:properties="clr-namespace:KACAHT_Next2.My"
+             mc:Ignorable="d">
+		<Expander	x:Name="expSetting"
+					Header="🛠️  Установкики" 
+					Background="{StaticResource ScrolBarBrush}"
+					Foreground="DarkBlue"
+					FontWeight="Bold"	
+					FontSize="15"
+					BorderThickness="3"
+					BorderBrush="{StaticResource SplitterBrush}"
+					d:IsExpanded="True"
+					IsExpanded="False" 
+					HorizontalContentAlignment="Stretch">
+			<StackPanel Orientation="Vertical" >
+				<StackPanel Orientation="Horizontal">
+					<local:MYToggleControl x:Name="ExpEXPERIMENTALVisToggle" MYToggleZagolovok="Показ. эксперим кнопки" Width="80" FontSize="12" FontWeight="Normal" IsChecked="{Binding Source={x:Static properties:MySettings.Default}, Path=ShowExperimentalButtons, Mode=TwoWay}" Foreground="Black" Background="{StaticResource AppBackBrush}" Padding="2" Margin="2"/>
+				<!-- Сюда можно добавить еще тумблеры  -->
+
+
+			</StackPanel>
+
+				<WrapPanel Orientation="Horizontal" Margin="0,0,0,5">
+					 
+					 <Border BorderBrush="{StaticResource SplitterBrush}" BorderThickness="1" CornerRadius="4" Padding="2" Margin="2" MaxWidth="250">
+						<StackPanel Orientation="Vertical">
+							<Button x:Name="BtnOldYeFileSet" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="BtnOldYeFileSet_Click" Content="📁 Указать файл прошлого года"/>
+
+							<TextBlock FontSize="12" FontWeight="Normal" Foreground="Black" TextWrapping="Wrap" Text="{Binding Source={x:Static properties:MySettings.Default}, Path=OldYJSON}"/>
+						</StackPanel>
+					</Border>
+					
+					<Border BorderBrush="{StaticResource SplitterBrush}" BorderThickness="1" CornerRadius="4" Padding="2" Margin="2" MaxWidth="250">
+						<StackPanel Orientation="Vertical">
+							<Button x:Name="BtnThisYeFileSet" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="BtnThisYeFileSet_Click" Content="📁 Указать файл текущего года"/>
+
+							<TextBlock FontSize="12" FontWeight="Normal" Foreground="Black" TextWrapping="Wrap" Text="{Binding Source={x:Static properties:MySettings.Default}, Path=THISYJSON}"/>
+						</StackPanel>
+					</Border>
+				</WrapPanel>
+					
+				
+				
+				<WrapPanel Orientation="Horizontal" Background="{StaticResource ScrolBarBrush}" VerticalAlignment="Center">
+					<Button x:Name="BtnResetSettings" Style="{StaticResource PopupStyleButtonOrange}" Click="BtnResetSettings_Click">📁Сброс установок для папок</Button>
+				
+				<Button x:Name="BtnGoalsEditor"  Style="{StaticResource PopupStyleButtonGreen}" Click="BtnGoalsEditor_Click">📝Редактор ЦП ОТС</Button>
+				<Button x:Name="BtnGoalsHoursEditor"  Style="{StaticResource PopupStyleButtonGreen}" Click="BtnGoalsHoursEditor_Click">📝Редактор ЦП П/Ч</Button>
+				<Button x:Name="BtnGoalsOtherRailsEditor"  Style="{StaticResource PopupStyleButtonGreen}" Click="BtnGoalsOtherRailsEditor_Click">📝Редактор ЦП дорог ВП</Button>
+				</WrapPanel>
+			</StackPanel>
+	</Expander>
+</UserControl>

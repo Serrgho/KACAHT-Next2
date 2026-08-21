@@ -1,0 +1,365 @@
+﻿<UserControl x:Class="Kas.InvestigationReportViewerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="1150">
+
+	
+
+	<UserControl.Resources>
+		<local:DeltaColorConverter x:Key="DeltaColorConverter"/>
+		<local:DeltaToStringConverter x:Key="DeltaToString"/>
+
+		 <!--🔹 Стиль для верхнего уровня шапки (названия групп)--> 
+		<Style x:Key="HeaderGroupStyle" TargetType="TextBlock">
+			<Setter Property="FontWeight" Value="SemiBold"/>
+			<Setter Property="FontSize" Value="15"/>
+			<Setter Property="HorizontalAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Padding" Value="4,2"/>
+		</Style>
+
+		 <!--🔹 Стиль для нижнего уровня шапки (годы)--> 
+		<Style x:Key="HeaderYearStyle" TargetType="TextBlock">
+			<Setter Property="FontSize" Value="13"/>
+			<Setter Property="HorizontalAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Padding" Value="2,0"/>
+		</Style>
+	</UserControl.Resources>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			 <!--шапка--> 
+			<RowDefinition Height="*"/>
+			 <!--Таблица--> 
+		</Grid.RowDefinitions>
+
+		 <!--Верхний уровень: названия групп--> 
+		<Grid Grid.Row="0" Background="{StaticResource ScrolBarBrush}" Margin="5,0">
+			
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				 <!--Верхний уровень--> 
+				<RowDefinition Height="Auto"/>
+				 <!--Нижний уровень--> 
+			</Grid.RowDefinitions>
+			
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="1.5*" MinWidth="230"/>
+				 <!--Название--> 
+				<ColumnDefinition Width="Auto" MinWidth="50"/>
+				 <!--Всего--> 
+				<ColumnDefinition Width="Auto" MinWidth="50"/>
+				 <!--Всего ПГ--> 
+				<ColumnDefinition Width="Auto" MinWidth="40"/>
+				 <!--Δ--> 
+				<ColumnDefinition Width="Auto" MinWidth="50"/>
+				 <!--Приняты--> 
+				<ColumnDefinition Width="Auto" MinWidth="50"/>
+				 <!--Приняты ПГ--> 
+				<ColumnDefinition Width="Auto" MinWidth="40"/>
+				 <!--Δ--> 
+				<ColumnDefinition Width="Auto" MinWidth="60"/>
+				 <!--Просрочено--> 
+				<ColumnDefinition Width="Auto" MinWidth="60"/>
+				 <!--Просрочено ПГ--> 
+				<ColumnDefinition Width="Auto" MinWidth="40"/>
+				 <!--Δ--> 
+				<ColumnDefinition Width="Auto" MinWidth="60"/>
+				 <!--Расследованы--> 
+				<ColumnDefinition Width="Auto" MinWidth="60"/>
+				 <!--Расследованы ПГ--> 
+				<ColumnDefinition Width="Auto" MinWidth="40"/>
+				<!--Δ-->
+				<ColumnDefinition Width="Auto" MinWidth="60"/>
+				 <!--Не приняты--> 
+				<ColumnDefinition Width="Auto" MinWidth="60"/>
+				 <!--Не приняты ПГ--> 
+				<ColumnDefinition Width="Auto" MinWidth="40"/>
+				 
+			</Grid.ColumnDefinitions>
+
+			 <!--🔑 Название (занимает ОБЕ строки)--> 
+			<Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                Background="{StaticResource ScrolBarBrush}"
+                BorderBrush="{StaticResource ScrolBarBrush}" BorderThickness="2,0,2,0">
+				<TextBlock Text="Регион / Подразделение" Style="{StaticResource HeaderGroupStyle}"
+                       VerticalAlignment="Center"/>
+			</Border>
+
+
+
+			 <!--===== ВЕРХНИЙ УРОВЕНЬ (Row 0) =====--> 
+			<Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3"
+                Background="{StaticResource ScrolBarBrush}"
+                BorderBrush="{StaticResource ScrolBarBrush}" BorderThickness="2,0,0,0">
+				<TextBlock Text="Всего" Style="{StaticResource HeaderGroupStyle}"/>
+			</Border>
+
+			<Border Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="3"
+                Background="{StaticResource ScrolBarBrush}"
+                BorderBrush="{StaticResource ScrolBarBrush}" BorderThickness="2,0,0,0">
+				<TextBlock Text="Приняты" Style="{StaticResource HeaderGroupStyle}"/>
+			</Border>
+
+			<Border Grid.Row="0" Grid.Column="7" Grid.ColumnSpan="3"
+                Background="{StaticResource ScrolBarBrush}"
+                BorderBrush="{StaticResource ScrolBarBrush}" BorderThickness="2,0,0,0">
+				<TextBlock Text="С нарушением срока" Style="{StaticResource HeaderGroupStyle}"/>
+			</Border>
+
+			<Border Grid.Row="0" Grid.Column="10" Grid.ColumnSpan="3"
+                Background="{StaticResource ScrolBarBrush}"
+                BorderBrush="{StaticResource ScrolBarBrush}" BorderThickness="2,0,0,0">
+				<TextBlock Text="Расследованы" Style="{StaticResource HeaderGroupStyle}"/>
+			</Border>
+
+			<Border Grid.Row="0" Grid.Column="13" Grid.ColumnSpan="3"
+                Background="{StaticResource ScrolBarBrush}"
+                BorderBrush="{StaticResource ScrolBarBrush}" BorderThickness="0,0,2,0">
+				<TextBlock Text="Не приняты" Style="{StaticResource HeaderGroupStyle}"/>
+			</Border>
+
+			 <!--===== НИЖНИЙ УРОВЕНЬ (Row 1) =====--> 
+			<TextBlock x:Name="hdrTotal" Grid.Row="1" Grid.Column="1" Text="(2026г)"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+			<TextBlock x:Name="hdrTotalPY" Grid.Row="1" Grid.Column="2" Text="(2025г)"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+			<TextBlock Grid.Row="1" Grid.Column="3" Text="+/-"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+
+			<TextBlock x:Name="hdrAccepted" Grid.Row="1" Grid.Column="4" Text="(2026г)"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+			<TextBlock x:Name="hdrAcceptedPY" Grid.Row="1" Grid.Column="5" Text="(2025г)"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+			<TextBlock Grid.Row="1" Grid.Column="6" Text="+/-"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+
+			<TextBlock x:Name="hdrOverdue" Grid.Row="1" Grid.Column="7" Text="(2026г)"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+			<TextBlock x:Name="hdrOverduePY" Grid.Row="1" Grid.Column="8" Text="(2025г)"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+			<TextBlock Grid.Row="1" Grid.Column="9" Text="+/-"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+
+			<TextBlock x:Name="hdrInvestigated" Grid.Row="1" Grid.Column="10" Text="(2026г)"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+			<TextBlock x:Name="hdrInvestigatedPY" Grid.Row="1" Grid.Column="11" Text="(2025г)"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+			<TextBlock Grid.Row="1" Grid.Column="12" Text="+/-"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+
+			<TextBlock x:Name="hdrNotAccepted" Grid.Row="1" Grid.Column="13" Text="(2026г)"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+			<TextBlock x:Name="hdrNotAcceptedPY" Grid.Row="1" Grid.Column="14" Text="(2025г)"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+			<TextBlock Grid.Row="1" Grid.Column="15" Text="+/-"
+                   Background="{StaticResource ScrolBarBrush}"
+                   Style="{StaticResource HeaderYearStyle}"/>
+		</Grid>
+		<DataGrid x:Name="dgReport" Grid.Row="2"
+				  HeadersVisibility="None"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  IsReadOnly="True"
+                  GridLinesVisibility="Horizontal"
+                  Background="Transparent"
+                  RowBackground="Transparent"
+                  LoadingRow="dgReport_LoadingRow"
+                  FontSize="12"
+                  FontFamily="Segoe UI"
+                  BorderThickness="0"
+                  Margin="5,0,5,5"
+                  SelectionUnit="Cell"
+                  SelectionMode="Extended"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  ScrollViewer.CanContentScroll="False"
+				  
+                  PreviewKeyDown="DgReport_PreviewKeyDown">
+			 <!--AlternatingRowBackground="#23FFFFFF"-->
+			<DataGrid.Resources>
+				<Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
+
+				<Style x:Key="BaseCellStyle" TargetType="DataGridCell">
+					<Setter Property="Padding" Value="4,2"/>
+					<Setter Property="Background" Value="{Binding Background, RelativeSource={RelativeSource AncestorType=DataGridRow}}"/>
+					<Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+					
+					<Style.Triggers>
+						<Trigger Property="IsSelected" Value="True">
+							<Setter Property="Background" Value="{StaticResource SplitterBrush}"/>
+							<Setter Property="Foreground" Value="{StaticResource AppBackBrush}"/>
+							<Setter Property="FontWeight" Value="SemiBold" />
+							<Setter Property="BorderBrush" Value="{StaticResource SplitterBrush}"/>
+						</Trigger>
+					</Style.Triggers>
+				</Style>
+
+				 <!--🔹 Стили для границ групп колонок 
+				 Левая граница группы (для первой колонки)--> 
+				<Style x:Key="GroupLeftCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource BaseCellStyle}">
+					<Setter Property="BorderBrush" Value="{StaticResource ScrolBarBrush}"/>
+					<Setter Property="BorderThickness" Value="2,0,0,0"/>
+				</Style>
+
+				 <!--Правая граница группы (для последней колонки)--> 
+				<Style x:Key="GroupRightCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource BaseCellStyle}">
+					<Setter Property="BorderBrush" Value="{StaticResource ScrolBarBrush}"/>
+					
+					<Setter Property="BorderThickness" Value="0,0,2,0"/>
+				</Style>
+
+				 <!--Левая + правая граница (для одиночной колонки, если нужна)--> 
+				<Style x:Key="GroupBothCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource BaseCellStyle}">
+					<Setter Property="BorderBrush" Value="{StaticResource ScrolBarBrush}"/>
+					<Setter Property="BorderThickness" Value="2,0,2,0"/>
+				</Style>
+
+				<Style TargetType="TextBlock" x:Key="CellWrapStyle">
+					<Setter Property="TextWrapping" Value="Wrap"/>
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="HorizontalAlignment" Value="Left"/>
+					<Setter Property="Padding" Value="4,2"/>
+					<Setter Property="TextAlignment" Value="Center"/>
+				</Style>
+
+				<Style TargetType="TextBlock" x:Key="NumberCellStyle" BasedOn="{StaticResource CellWrapStyle}">
+					<Setter Property="HorizontalAlignment" Value="Center"/>
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="TextAlignment" Value="Center"/>
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+							<Setter Property="Foreground" Value="{StaticResource AppBackBrush}"/>
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+
+				<Style TargetType="TextBlock" x:Key="DeltaCellStyle" BasedOn="{StaticResource CellWrapStyle}">
+					<Setter Property="HorizontalAlignment" Value="Right"/>
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="TextAlignment" Value="Right"/>
+					<Setter Property="FontWeight" Value="Bold"/>
+					<Setter Property="FontSize" Value="13"/>
+					<Setter Property="Padding" Value="4,2,8,2"/>
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+							<Setter Property="Foreground" Value="{StaticResource AppBackBrush}"/>
+							<Setter Property="Background" Value="{StaticResource SplitterBrush}"/>
+							<Setter Property="FontWeight" Value="SemiBold"/>
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</DataGrid.Resources>
+
+			<DataGrid.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="📋 Копировать выделенное" Click="MenuItem_Copy_Click"/>
+				</ContextMenu>
+			</DataGrid.ContextMenu>
+			<DataGrid.Columns>
+				 <!--Название--> 
+				<DataGridTextColumn Binding="{Binding Name}" Width="1.5*" MinWidth="230"
+                                CellStyle="{StaticResource GroupBothCellStyle}" 
+                                ElementStyle="{StaticResource CellWrapStyle}"/>
+
+				 <!--Всего--> 
+				<DataGridTextColumn Binding="{Binding Total}" Width="Auto" MinWidth="50"
+                                CellStyle="{StaticResource GroupLeftCellStyle}" ElementStyle="{StaticResource NumberCellStyle}"/>
+				<DataGridTextColumn Binding="{Binding Total_PY}" Width="Auto" MinWidth="50"
+                                CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource NumberCellStyle}"/>
+				<DataGridTemplateColumn Width="Auto" MinWidth="40" CellStyle="{StaticResource GroupRightCellStyle}">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Delta_Total, Converter={StaticResource DeltaToString}}" 
+                                   Style="{StaticResource DeltaCellStyle}"
+                                   Foreground="{Binding Delta_Total, Converter={StaticResource DeltaColorConverter}}"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+
+				 <!--Приняты--> 
+				<DataGridTextColumn Binding="{Binding Accepted}" Width="Auto" MinWidth="50"
+                                CellStyle="{StaticResource GroupLeftCellStyle}" ElementStyle="{StaticResource NumberCellStyle}"/>
+				<DataGridTextColumn Binding="{Binding Accepted_PY}" Width="Auto" MinWidth="50"
+                                CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource NumberCellStyle}"/>
+				<DataGridTemplateColumn Width="Auto" MinWidth="40" CellStyle="{StaticResource GroupRightCellStyle}">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Delta_Accepted, Converter={StaticResource DeltaToString}}" 
+                                   Style="{StaticResource DeltaCellStyle}"
+                                   Foreground="{Binding Delta_Accepted, Converter={StaticResource DeltaColorConverter}}"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+
+				 <!--Просрочено--> 
+				<DataGridTextColumn Binding="{Binding Overdue}" Width="Auto" MinWidth="60"
+                                CellStyle="{StaticResource GroupLeftCellStyle}" ElementStyle="{StaticResource NumberCellStyle}"/>
+				<DataGridTextColumn Binding="{Binding Overdue_PY}" Width="Auto" MinWidth="60"
+                                CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource NumberCellStyle}"/>
+				<DataGridTemplateColumn Width="Auto" MinWidth="40" CellStyle="{StaticResource GroupRightCellStyle}">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Delta_Overdue, Converter={StaticResource DeltaToString}}" 
+                                   Style="{StaticResource DeltaCellStyle}"
+                                   Foreground="{Binding Delta_Overdue, Converter={StaticResource DeltaColorConverter}}"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+
+				 <!--Расследованы--> 
+				<DataGridTextColumn Binding="{Binding Investigated}" Width="Auto" MinWidth="60"
+                                CellStyle="{StaticResource GroupLeftCellStyle}" ElementStyle="{StaticResource NumberCellStyle}"/>
+				<DataGridTextColumn Binding="{Binding Investigated_PY}" Width="Auto" MinWidth="60"
+                                CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource NumberCellStyle}"/>
+				<DataGridTemplateColumn Width="Auto" MinWidth="40" CellStyle="{StaticResource GroupRightCellStyle}">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Delta_Investigated, Converter={StaticResource DeltaToString}}" 
+                                   Style="{StaticResource DeltaCellStyle}"
+                                   Foreground="{Binding Delta_Investigated, Converter={StaticResource DeltaColorConverter}}"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+
+				 <!--Не приняты--> 
+				<DataGridTextColumn Binding="{Binding NotAccepted}" Width="Auto" MinWidth="60"
+                                CellStyle="{StaticResource GroupLeftCellStyle}" ElementStyle="{StaticResource NumberCellStyle}"/>
+				<DataGridTextColumn Binding="{Binding NotAccepted_PY}" Width="Auto" MinWidth="60"
+                                CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource NumberCellStyle}"/>
+				<DataGridTemplateColumn Width="Auto" MinWidth="40" CellStyle="{StaticResource GroupRightCellStyle}">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Delta_NotAccepted, Converter={StaticResource DeltaToString}}" 
+                                   Style="{StaticResource DeltaCellStyle}"
+                                   Foreground="{Binding Delta_NotAccepted, Converter={StaticResource DeltaColorConverter}}"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+			</DataGrid.Columns>
+		</DataGrid>
+	</Grid>
+
+
+
+</UserControl>
