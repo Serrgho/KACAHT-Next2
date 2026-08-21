@@ -1,8 +1,17 @@
 ﻿Imports System.Globalization
+Imports System.IO
 Imports System.Linq
+Imports System.Printing
 Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Media
+Imports System.Windows.Xps
+Imports iText.IO.Image
+Imports iText.Kernel.Geom
+Imports iText.Kernel.Pdf
+Imports iText.Layout
+Imports Path = System.IO.Path
+Imports PdfImage = iText.Layout.Element.Image   ' ← алиас, чтобы не конфликтовать с WPF Image
 
 Namespace Kas
 
@@ -499,6 +508,135 @@ Namespace Kas
 
 
 #End Region
+
+
+
+        ' ==========================================
+        ' СВОЙСТВА И МЕТОДЫ ДЛЯ ЭКСПОРТА В PDF
+        ' ==========================================
+
+        Private _isExportEnabled As Boolean = True
+        Public Property IsExportEnabled As Boolean
+            Get
+                Return _isExportEnabled
+            End Get
+            Set(valueToSet As Boolean)
+                _isExportEnabled = valueToSet
+                ' Обновляем состояние кнопки, если она уже инициализирована
+                If BtnExportToPdf IsNot Nothing Then
+                    BtnExportToPdf.IsEnabled = valueToSet
+                End If
+            End Set
+        End Property
+
+        ''' <summary>
+        ''' Обработчик нажатия на кнопку "Выдать в PDF"
+        ''' </summary>
+        Private Sub BtnExportToPdf_Click(sender As Object, e As RoutedEventArgs)
+            Dim folderPath As String = My.Settings.ReportFolderPath
+
+            If String.IsNullOrEmpty(folderPath) Then
+                MessageBox.Show("Папка для отчётов не задана в настройках.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error)
+                Return
+            End If
+
+            If Not Directory.Exists(folderPath) Then
+                Directory.CreateDirectory(folderPath)
+            End If
+
+            Dim filePath As String = Path.Combine(folderPath, $"Справка по комплексам_{DateTime.Now:yyyyMMdd_HHmmss}.pdf")
+
+            ButtonSPanel.Visibility = Visibility.Collapsed
+            Me.UpdateLayout()
+
+            Try
+                SaveVisualsToPdf(filePath, Me)
+            Finally
+                ButtonSPanel.Visibility = Visibility.Visible
+                Me.UpdateLayout()
+            End Try
+        End Sub
+
+
+
+
+
+
+        ''' <summary>
+        ''' Рендерит указанные объекты, объединяет их в одну картинку и кладёт на ОДНУ страницу PDF.
+        ''' </summary>
+        Private Sub SaveVisualsToPdf(destinationPath As String, targetVisual As Visual)
+
+
+            Try
+                Dim targetElement As FrameworkElement = TryCast(targetVisual, FrameworkElement)
+                If targetElement Is Nothing Then Return
+
+                ' 1. Измеряем элемент полностью (игнорирует ограничения родителя)
+                targetElement.Measure(New Size(Double.PositiveInfinity, Double.PositiveInfinity))
+                targetElement.Arrange(New Rect(0, 0, targetElement.DesiredSize.Width, targetElement.DesiredSize.Height))
+
+                Dim elementWidth As Double = targetElement.DesiredSize.Width
+                Dim elementHeight As Double = targetElement.DesiredSize.Height
+
+                If elementWidth <= 0 OrElse elementHeight <= 0 Then Return
+
+                ' 2. Рендерим в битмап с высоким DPI (300) для максимальной чёткости
+                Dim dpi As Double = 300.0
+                Dim pixelWidth As Integer = CInt(Math.Ceiling(elementWidth * dpi / 96.0))
+                Dim pixelHeight As Integer = CInt(Math.Ceiling(elementHeight * dpi / 96.0))
+
+                Dim bitmap As New RenderTargetBitmap(pixelWidth, pixelHeight, dpi, dpi, PixelFormats.Pbgra32)
+                bitmap.Render(targetElement)
+
+                ' 3. Кодируем в PNG
+                Dim pngEncoder As New PngBitmapEncoder()
+                pngEncoder.Frames.Add(BitmapFrame.Create(bitmap))
+
+                Dim imageBytes As Byte()
+                Using memoryStream As New MemoryStream()
+                    pngEncoder.Save(memoryStream)
+                    imageBytes = memoryStream.ToArray()
+                End Using
+
+                ' 4. Создаём PDF A4 альбомный
+                Using writerStream As New FileStream(destinationPath, FileMode.Create, FileAccess.Write)
+                    Dim pdfWriter As New PdfWriter(writerStream)
+                    Dim pdfDocument As New PdfDocument(pdfWriter)
+                    pdfDocument.SetDefaultPageSize(PageSize.A4.Rotate())
+
+                    Dim document As New Document(pdfDocument)
+                    document.SetMargins(10, 10, 10, 10)
+
+                    Dim imageData As ImageData = ImageDataFactory.Create(imageBytes)
+                    Dim pdfImage As New PdfImage(imageData)
+
+                    Dim availableWidth As Single = pdfDocument.GetDefaultPageSize().GetWidth() - 20
+                    Dim availableHeight As Single = pdfDocument.GetDefaultPageSize().GetHeight() - 20
+                    pdfImage.ScaleToFit(availableWidth, availableHeight)
+
+                    document.Add(pdfImage)
+                    document.Close()
+                End Using
+
+                ' 5. Открываем папку с сохранённым файлом
+                Dim folderPath As String = System.IO.Path.GetDirectoryName(destinationPath)
+                If Not String.IsNullOrEmpty(folderPath) AndAlso System.IO.Directory.Exists(folderPath) Then
+                    Dim processInfo As New ProcessStartInfo()
+                    processInfo.FileName = folderPath
+                    processInfo.UseShellExecute = True
+                    Process.Start(processInfo)
+                End If
+
+            Catch ex As Exception
+                MessageBox.Show($"Не удалось сохранить PDF." & Environment.NewLine & "Ошибка: {ex.Message}",
+                        "Ошибка экспорта", MessageBoxButton.OK, MessageBoxImage.Error)
+            End Try
+        End Sub
+
+
+
+
 
     End Class
 

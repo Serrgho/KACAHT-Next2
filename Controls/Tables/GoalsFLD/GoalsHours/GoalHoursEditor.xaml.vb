@@ -13,11 +13,7 @@ Namespace Kas
 
 		' все редактируемые числовые поля (Single), кроме Year/Month
 		Private Shared ReadOnly ValueProps As List(Of PropertyInfo) =
-			GetType(MonthlyGoalHours).GetProperties() _
-				.Where(Function(p) p.CanWrite AndAlso
-								   p.Name <> "Year" AndAlso p.Name <> "Month" AndAlso
-								   p.PropertyType Is GetType(Single)) _
-				.ToList()
+			GetType(MonthlyGoalHours).GetProperties().Where(Function(p) p.CanWrite AndAlso p.Name <> "Year" AndAlso p.Name <> "Month" AndAlso p.PropertyType Is GetType(Single)).ToList()
 
 		' ==================== КОНСТРУКТОР ====================
 
@@ -196,7 +192,7 @@ Namespace Kas
 
 		''' <summary>True, если в записи есть хотя бы одно ненулевое значение.</summary>
 		Private Function HasData(g As MonthlyGoalHours) As Boolean
-			Return ValueProps.Any(Function(p) Convert.ToSingle(p.GetValue(g)) <> 0)
+			Return ValueProps.Any(Function(p) p.Name <> "DailyThreshold" AndAlso Convert.ToSingle(p.GetValue(g)) <> 0)
 		End Function
 
 		Private Sub RefreshHighlights()
@@ -257,7 +253,10 @@ Namespace Kas
 		Private Function GetTotalValue() As Single
 			Dim total As Single = 0
 			For Each p In ValueProps
-				total += Convert.ToSingle(p.GetValue(_goal))
+				' Исключаем пороговое значение из общей суммы потерь
+				If p.Name <> "DailyThreshold" Then
+					total += Convert.ToSingle(p.GetValue(_goal))
+				End If
 			Next
 			Return total
 		End Function

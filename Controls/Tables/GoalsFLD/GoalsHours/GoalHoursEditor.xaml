@@ -61,17 +61,19 @@
 				<RowDefinition Height="Auto"/>
 				<!-- 0: заголовки -->
 				<RowDefinition Height="Auto"/>
-				<!-- 1: Боготол (k=1) -->
+				<!-- 1: Суточное пороговое кол-во (НОВОЕ) -->
 				<RowDefinition Height="Auto"/>
-				<!-- 2: Красноярск (k=2) -->
+				<!-- 2: Боготол (k=1) -->
 				<RowDefinition Height="Auto"/>
-				<!-- 3: Иланская (k=3) -->
+				<!-- 3: Красноярск (k=2) -->
 				<RowDefinition Height="Auto"/>
-				<!-- 4: Ачинск (k=5) -->
+				<!-- 4: Иланская (k=3) -->
 				<RowDefinition Height="Auto"/>
-				<!-- 5: Абакан (k=7) -->
+				<!-- 5: Ачинск (k=5) -->
 				<RowDefinition Height="Auto"/>
-				<!-- 6: Всего -->
+				<!-- 6: Абакан (k=7) -->
+				<RowDefinition Height="Auto"/>
+				<!-- 7: Всего -->
 			</Grid.RowDefinitions>
 
 			<!-- Заголовки -->
@@ -82,53 +84,57 @@
 			<TextBlock Grid.Row="0" Grid.Column="4" Text="ТР" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
 			<TextBlock Grid.Row="0" Grid.Column="5" Text="Всего" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
 
-			<!-- Боготол (k=1) -->
-			<TextBlock Grid.Row="1" Grid.Column="0" Text="Боготол" VerticalAlignment="Center" Padding="5"/>
-			<TextBox Grid.Row="1" Grid.Column="1" Text="{Binding D1Tche, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="1" Grid.Column="2" Text="{Binding D1Sld, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="1" Grid.Column="3" Text="{Binding D1Zav, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="1" Grid.Column="4" Text="{Binding D1Tr, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBlock Grid.Row="1" Grid.Column="5" Text="{Binding D1All, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5"/>
+			<!-- Суточное пороговое количество (НОВОЕ) -->
+			<TextBlock Grid.Row="1" Grid.Column="0" Text="Суточное пороговое кол-во" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
+			<TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding DailyThreshold, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}" Width="170" HorizontalAlignment="Left" Margin="5,2,2,2"/>
 
-			<!-- Красноярск (k=2) -->
-			<TextBlock Grid.Row="2" Grid.Column="0" Text="Красноярск" VerticalAlignment="Center" Padding="5"/>
-			<TextBox Grid.Row="2" Grid.Column="1" Text="{Binding D2Tche, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="2" Grid.Column="2" Text="{Binding D2Sld, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="2" Grid.Column="3" Text="{Binding D2Zav, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="2" Grid.Column="4" Text="{Binding D2Tr, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBlock Grid.Row="2" Grid.Column="5" Text="{Binding D2All, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5"/>
+			<!-- Боготол (теперь Row="2") -->
+			<TextBlock Grid.Row="2" Grid.Column="0" Text="Боготол" VerticalAlignment="Center" Padding="5"/>
+			<TextBox Grid.Row="2" Grid.Column="1" Text="{Binding D1Tche, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="2" Grid.Column="2" Text="{Binding D1Sld, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="2" Grid.Column="3" Text="{Binding D1Zav, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="2" Grid.Column="4" Text="{Binding D1Tr, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBlock Grid.Row="2" Grid.Column="5" Text="{Binding D1All, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5"/>
 
-			<!-- Иланская (k=3) -->
-			<TextBlock Grid.Row="3" Grid.Column="0" Text="Иланская" VerticalAlignment="Center" Padding="5"/>
-			<TextBox Grid.Row="3" Grid.Column="1" Text="{Binding D3Tche, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="3" Grid.Column="2" Text="{Binding D3Sld, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="3" Grid.Column="3" Text="{Binding D3Zav, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="3" Grid.Column="4" Text="{Binding D3Tr, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBlock Grid.Row="3" Grid.Column="5" Text="{Binding D3All, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5"/>
+			<!-- Красноярск (теперь Row="3") -->
+			<TextBlock Grid.Row="3" Grid.Column="0" Text="Красноярск" VerticalAlignment="Center" Padding="5"/>
+			<TextBox Grid.Row="3" Grid.Column="1" Text="{Binding D2Tche, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="3" Grid.Column="2" Text="{Binding D2Sld, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="3" Grid.Column="3" Text="{Binding D2Zav, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="3" Grid.Column="4" Text="{Binding D2Tr, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBlock Grid.Row="3" Grid.Column="5" Text="{Binding D2All, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5"/>
 
-			<!-- Ачинск (k=5) -->
-			<TextBlock Grid.Row="4" Grid.Column="0" Text="Ачинск" VerticalAlignment="Center" Padding="5"/>
-			<TextBox Grid.Row="4" Grid.Column="1" Text="{Binding D5Tche, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="4" Grid.Column="2" Text="{Binding D5Sld, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="4" Grid.Column="3" Text="{Binding D5Zav, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="4" Grid.Column="4" Text="{Binding D5Tr, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBlock Grid.Row="4" Grid.Column="5" Text="{Binding D5All, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5"/>
+			<!-- Иланская (теперь Row="4") -->
+			<TextBlock Grid.Row="4" Grid.Column="0" Text="Иланская" VerticalAlignment="Center" Padding="5"/>
+			<TextBox Grid.Row="4" Grid.Column="1" Text="{Binding D3Tche, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="4" Grid.Column="2" Text="{Binding D3Sld, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="4" Grid.Column="3" Text="{Binding D3Zav, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="4" Grid.Column="4" Text="{Binding D3Tr, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBlock Grid.Row="4" Grid.Column="5" Text="{Binding D3All, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5"/>
 
-			<!-- Абакан (k=7) -->
-			<TextBlock Grid.Row="5" Grid.Column="0" Text="Абакан" VerticalAlignment="Center" Padding="5"/>
-			<TextBox Grid.Row="5" Grid.Column="1" Text="{Binding D7Tche, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="5" Grid.Column="2" Text="{Binding D7Sld, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="5" Grid.Column="3" Text="{Binding D7Zav, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBox Grid.Row="5" Grid.Column="4" Text="{Binding D7Tr, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
-			<TextBlock Grid.Row="5" Grid.Column="5" Text="{Binding D7All, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5"/>
+			<!-- Ачинск (теперь Row="5") -->
+			<TextBlock Grid.Row="5" Grid.Column="0" Text="Ачинск" VerticalAlignment="Center" Padding="5"/>
+			<TextBox Grid.Row="5" Grid.Column="1" Text="{Binding D5Tche, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="5" Grid.Column="2" Text="{Binding D5Sld, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="5" Grid.Column="3" Text="{Binding D5Zav, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="5" Grid.Column="4" Text="{Binding D5Tr, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBlock Grid.Row="5" Grid.Column="5" Text="{Binding D5All, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5"/>
 
-			<!-- Всего (вычисляемое всё) -->
-			<TextBlock Grid.Row="6" Grid.Column="0" Text="Всего" FontWeight="Bold" VerticalAlignment="Center" Padding="5"/>
-			<TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding TotalTche, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
-			<TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding TotalSld, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
-			<TextBlock Grid.Row="6" Grid.Column="3" Text="{Binding TotalZav, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
-			<TextBlock Grid.Row="6" Grid.Column="4" Text="{Binding TotalTr, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
-			<TextBlock Grid.Row="6" Grid.Column="5" Text="{Binding TotalAll, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
+			<!-- Абакан (теперь Row="6") -->
+			<TextBlock Grid.Row="6" Grid.Column="0" Text="Абакан" VerticalAlignment="Center" Padding="5"/>
+			<TextBox Grid.Row="6" Grid.Column="1" Text="{Binding D7Tche, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="6" Grid.Column="2" Text="{Binding D7Sld, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="6" Grid.Column="3" Text="{Binding D7Zav, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBox Grid.Row="6" Grid.Column="4" Text="{Binding D7Tr, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}"/>
+			<TextBlock Grid.Row="6" Grid.Column="5" Text="{Binding D7All, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5"/>
+
+			<!-- Всего (теперь Row="7") -->
+			<TextBlock Grid.Row="7" Grid.Column="0" Text="Всего" FontWeight="Bold" VerticalAlignment="Center" Padding="5"/>
+			<TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding TotalTche, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
+			<TextBlock Grid.Row="7" Grid.Column="2" Text="{Binding TotalSld, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
+			<TextBlock Grid.Row="7" Grid.Column="3" Text="{Binding TotalZav, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
+			<TextBlock Grid.Row="7" Grid.Column="4" Text="{Binding TotalTr, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
+			<TextBlock Grid.Row="7" Grid.Column="5" Text="{Binding TotalAll, StringFormat=F2, ConverterCulture=ru-RU}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
 		</Grid>
 
 		<!-- Кнопки -->

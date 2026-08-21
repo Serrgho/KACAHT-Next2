@@ -235,7 +235,7 @@ Namespace Kas
         ' ---------- Подсветка лет/месяцев с данными ----------
         ''' <summary>True, если в записи есть хотя бы одно ненулевое значение.</summary>
         Private Function HasData(g As MonthlyGoal) As Boolean
-            Return ValueProps.Any(Function(p) Convert.ToDouble(p.GetValue(g)) <> 0)
+            Return ValueProps.Any(Function(p) p.Name <> "DailyThreshold" AndAlso Convert.ToDouble(p.GetValue(g)) <> 0)
         End Function
 
         Private Sub RefreshHighlights()
@@ -302,7 +302,10 @@ Namespace Kas
         Private Function GetTotalValue() As Double
             Dim total As Double = 0
             For Each p In ValueProps
-                total += Convert.ToDouble(p.GetValue(_goal))
+                ' Исключаем пороговое значение из общей суммы целевых показателей
+                If p.Name <> "DailyThreshold" Then
+                    total += Convert.ToDouble(p.GetValue(_goal))
+                End If
             Next
             Return total
         End Function

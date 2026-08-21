@@ -51,6 +51,29 @@ Namespace Kas
             ' k=7 Нижнеудинск
             Private _d7Tche As Single, _d7Sld As Single, _d7Zav As Single, _d7Tr As Single
 
+            ' ===== НОВОЕ ПОЛЕ: Суточное пороговое количество =====
+            Private _dailyThreshold As Single
+
+
+
+
+            ' ===== НОВОЕ СВОЙСТВО: Суточное пороговое количество =====
+            Public Property DailyThreshold As Single
+                Get
+                    Return _dailyThreshold
+                End Get
+                Set(v As Single)
+                    If _dailyThreshold <> v Then
+                        _dailyThreshold = v
+                        OnPropertyChanged()
+                        ' Намеренно не вызываем OnPropertyChanged для Total, 
+                        ' так как это лимит, а не часть суммы потерь.
+                    End If
+                End Set
+            End Property
+
+
+
             ' =====================================================================
             ' Ачинск (k=1)
             ' =====================================================================

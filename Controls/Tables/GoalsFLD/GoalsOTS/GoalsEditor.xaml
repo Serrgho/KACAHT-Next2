@@ -61,6 +61,7 @@
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
 			</Grid.RowDefinitions>
 			
 			<!-- Заголовки -->
@@ -99,6 +100,9 @@
 			<TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Factory12, Converter={StaticResource ZeroTextConverter},UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource GoalTextBoxStyle}"/>
 			<TextBox Grid.Row="5" Grid.Column="2" Text="{Binding Factory3, Converter={StaticResource ZeroTextConverter},UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource GoalTextBoxStyle}"/>
 			<TextBlock Grid.Row="5" Grid.Column="3" Text="{Binding Factory13}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5"/>
+
+			<TextBlock Grid.Row="6" Grid.Column="0" Text="Суточное пороговое кол-во" VerticalAlignment="Center" TextAlignment="Center" Padding="5"/>
+			<TextBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding DailyThreshold, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource GoalTextBoxStyle}" Width="180" HorizontalAlignment="Left" Margin="10,3,0,0"/>
 		</Grid>
 
 		<!-- Кнопки -->

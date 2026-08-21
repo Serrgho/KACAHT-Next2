@@ -35,6 +35,13 @@
 	</UserControl.Resources>
 
 	<StackPanel>
+		<!-- НОВАЯ ПАНЕЛЬ С КНОПКОЙ ЭКСПОРТА -->
+		<StackPanel x:Name="ButtonSPanel" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0,10,10">
+			<Button x:Name="BtnExportToPdf" 
+                    Content="Выдать в PDF" 
+                    Padding="15,5" 
+                    Click="BtnExportToPdf_Click"/>
+		</StackPanel>
 		<TextBlock x:Name="LblCaption" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center" Margin="0,0,0,5"/>
 
 		<Grid>

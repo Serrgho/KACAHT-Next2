@@ -427,14 +427,27 @@ Namespace Kas
         End Sub
 
         Sub ClearFiles(Pth As String)
-            If System.IO.Directory.Exists(Pth) Then
-                ' Удаляем все файлы в папке
-                For Each f In System.IO.Directory.GetFiles(Pth)
+
+            If String.IsNullOrWhiteSpace(Pth) Then Return
+            If Not System.IO.Directory.Exists(Pth) Then Return
+
+            Try
+                ' 1. Удаляем все файлы в текущей папке
+                For Each f As String In System.IO.Directory.GetFiles(Pth)
                     Try
                         System.IO.File.Delete(f)
-                    Catch : End Try  ' Игнорируем, если файл ещё занят
+                    Catch : End Try  ' Игнорируем занятые файлы
                 Next
-            End If
+
+                ' 2. Рекурсивно удаляем все вложенные папки
+                For Each subDir As String In System.IO.Directory.GetDirectories(Pth)
+                    Try
+                        System.IO.Directory.Delete(subDir, recursive:=True)
+                    Catch : End Try  ' Игнорируем, если не удалось
+                Next
+
+            Catch : End Try
+
         End Sub
 
 

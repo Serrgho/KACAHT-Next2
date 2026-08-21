@@ -49,7 +49,24 @@ Namespace Kas
             Public Property Year As Integer
             Public Property Month As Integer
 
+            Private _dailyThreshold As Integer ' <-- Добавлено
+
             ' ===== СВОЙСТВА С УВЕДОМЛЕНИЯМИ =====
+            Public Property DailyThreshold As Integer
+                Get
+                    Return _dailyThreshold
+                End Get
+                Set(value As Integer)
+                    If _dailyThreshold <> value Then
+                        _dailyThreshold = value
+                        OnPropertyChanged()
+                        ' Намеренно не вызываем OnPropertyChanged для Complex/13, 
+                        ' так как это лимит, а не часть суммы.
+                    End If
+                End Set
+            End Property
+
+
 
             Public Property T12 As Integer
                 Get
