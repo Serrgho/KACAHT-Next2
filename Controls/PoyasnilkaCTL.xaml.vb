@@ -245,6 +245,15 @@ Namespace Kas
                 btnDailyShow.IsEnabled = True
             End Try
         End Sub
+
+        Private Sub btnDailyPoyasnShow_Click(sender As Object, e As RoutedEventArgs)
+            'Dim ExclusivePeriod As Func(Of Otkaz, Boolean) = (Function(o) o.Nach.IsInRangeWithTime AndAlso Not (o.KtoZakryl.ToLower.Contains("трп")))
+            'RezervList = OTSList
+            'OTSList = OTSList.Where(ExclusivePeriod).OrderBy(Function(o) o.Nach).ToList
+            'ResetPeriodSUB()
+            'InitFirst()
+            'YarCon.UpdateYarlykInfo()
+        End Sub
     End Class
 End Namespace
 

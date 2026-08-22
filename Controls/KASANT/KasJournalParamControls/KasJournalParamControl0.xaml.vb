@@ -45,7 +45,8 @@ Namespace Kas
                 End If
 
                 .KonDat = Today.Date
-
+                MW.JourParam.ParamTimeCTL.But23.IsChecked = True
+                'MW.expPoyasnilka.btnDailyPoyasnShow.Visibility = Visibility.Collapsed
             End With
 
         End Sub

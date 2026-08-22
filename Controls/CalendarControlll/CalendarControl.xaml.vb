@@ -81,6 +81,30 @@ Namespace Kas
 
 #End Region
 
+#Region "Обработка выбора месяца"
+
+        ' Объявление события изменения месяца
+        Public Event MonthChanged As EventHandler(Of MonthChangedEventArgs)
+
+        ' Метод для вызова события
+        Protected Sub OnMonthChanged(year As Integer, monthIndex As Integer)
+            RaiseEvent MonthChanged(Me, New MonthChangedEventArgs(year, monthIndex))
+        End Sub
+
+        ' Класс аргументов события
+        Public Class MonthChangedEventArgs
+            Inherits EventArgs
+
+            Public Property Year As Integer
+            Public Property MonthIndex As Integer ' 0-11
+
+            Public Sub New(year As Integer, monthIndex As Integer)
+                Me.Year = year
+                Me.MonthIndex = monthIndex
+            End Sub
+        End Class
+
+#End Region
 
 
         Private Dayz As String() = {"пн", "вт", "ср", "чт", "пт", "сб", "вс"}
@@ -217,6 +241,12 @@ Namespace Kas
         Private Sub MonthSelector_SelectionChanged(sender As Object, e As SelectionChangedEventArgs)
             ' Если идёт инициализация, пропускаем выполнение
             If IsInitializing Then Return
+
+            ' Вызываем событие изменения месяца для внешней обработки
+            Dim currentYear As Integer = CInt(YearLabel.SelectedItem)
+            Dim currentMonthIdx As Integer = MonthSelector.SelectedIndex
+            OnMonthChanged(currentYear, currentMonthIdx)
+
             UpdateCalendar()
         End Sub
 
@@ -224,6 +254,12 @@ Namespace Kas
         Private Sub YearLabel_SelectionChanged(sender As Object, e As SelectionChangedEventArgs)
             ' Если идёт инициализация, пропускаем выполнение
             If IsInitializing Then Return
+
+            ' Вызываем событие изменения месяца/года для внешней обработки
+            Dim currentYear As Integer = CInt(YearLabel.SelectedItem)
+            Dim currentMonthIdx As Integer = MonthSelector.SelectedIndex
+            OnMonthChanged(currentYear, currentMonthIdx)
+
             UpdateCalendar()
         End Sub
 

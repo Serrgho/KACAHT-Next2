@@ -2391,42 +2391,42 @@ Namespace Kas
 
 
 
-        'для карточки отказа
-        <JsonIgnore>
-        Public ReadOnly Property OTSCar_Zagolovok As String
-            Get
-                Dim Ss As String = ""
-                ' Обрабатываем все случаи:
-                If ZaKem = "!" OrElse String.IsNullOrEmpty(ZaKem) Then
-                    ' Отказ в процессе расследования
-                    Ss = $"В расследовании на {(KtoZakryl)}"
-                ElseIf Zakryt > Date.MinValue AndAlso (Not ZaKem.Contains("ублика")) Then
-                    ' Завершенное расследование
-                    Ss = $"В {KtoZakryl} расследование завершено { Zakryt:dd.MM.yyyy}  {If(ZaKem = "тч", $"по ответственности {KtoZakryl}", If(ZaKem = "тр", $"по ответственности {KtoZakryl}", If(ZaKem.ToLower.Contains("п.5.15 положения"), "отнесен на Прочие причины (п.5.15 Положения)", If(ZaKem.ToLower.Contains("рочи"), "по ответственности прочих предприятий", ZaKem))))}"
-                ElseIf ZaKem.Contains("ублика") Then
-                    ' Дубликат
-                    Ss = If(Zakryt > Date.MinValue,
-                   $"Переведен в дубликат { Zakryt:dd.MM.yyyy}",
-                   "Переведен в дубликат")
-                ElseIf ZaKem.Contains("орог") Then
-                    Ss = If(Peredan > Date.MinValue,
-                   $"Передан на другую дорогу { Peredan:dd.MM.yyyy}",
-                   "Передан на другую дорогу")
-                ElseIf IsSaved Then
-                    ' Назначено, но еще не завершено
-                    If ZaKem.ToLower.Contains("рочи") Then
-                        Ss = $"Сохранен за прочими предприятиями"
-                    Else
-                        Ss = $"Сохранен за { ZaKem}"
-                    End If
+        ''для карточки отказа
+        '<JsonIgnore>
+        'Public ReadOnly Property OTSCar_Zagolovok As String
+        '    Get
+        '        Dim Ss As String = ""
+        '        ' Обрабатываем все случаи:
+        '        If ZaKem = "!" OrElse String.IsNullOrEmpty(ZaKem) Then
+        '            ' Отказ в процессе расследования
+        '            Ss = $"В расследовании на {(KtoZakryl)}"
+        '        ElseIf Zakryt > Date.MinValue AndAlso (Not ZaKem.Contains("ублика")) Then
+        '            ' Завершенное расследование
+        '            Ss = $"В {KtoZakryl} расследование завершено { Zakryt:dd.MM.yyyy}  {If(ZaKem = "тч", $"по ответственности {KtoZakryl}", If(ZaKem = "тр", $"по ответственности {KtoZakryl}", If(ZaKem.ToLower.Contains("п.5.15 положения"), "отнесен на Прочие причины (п.5.15 Положения)", If(ZaKem.ToLower.Contains("рочи"), "по ответственности прочих предприятий", ZaKem))))}"
+        '        ElseIf ZaKem.Contains("ублика") Then
+        '            ' Дубликат
+        '            Ss = If(Zakryt > Date.MinValue,
+        '           $"Переведен в дубликат { Zakryt:dd.MM.yyyy}",
+        '           "Переведен в дубликат")
+        '        ElseIf ZaKem.Contains("орог") Then
+        '            Ss = If(Peredan > Date.MinValue,
+        '           $"Передан на другую дорогу { Peredan:dd.MM.yyyy}",
+        '           "Передан на другую дорогу")
+        '        ElseIf IsSaved Then
+        '            ' Назначено, но еще не завершено
+        '            If ZaKem.ToLower.Contains("рочи") Then
+        '                Ss = $"Сохранен за прочими предприятиями"
+        '            Else
+        '                Ss = $"Сохранен за { ZaKem}"
+        '            End If
 
 
-                Else
-                    'Ss = $"В {KtoZakryl} расследование завершено { Zakryt:dd.MM.yyyy}  {If(ZaKem = "тч", $"по ответственности {KtoZakryl}", If(ZaKem = "тр", $"по ответственности {KtoZakryl}", If(OTSLev3.ToLower.Contains("п.5.15 положения"), "отнесен на Прочие причины (п.5.15 Положения)", If(ZaKem.ToLower.Contains("рочи"), "по ответственности прочих предприятий", ZaKem))))}"
-                End If
-                Return Ss
-            End Get
-        End Property
+        '        Else
+        '            'Ss = $"В {KtoZakryl} расследование завершено { Zakryt:dd.MM.yyyy}  {If(ZaKem = "тч", $"по ответственности {KtoZakryl}", If(ZaKem = "тр", $"по ответственности {KtoZakryl}", If(OTSLev3.ToLower.Contains("п.5.15 положения"), "отнесен на Прочие причины (п.5.15 Положения)", If(ZaKem.ToLower.Contains("рочи"), "по ответственности прочих предприятий", ZaKem))))}"
+        '        End If
+        '        Return Ss
+        '    End Get
+        'End Property
 
 
 

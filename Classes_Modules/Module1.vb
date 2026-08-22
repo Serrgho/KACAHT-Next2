@@ -32,11 +32,12 @@ Namespace Kas
 
         Public IstRails As New List(Of String)({"ГИД УРАЛ", "ВСЖД", "ЗАБЖД", "ДВЖД", "ЗСЖД", "РУЧНОЙ ВВОД", "ПРИВЖД", "СКАВЖД", "ЮВЖД", "ЮУРЖД", "КБШЖД", "ГОРЖД", "СВРДЖД", "ОКТЖД", "КЛНГЖД", "СЕВЖД", "САХЖД"})
 
+
+#Region "Анимация значка в трэе"
         ''' <summary>
         ''' Анимация "бегущей полоски" на иконке в панели задач.
         ''' Базовая иконка берётся из самого окна (та, что указана в XAML).
         ''' </summary>
-#Region "Анимация значка в трэе"
 
         Private _frames As New List(Of ImageSource)
         Private _timer As DispatcherTimer
@@ -229,7 +230,18 @@ Namespace Kas
             Return d.Value >= Fetcher.NachDat AndAlso d.Value <= Fetcher.KonDat
         End Function
 
+        <Extension()>
+        Public Function IsInRangeWithTime(d As Date) As Boolean
+            ' Создаем полные DateTime для границ периода, подставляя часы из свойств Fetcher
+            Dim startDateTime As New Date(Fetcher.NachDat.Year, Fetcher.NachDat.Month, Fetcher.NachDat.Day,
+                                  Fetcher.NachTim, 0, 0)
 
+            Dim endDateTime As New Date(Fetcher.KonDat.Year, Fetcher.KonDat.Month, Fetcher.KonDat.Day,
+                                Fetcher.KonTim, 0, 0)
+
+            ' Возвращаем результат проверки попадания даты d в полный диапазон [startDateTime; endDateTime]
+            Return d >= startDateTime AndAlso d <= endDateTime
+        End Function
 
 
 
@@ -446,7 +458,7 @@ Namespace Kas
             OTSList = Lst
             ResetPeriodSUB()
             InitFirst()
-            YarCon.UpdateYarlykInfo()
+            'YarCon.UpdateYarlykInfo()
         End Sub
 
 
@@ -539,7 +551,7 @@ Namespace Kas
             ' 3. Обновляем UI
 
             InitFirst()                  ' ← ваша глобальная инициализация
-            YarCon.UpdateYarlykInfo()   ' ← обновление ярлыков
+            'YarCon.UpdateYarlykInfo()   ' ← обновление ярлыков
 
             MW.InfoBLOK.ScrollToEnd()
 

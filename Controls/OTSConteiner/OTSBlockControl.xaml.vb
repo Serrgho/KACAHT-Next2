@@ -1358,7 +1358,7 @@ Namespace Kas
             End With
 
             InitFirst()
-            YarCon.UpdateYarlykInfo()
+            'YarCon.UpdateYarlykInfo()
             UpdateTotal()
         End Sub
 

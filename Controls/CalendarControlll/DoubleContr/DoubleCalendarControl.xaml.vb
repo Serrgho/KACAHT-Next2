@@ -40,7 +40,47 @@ Namespace Kas
             ' Добавить код инициализации после вызова InitializeComponent().
             AddHandler MyCalendar1.SelectedDateChanged, AddressOf OnSelectedNachDateChanged
             AddHandler MyCalendar2.SelectedDateChanged, AddressOf OnSelectedKonDateChanged
+
+            ' Подписка на события смены месяца (стрелки/комбобоксы)
+            AddHandler MyCalendar1.MonthChanged, AddressOf OnCalendar1MonthChanged
+            AddHandler MyCalendar2.MonthChanged, AddressOf OnCalendar2MonthChanged
+
             PeriodOKPressed = False
+        End Sub
+
+
+        ''' <summary>
+        ''' Обработчик смены месяца в ЛЕВОМ календаре (Начало периода)
+        ''' Устанавливает дату на 1-е число выбранного месяца
+        ''' </summary>
+        Private Sub OnCalendar1MonthChanged(sender As Object, e As CalendarControl.MonthChangedEventArgs)
+            Dim newDate As New DateTime(e.Year, e.MonthIndex + 1, 1)
+
+            ' Используем штатный метод установки даты
+            MyCalendar1.SetSelectedDate(newDate)
+        End Sub
+
+        ''' <summary>
+        ''' Обработчик смены месяца в ПРАВОМ календаре (Конец периода)
+        ''' Устанавливает дату на последнее число выбранного месяца
+        ''' </summary>
+        Private Sub OnCalendar2MonthChanged(sender As Object, e As CalendarControl.MonthChangedEventArgs)
+
+            Dim newDate As Date
+
+            ' Если выбранный месяц НЕ равен текущему системному, ставим последнее число
+            If e.Year <> Now.Year OrElse (e.MonthIndex + 1) <> Now.Month Then
+                Dim daysInMonth As Integer = DateTime.DaysInMonth(e.Year, e.MonthIndex + 1)
+                newDate = New DateTime(e.Year, e.MonthIndex + 1, daysInMonth)
+            Else
+                ' Если месяц ТЕКУЩИЙ, ставим СЕГОДНЯШНЮЮ дату
+                newDate = Today
+            End If
+
+            MyCalendar2.SetSelectedDate(newDate)
+
+
+
         End Sub
 
         Private Sub CalendarPopup_Opened(sender As Object, e As EventArgs)
@@ -150,7 +190,7 @@ Namespace Kas
                         ' Логируем результат
                         Tx = ($"В My.Settings установлен период{vbCrLf}с { .NachPeriod:dd.MM.yyyy HH:mm}{vbCrLf}по { .KonPeriod:dd.MM.yyyy HH:mm}")
                         'Обновляем ЧЯрлыки ну и запросы
-                        YarCon.UpdateYarlykInfo()
+                        'YarCon.UpdateYarlykInfo()
                         InitFirst()
                         MW.InfoBLOK.AddItem(Tx)
                         MW.InfoBLOK.ScrollToEnd()

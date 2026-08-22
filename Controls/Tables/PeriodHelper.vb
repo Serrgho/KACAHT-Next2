@@ -85,11 +85,19 @@ Module PeriodHelper
         If otsList IsNot Nothing Then combined.AddRange(otsList)
 
         Return combined.GroupBy(Function(o) o.Id) _
-                       .Select(Function(g) g.First()) _
-                       .Where(Function(o)
-                                  Dim d = o.Nach.Date
-                                  Return d >= periodStart.Date AndAlso d <= periodEnd.Date
-                              End Function).ToList()
+                      .Select(Function(g) g.First()) _
+                      .Where(Function(o)
+                                 Dim d = o.Nach
+                                 Return d >= periodStart AndAlso d <= periodEnd
+                             End Function).ToList()
+
+
+        'Return combined.GroupBy(Function(o) o.Id) _
+        '               .Select(Function(g) g.First()) _
+        '               .Where(Function(o)
+        '                          Dim d = o.Nach.Date
+        '                          Return d >= periodStart.Date AndAlso d <= periodEnd.Date
+        '                      End Function).ToList()
     End Function
 
     Public Function GetYearToDateOtkazy(otsList As List(Of Otkaz), oldY As List(Of Otkaz)) As List(Of Otkaz)

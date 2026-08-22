@@ -192,18 +192,20 @@ Namespace Kas
 
             End With
 
+
+            '=======================================================
             ' 0. Сначала настройки:
             BarHeight = 6        ' толщина полоски
             BarColor = Color.FromRgb(0, 255, 0)
             FrameIntervalMs = 40 ' скорость (~12 FPS)
             TotalFrames = 48
+
+
             ' 1. Инициализируем аниматор при старте
             AnimIconInitialize(Me)
             ' 2. Запускаем анимацию (например, при начале обновления)
             Start()
-
-
-
+            '=======================================================
 
             ResetPeriodSUB()
             InfoBLOK.AddItem("=== Начальная загрузка ===")
@@ -344,15 +346,6 @@ Namespace Kas
         Public _filterNumbers As List(Of String) = Nothing
 
 
-
-
-
-
-
-
-
-
-
 #Region "МышеКнопки"
 
         'копирование номеров ОТС
@@ -360,18 +353,7 @@ Namespace Kas
 
         End Sub
 
-        'Private Sub LoadData_Click(sender As Object, e As RoutedEventArgs)
 
-
-        '    'PointedOtkaz = Nothing
-        '    'InitFirst()
-        '    'YarCon.UpdateYarlykInfo()
-        'End Sub
-
-
-
-
-        '============================================================
         Private Sub SelectPeriod_Click(sender As Object, e As RoutedEventArgs)
             ' Открываем окно
             DContrPop.PlaceTarget = sender
@@ -486,112 +468,9 @@ Namespace Kas
             PeredachaPopup.IsOpen = False
         End Sub
 
-
-
-        Private Sub TabSummary_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs)
-            'If Not TabSummary.IsVisible Then Exit Sub
-            'If My.Settings.OldYJSON = "" Then Exit Sub
-            'Dim oldY As List(Of Otkaz) = StorageModule.LoadFromJson(My.Settings.OldYJSON)
-
-            '' С фильтрацией по периоду
-            'Dim table As New S24Table1(
-            '    OTSList,
-            '    oldY,
-            '    Fetcher.NachDat,
-            '    Fetcher.KonDat)
-
-
-            'TabSummary.Content = table
-
-        End Sub
-
-
-
-        Private Sub BtnZmeyka_Click(sender As Object, e As RoutedEventArgs)
-            ''        🔹 Дочерний проект (который вставляем)
-            ''- Свойства → Тип вывода (Output type) = «Библиотека классов» (для WPF — «Библиотека классов WPF»). Объект запуска при этом сам станет «(Нет)».
-            ''- Удалить Application.xaml(и его .vb) — это точка входа приложения с StartupUri, в библиотеке ей места нет.
-            ''- Удалить App.config и иконку (favicon.ico) — в DLL они не нужны (не критично, но мусор).
-            ''- Класс окна, которое вызываем снаружи — Public
-            ''- Никаких Application.Current.Shutdown() внутри библиотеки — только Me.Close(). Иначе модуль будет убивать всё приложение-хозяин.
-
-            ''       🔹 Родительский проект (куда вставляем)
-            ''- ПКМ по Зависимости (Ссылки) → Добавить ссылку на проект... → галка на дочернем проекте → ОК.
-            ''- Вызывать окно полным именем (без Imports, чтобы не было конфликтов имён)
-            ''               Dim game As New Zmeyka.MainWindow()
-            ''               game.ShowDialog()   ' или .Show()
-            ''- Сборка → Перестроить решение (Rebuild Solution).
-            ''- Целевые платформы совместимые: оба проекта.NET Framework 4.8 (или библиотека — .NET Standard). В 4.8 нельзя воткнуть библиотеку на .NET 8.
-
-
-
-
-            '' Защита: не открываем второе окно, пока открыто первое
-            'If gameIsOpen Then Return
-            'gameIsOpen = True
-            'BtnZmeyka.IsEnabled = False
-
-            'Dim game As New Zmeyka.MainWindow()
-            'AddHandler game.Closed, AddressOf GameWindow_Closed
-            'game.Show()
-        End Sub
-
-        ' Срабатывает, когда окно игры закрылось (крестиком или кнопкой "Выход")
-        Private Sub GameWindow_Closed(sender As Object, e As EventArgs)
-            'gameIsOpen = False
-            'BtnZmeyka.IsEnabled = True
-        End Sub
-
-
-
-        Private Sub BtnSmoke_Click(sender As Object, e As RoutedEventArgs)
-            '    Dim btn As FrameworkElement = CType(expPoyasnilka, FrameworkElement)
-            '    ' Dim mw As System.Windows.Window = Application.Current.MainWindow
-
-
-            '    Dim winPos As System.Windows.Point = mw.PointToScreen(New System.Windows.Point(0, 0))
-            '    Dim expPos As System.Windows.Point = btn.PointToScreen(New System.Windows.Point(0, 0))
-            '    Dim splPos As System.Windows.Point = MainWinSplitter.PointToScreen(New System.Windows.Point(0, 0))
-            '    Dim connPos As System.Windows.Point = ConnIndicator.PointToScreen(New System.Windows.Point(0, 0))
-
-
-            '    ' Координаты относительно окна
-            '    Dim expLeft As Double = expPos.X - winPos.X
-            '    Dim expTop As Double = expPos.Y - winPos.Y
-            '    Dim splLeft As Double = splPos.X - winPos.X
-            '    Dim connTop As Double = connPos.Y - winPos.Y
-
-            '    ' Границы канваса: верх и низ задаём явно
-            '    Dim topY As Double = connTop - 20        ' верх: на 20px выше ConnIndicator
-            '    Dim bottomY As Double = expTop + 12      ' низ: нахлёст 12px на кнопку (0 = встык)
-            '    Dim popWidth As Double = Math.Max(100, splLeft - expLeft)
-            '    Dim popHeight As Double = Math.Max(100, bottomY - topY)
-
-            '    Dim wa = SystemParameters.WorkArea
-            '    If popWidth > wa.Width - 20 Then popWidth = wa.Width - 20
-            '    If popHeight > wa.Height - 20 Then popHeight = wa.Height - 20
-
-            '    Dim Kanv As New SmokeCanvas With {.Width = popWidth, .Height = popHeight}
-            '    SmokeParamsStore.LoadParams(Kanv)
-
-
-
-            '    Dim Pop As New Popup With {
-            '.AllowsTransparency = True, .StaysOpen = False,
-            '.PlacementTarget = mw,
-            '.Placement = Primitives.PlacementMode.Relative,
-            '.HorizontalOffset = expLeft,
-            '.VerticalOffset = topY,
-            '.Child = Kanv, .IsOpen = True}
-
-            '    Kanv.StartSmoke()
-            '    Dispatcher.BeginInvoke(Sub() Pop.IsOpen = True, Threading.DispatcherPriority.Loaded)
-        End Sub
-
-
-
-
 #End Region
+
+
 
     End Class
 

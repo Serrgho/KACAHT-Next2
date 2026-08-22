@@ -266,11 +266,11 @@ Namespace Kas
             Try
                 Dim loadedList As List(Of Otkaz)
                 loadedList = GetJSONList()
-                'RezervList = loadedList
+                RezervList = loadedList
                 OTSList = loadedList
                 ResetPeriodSUB()
                 InitFirst()
-                YarCon.UpdateYarlykInfo()
+                'YarCon.UpdateYarlykInfo()
 
             Catch ex As Exception
                 'ShowMSG(MW, $"❌ Ошибка при загрузке:{vbCrLf}{ex.Message}", "Ошибка")
@@ -325,7 +325,7 @@ Namespace Kas
         Private Sub LoadData_Click(sender As Object, e As RoutedEventArgs)
             ImportOTS()
             ResetPeriodSUB()
-            'RezervList = OTSList
+            RezervList = OTSList
         End Sub
 
         Sub ImportOTS(Optional Self As Boolean = False)
@@ -376,12 +376,24 @@ Namespace Kas
         Private Sub ResetToOTSList_Click(sender As Object, e As RoutedEventArgs)
             If RezervList IsNot Nothing Then
                 ResignOTSList(RezervList)
-                'RezervList = Nothing
+                MW.JourParam.ParamTimeCTL.But23.IsChecked = True
+                'MW.expPoyasnilka.btnDailyPoyasnShow.Visibility = Visibility.Collapsed
             End If
         End Sub
 
         Private Sub UserControl_Loaded(sender As Object, e As RoutedEventArgs) Handles MyBase.Loaded
 
+        End Sub
+
+        Private Sub FilterWithTimeOTSList_Click(sender As Object, e As RoutedEventArgs)
+
+            Dim ExclusivePeriod As Func(Of Otkaz, Boolean) = (Function(o) o.Nach.IsInRangeWithTime AndAlso Not (o.KtoZakryl.ToLower.Contains("трп")))
+
+            'MW.expPoyasnilka.btnDailyPoyasnShow.Visibility = Visibility.Visible
+            OTSList = OTSList.Where(ExclusivePeriod).OrderBy(Function(o) o.Nach).ToList
+            ResetPeriodSUB()
+            InitFirst()
+            'YarCon.UpdateYarlykInfo()
         End Sub
     End Class
 

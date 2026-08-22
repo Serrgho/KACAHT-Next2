@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:KACAHT_Next2.Kas"
              mc:Ignorable="d">
-	<Expander x:Name="expPoyasnilka"
+    <Expander x:Name="expPoyasnilka"
 Header="📝 Справки, Пояснилка"	  
 Background="{StaticResource ScrolBarBrush}"
 Foreground="DarkBlue"	  
@@ -17,19 +17,20 @@ BorderBrush="{StaticResource SplitterBrush}"
 IsExpanded="False"
 d:IsExpanded="True"
 HorizontalContentAlignment="Stretch">
-		<WrapPanel Orientation="Horizontal" Background="{StaticResource ScrolBarBrush}" VerticalAlignment="Center">
-			<Button x:Name="SelectPeriod" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="SelectPeriod_Click" Visibility="Collapsed">Указать тек период</Button>
-			<Button x:Name="SelectOldPeriod"  Style="{StaticResource PopupStyleButton}" Click="SelectPeriod_Click" Cursor="Hand">🔅 Указать свой прошлый период</Button>
-			<Button x:Name="ResetPeriod"  Style="{StaticResource PopupStyleButton}" Click="ResetPeriod_Click" Cursor="Hand">🔅 Сбросить прошлый период</Button>
-			
-			<Button x:Name="BtnExport" Style="{StaticResource PopupStyleButtonGreen}" Click="BtnExport_Click">📝 ПОЯСНИЛКА</Button>
+        <WrapPanel Orientation="Horizontal" Background="{StaticResource ScrolBarBrush}" VerticalAlignment="Center">
+            <Button x:Name="SelectPeriod" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="SelectPeriod_Click" Visibility="Collapsed">Указать тек период</Button>
+            <Button x:Name="SelectOldPeriod"  Style="{StaticResource PopupStyleButton}" Click="SelectPeriod_Click" Cursor="Hand">🔅 Указать свой прошлый период</Button>
+            <Button x:Name="ResetPeriod"  Style="{StaticResource PopupStyleButton}" Click="ResetPeriod_Click" Cursor="Hand">🔅 Сбросить прошлый период</Button>
+            
+            <Button  x:Name="btnDailyPoyasnShow" Content="📝 Утренняя пояснилка" Style="{StaticResource PopupStyleButtonGreen}" Click="btnDailyPoyasnShow_Click" Width="auto" />
+            <Button x:Name="BtnExport" Style="{StaticResource PopupStyleButtonGreen}" Click="BtnExport_Click">📝 ПОЯСНИЛКА</Button>
 
-			<Button  x:Name="btnS24Show" Content="📝 Справка 24" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnS24Show_Click" Width="auto" />
-			<Button  x:Name="btnS24T2Show" Content="📝 Справка по комплексам" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnS24T2Show_Click" Width="auto" />
-			<Button  x:Name="btnDailyShow" Content="📝 Суточный отчет" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnDailyShow_Click" Width="auto" />
-		</WrapPanel>
+            <Button  x:Name="btnS24Show" Content="📝 Справка 24" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnS24Show_Click" Width="auto" />
+            <Button  x:Name="btnS24T2Show" Content="📝 Справка по комплексам" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnS24T2Show_Click" Width="auto" />
+            <Button  x:Name="btnDailyShow" Content="📝 Суточный отчет" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnDailyShow_Click" Width="auto" />
+        </WrapPanel>
 
 
 
-	</Expander>
+    </Expander>
 </UserControl>

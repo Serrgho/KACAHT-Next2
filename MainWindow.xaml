@@ -68,7 +68,7 @@
 			<Grid Grid.Column="0">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="auto"/>
-					
+
 					<RowDefinition Height="*"/>
 					<RowDefinition Height="auto"/>
 				</Grid.RowDefinitions>
@@ -83,11 +83,11 @@
 					<local:PoyasnilkaCTL x:Name="expPoyasnilka" Margin="2"/>
 					<local:ExperimentalButtonsCTL x:Name="expExperimental" Margin="2"/>
 				</StackPanel>
-				
-				
+
+
 				<local:YarlykContainerControl  Grid.Row="1" Grid.Column="0" x:Name="YarlykContainer" />
-				
-				
+
+
 
 				<local:InfoLBoxControl  Grid.Row="3" x:Name="InfoBLOK" MaxHeight="300" Margin="2 2 7 2"/>
 			</Grid>
@@ -123,7 +123,7 @@
 						</Grid>
 					</TabItem>
 					<!---->
-					<!-- Вкладка 2: Сводная статистика -->
+					<!-- Вкладка 2: Сводная статистика --><!--
 					<TabItem Header="Сводная статистика"
                              x:Name="TabSummary"
                              Padding="2,2"
@@ -132,9 +132,9 @@
                              Visibility="Collapsed">
 
 						<Grid Background="Transparent">
-							<!--<local:S24Table1 x:Name="S24Table1Ctrl"/>-->
+							--><!--<local:S24Table1 x:Name="S24Table1Ctrl"/>--><!--
 						</Grid>
-					</TabItem>
+					</TabItem>-->
 
 					<TabItem x:Name="OTSCard"
                              Visibility="Collapsed"
@@ -151,36 +151,36 @@
 		<local:DoubleCalendarControl x:Name="DContrPop"/>
 		<local:SingleCalendarControl x:Name="SContrPop"/>
 		<local:SingleCalendarControl x:Name="SharedCalendar" Visibility="Collapsed" />
-		
+
 		<Popup	x:Name="SerLokPopup"
 				Placement="Center"
 				StaysOpen="False"
 				AllowsTransparency="True">
-				<local:SerLokPopup x:Name="SerLokContent" />
+			<local:SerLokPopup x:Name="SerLokContent" />
 		</Popup>
 
 		<Popup	x:Name="EquipmentPopup" 
 				Placement="Center" 
 				StaysOpen="False" 
 				AllowsTransparency="True">
-				<local:EquipmentHierarchyPopup x:Name="EquipmentContent" />
+			<local:EquipmentHierarchyPopup x:Name="EquipmentContent" />
 		</Popup>
-		
+
 
 		<Popup	x:Name="IstochPopup"
 				Placement="Center"
 				StaysOpen="False"
 				AllowsTransparency="True">
-				<local:IstochnikControl x:Name="IstochContent" />
+			<local:IstochnikControl x:Name="IstochContent" />
 		</Popup>
 
-		
+
 
 		<Popup	x:Name="PripisMash"
 				Placement="Center"
 				StaysOpen="False"
 				AllowsTransparency="True">
-				<local:PripisMashinistaPopup x:Name="PripMashPopup" />
+			<local:PripisMashinistaPopup x:Name="PripMashPopup" />
 		</Popup>
 
 		<!-- Попап передачи отказа -->
@@ -194,12 +194,12 @@
 				Canceled="PeredachaPopContent_Canceled"/>
 		</Popup>
 
-		
+
 		<local:SmokeCanvas	x:Name="SmokeOverlay"
 							Visibility="Collapsed"
 							HorizontalAlignment="Stretch"
 							VerticalAlignment="Stretch" />
-		
+
 
 	</Grid>
 </Window>

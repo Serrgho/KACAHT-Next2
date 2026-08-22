@@ -260,8 +260,8 @@
                             </ListBox>
                         </StackPanel>
 
-						<Border Grid.Column="1" BorderBrush="{StaticResource SplitterBrush}" >
-							<ListBox Grid.Column="1" x:Name="PlanTxtBLK" ItemsSource="{Binding Plan}" Background ="Transparent"   ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseRightButtonUp="PlanTxtBLK_MouseLeftButtonUp" BorderThickness="0.5 0 0.5 0" Margin="5 0 0 0">
+						<Border Grid.Column="1" BorderBrush="{StaticResource SplitterBrush}" MouseRightButtonUp="PlanTxtBLK_MouseLeftButtonUp">
+							<ListBox Grid.Column="1" x:Name="PlanTxtBLK" ItemsSource="{Binding Plan}" Background ="Transparent"   ScrollViewer.HorizontalScrollBarVisibility="Disabled"  BorderThickness="0.5 0 0.5 0" Margin="5 0 0 0">
 
 								<ListBox.ItemContainerStyle>
 
@@ -384,7 +384,7 @@
                                      Duration="0:0:0.2" />
                         <ColorAnimation Storyboard.TargetName="HighlightRect"
                                     Storyboard.TargetProperty="Stroke.Color"
-                                    To="Blue"
+                                    To="Black"
                                     Duration="0:0:0" />
                     </Storyboard>
                 </BeginStoryboard>
@@ -401,16 +401,7 @@
             </EventTrigger>
         </Grid.Triggers>
 
-		
-
-
-
-
-
-
-
-
-
+	
 	</Grid>
     
 
