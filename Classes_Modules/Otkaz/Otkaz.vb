@@ -49,14 +49,12 @@ Namespace Kas
 
         Private _Id As String
         Private _NewId As String
-        'Private _ChangedOldId As String
-
 
         Private _Istochnik As String
 
         Private _Kat As Integer = 0
         Private _PCh As Single? = Nothing  ' Nothing = ещё не установлено
-        'Private _PCh As Single = 0
+
         Private _KorPCH As Single = 0
 
         Private _GruzKol As Integer = 0
@@ -435,8 +433,6 @@ Namespace Kas
         End Property
 
 
-
-
         <JsonIgnore>
         Public ReadOnly Property SerLokPripLokTXT As String
             Get
@@ -543,7 +539,6 @@ Namespace Kas
 
         Public ReadOnly Property MashPripTXT_IsRed As Boolean
             Get
-
                 'если маш указан, дорога не крас и не ГИД 
                 If (Not String.IsNullOrWhiteSpace(Mash)) AndAlso (Not MestoOTS_Dor.ToLower.Contains("крас") AndAlso (Not String.IsNullOrWhiteSpace(Istochnik) AndAlso Not Istochnik.ToLower.Contains("гид"))) Then
                     Return True
@@ -715,7 +710,6 @@ Namespace Kas
                     AddUpdateNote("???")
                 End If
             End If
-
 
         End Sub
 
@@ -1149,25 +1143,6 @@ Namespace Kas
         End Property
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
         '==============================================================================================
         '==============================================================================================
 
@@ -1232,13 +1207,7 @@ Namespace Kas
             End Get
         End Property
 
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
+
         '==============================================================================================
         '==============================================================================================
 
@@ -1294,12 +1263,6 @@ Namespace Kas
                 OnPropertyChanged(NameOf(VernulsaOTS))
             End Set
         End Property
-
-
-
-
-
-        'GetContainsHistoryEntryByDescription
 
 
         ''' <summary>
@@ -1365,12 +1328,6 @@ Namespace Kas
         End Sub
 
 
-
-
-
-
-
-
         Private _FormattedPCh As String
         ' Свойство для форматирования PCh
         Public Property FormattedPCh As String
@@ -1401,7 +1358,6 @@ Namespace Kas
                 If _KtoZakryl <> Value Then
                     _KtoZakryl = Value
 
-
                     OnPropertyChanged(NameOf(KtoZakryl))
                     OnPropertyChanged(NameOf(KomplexAsInt))
                     OnPropertyChanged(NameOf(Uchet))
@@ -1412,17 +1368,9 @@ Namespace Kas
                     OnPropertyChanged(NameOf(ZaKem))
                 End If
 
-
-                'OnPropertyChanged(NameOf(OTSBackColorBrush))
-
-                'работает (вместо CheckChangeProperties())
             End Set
         End Property
 
-
-
-
-        '
 
         ''' <summary>
         ''' (21) Дата передачи ОТС на др дорогу
@@ -1533,30 +1481,6 @@ Namespace Kas
 
 
         End Property
-
-
-        '' Отдельная функция, которую можно вызвать откуда угодно
-        'Private Function GetBrushForCode(code As String, zakryl As String) As Brush
-        '    Dim raw = code?.ToLower()
-
-        '    If String.IsNullOrEmpty(raw) Then
-        '        Return DirectCast(Application.Current.FindResource("AppBackBrush"), Brush)
-        '    End If
-
-        '    ' Используем наши SHARED цвета
-        '    If raw Like "слд*" Then Return SLDColor
-        '    If raw Like "*окорем*" Then Return LocoRemColor
-        '    If raw Like "*окостро*" Then Return LocoStroyColor
-        '    If raw Like "*ублика*" Then Return DublicatColor
-        '    If raw Like "*ехнол*" Then Return TechologyColor
-        '    If raw = "тч" Then Return TCHColor
-        '    If raw Like "проч*" OrElse raw = "тч9" Then Return ProchColor
-
-        '    ' Дополнительная проверка по другому полю
-        '    If zakryl?.ToLower() Like "тр*" Then Return TRColor
-
-        '    Return DirectCast(Application.Current.FindResource("AppBackBrush"), Brush)
-        'End Function
 
 
 
@@ -1694,12 +1618,6 @@ Namespace Kas
 
                 Return Rez
 
-                'Dim Rez As Integer = 0
-                'If Not Uslovie3 OrElse ((ZaKem = "" Or ZaKem = "!") And Not KtoZakryl.ToLower.Contains("трп")) Then
-                '    Rez = (Date.Today - _Nach.Date).Days
-                'End If
-
-                'Return Rez
             End Get
         End Property
 
@@ -1728,17 +1646,6 @@ Namespace Kas
 
         '==============================================================================================
         '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-        '==============================================================================================
-
-
-
-
 
 
         <Description("Отказ выбран/Pointed/ (да/нет)")>
@@ -1905,9 +1812,6 @@ Namespace Kas
         End Property
 
 
-
-
-
 #End Region
 
         '==============================================================================================
@@ -2016,7 +1920,6 @@ Namespace Kas
                 Case ZakemFilter.SavedOnly
                     keys = {"слд1", "слд2", "слд3", "слд5", "слд7", "прочие", "ЛокоРемЗавод", "локостройЗавод"}
                 Case ZakemFilter.ToOut
-                    'keys = {"дубликат", "тч9", "технология", "др дорога", "др дорога/П", "др дорога/В", "др дорога/Ш", "др дорога/Э", "др дорога/Д", "др дорога/ДМВ"}
                     keys = {"дубликат", "технология", "др дорога", "др дорога/П", "др дорога/В", "др дорога/Ш", "др дорога/Э", "др дорога/Д", "др дорога/ДМВ"}
                 Case Else
                     Return New Dictionary(Of String, String)
@@ -2053,8 +1956,7 @@ Namespace Kas
                 ' 3. Ничего не подошло — возвращаем исходное значение
                 Return value
             End If
-            'If String.IsNullOrEmpty(value) Then Return value
-            'Return SafeName.GetValueOrDefault(value.Trim(), value)
+
         End Function
 
 
@@ -2127,7 +2029,6 @@ Namespace Kas
             Get
 
                 Dim Gg As String = NormalizeName(_ZaKem) ' на случай, если кто-то напрямую тронул _ZaKem
-                'Gg = IIf(Gg = "" And (Not String.IsNullOrWhiteSpace(KtoZakryl) And KtoZakryl.ToLower.Contains("трп")), "тр", Gg)
 
                 If Not IsNothing(KtoZakryl) Then
                     Gg = IIf((Gg = "" Or Gg = "!") And (KtoZakryl?.ToLower.Contains("трп")), "тр", Gg)
@@ -2308,42 +2209,23 @@ Namespace Kas
             ' === 3. Не распознано ===
             Return If(asString, "--", 0)
 
-            '' Создаем словарь соответствий мест и номеров ТЧЭ
-            'Dim mappings As New Dictionary(Of String, Integer) From
-            '    {
-            '    {"*огото*", 1},
-            '    {"*расноярс*", 2},
-            '    {"*ланск*", 3},
-            '    {"*чинс*", 5},
-            '    {"*бака*", 7}
-            '}
-
-            '' Проходим по всем соответствиям
-            'For Each pattern In mappings.Keys
-            '    If St Like pattern Then
-            '        Return If(asString, $"ТЧЭ-{mappings(pattern)}", mappings(pattern))
-            '    End If
-            'Next
-
-            '' Если ничего не найдено
-            'Return If(asString, "--", 0)
         End Function
 
 
-        ''' <summary>
-        ''' Маппинг оборотных депо (ТДЭ) в эксплуатационные (ТЧЭ)
-        ''' Ключ — шаблон поиска (Like-паттерн), Значение — номер ТЧЭ
-        ''' </summary>
-        Private Shared ReadOnly TDE_TO_TCHE_MAP As New Dictionary(Of String, Integer) From {
-    {"*Мариинск*", 1},      ' ТДЭ Мариинск → ТЧЭ Боготол (ТЧЭ-1)
-    {"*Саянск*", 2},        ' ТДЭ Саянская → ТЧЭ Красноярск (ТЧЭ-2)
-    {"*Решот*", 3},         ' ТДЭ Решоты → ТЧЭ Иланская (ТЧЭ-3)
-    {"*Ужур*", 5},          ' ТДЭ Ужур → ТЧЭ Ачинск (ТЧЭ-5)
-    {"*Бискамж*", 7},       ' ТДЭ Бискамжа → ТЧЭ Абакан (ТЧЭ-7)
-    {"*Кошурник*", 7},      ' ТДЭ Кошурниково → ТЧЭ Абакан
-    {"*Междуреченск*", 7},  ' ТДЭ Междуреченск → ТЧЭ Абакан
-    {"*Аскиз*", 7}          ' ТДЭ Аскиз → ТЧЭ Абакан (из вашего примера с ЛокоРемЗавод)
-}
+        '        ''' <summary>
+        '        ''' Маппинг оборотных депо (ТДЭ) в эксплуатационные (ТЧЭ)
+        '        ''' Ключ — шаблон поиска (Like-паттерн), Значение — номер ТЧЭ
+        '        ''' </summary>
+        '        Private Shared ReadOnly TDE_TO_TCHE_MAP As New Dictionary(Of String, Integer) From {
+        '    {"*Мариинск*", 1},      ' ТДЭ Мариинск → ТЧЭ Боготол (ТЧЭ-1)
+        '    {"*Саянск*", 2},        ' ТДЭ Саянская → ТЧЭ Красноярск (ТЧЭ-2)
+        '    {"*Решот*", 3},         ' ТДЭ Решоты → ТЧЭ Иланская (ТЧЭ-3)
+        '    {"*Ужур*", 5},          ' ТДЭ Ужур → ТЧЭ Ачинск (ТЧЭ-5)
+        '    {"*Бискамж*", 7},       ' ТДЭ Бискамжа → ТЧЭ Абакан (ТЧЭ-7)
+        '    {"*Кошурник*", 7},      ' ТДЭ Кошурниково → ТЧЭ Абакан
+        '    {"*Междуреченск*", 7},  ' ТДЭ Междуреченск → ТЧЭ Абакан
+        '    {"*Аскиз*", 7}          ' ТДЭ Аскиз → ТЧЭ Абакан (из вашего примера с ЛокоРемЗавод)
+        '}
 
 
 
@@ -2361,17 +2243,12 @@ Namespace Kas
                     Return "ВЛ80в/и"
                 Case InStr(sourceString, "вл60") > 0 ' включая ВЛ65
                     Return "ВЛ60"
-                'Case InStr(sourceString, "ВЛ80С") > 0
-                '    Return "ВЛ80С"
-                'Case InStr(sourceString, "ВЛ80Т") > 0
-                '    Return "ВЛ80ТК"
                 Case sourceString.ToLower.Contains("эс6")
                     Return "2[3]ЭС6"
                 Case sourceString.ToLower.Contains("эс5к"), sourceString.ToLower.Contains("э5к")
                     Return "2[3]ЭС5К"
                 Case sourceString.ToLower.Contains("вл85"), sourceString.ToLower.Contains("вл65")
                     Return "ВЛ85"
-
                 Case sourceString.ToLower.Contains("эп")
                     Return "ЭП"
                 Case sourceString.ToLower.Contains("тэ10"), sourceString.ToLower.Contains("тэ3"), sourceString.ToLower.Contains("тэ25")
@@ -2388,47 +2265,6 @@ Namespace Kas
 
 
 #End Region
-
-
-
-        ''для карточки отказа
-        '<JsonIgnore>
-        'Public ReadOnly Property OTSCar_Zagolovok As String
-        '    Get
-        '        Dim Ss As String = ""
-        '        ' Обрабатываем все случаи:
-        '        If ZaKem = "!" OrElse String.IsNullOrEmpty(ZaKem) Then
-        '            ' Отказ в процессе расследования
-        '            Ss = $"В расследовании на {(KtoZakryl)}"
-        '        ElseIf Zakryt > Date.MinValue AndAlso (Not ZaKem.Contains("ублика")) Then
-        '            ' Завершенное расследование
-        '            Ss = $"В {KtoZakryl} расследование завершено { Zakryt:dd.MM.yyyy}  {If(ZaKem = "тч", $"по ответственности {KtoZakryl}", If(ZaKem = "тр", $"по ответственности {KtoZakryl}", If(ZaKem.ToLower.Contains("п.5.15 положения"), "отнесен на Прочие причины (п.5.15 Положения)", If(ZaKem.ToLower.Contains("рочи"), "по ответственности прочих предприятий", ZaKem))))}"
-        '        ElseIf ZaKem.Contains("ублика") Then
-        '            ' Дубликат
-        '            Ss = If(Zakryt > Date.MinValue,
-        '           $"Переведен в дубликат { Zakryt:dd.MM.yyyy}",
-        '           "Переведен в дубликат")
-        '        ElseIf ZaKem.Contains("орог") Then
-        '            Ss = If(Peredan > Date.MinValue,
-        '           $"Передан на другую дорогу { Peredan:dd.MM.yyyy}",
-        '           "Передан на другую дорогу")
-        '        ElseIf IsSaved Then
-        '            ' Назначено, но еще не завершено
-        '            If ZaKem.ToLower.Contains("рочи") Then
-        '                Ss = $"Сохранен за прочими предприятиями"
-        '            Else
-        '                Ss = $"Сохранен за { ZaKem}"
-        '            End If
-
-
-        '        Else
-        '            'Ss = $"В {KtoZakryl} расследование завершено { Zakryt:dd.MM.yyyy}  {If(ZaKem = "тч", $"по ответственности {KtoZakryl}", If(ZaKem = "тр", $"по ответственности {KtoZakryl}", If(OTSLev3.ToLower.Contains("п.5.15 положения"), "отнесен на Прочие причины (п.5.15 Положения)", If(ZaKem.ToLower.Contains("рочи"), "по ответственности прочих предприятий", ZaKem))))}"
-        '        End If
-        '        Return Ss
-        '    End Get
-        'End Property
-
-
 
 
         ''' <summary>
@@ -3092,12 +2928,6 @@ Namespace Kas
             For i = History.Count - 1 To 0 Step -1
                 If History(i) IsNot Nothing AndAlso History(i).DisplayText.ToLower.Contains(description) Then Return History(i)
             Next
-            ' For Each item As HistoryEntry In History
-            '     If item IsNot Nothing AndAlso
-            'item.DisplayText.ToLower.Contains(description) Then
-            '         Return item
-            '     End If
-            ' Next
 
             Return Nothing
         End Function
@@ -3177,302 +3007,10 @@ Namespace Kas
             Return items.OrderBy(Function(i) i.Category).ThenBy(Function(i) i.Name).ToList()
         End Function
 
-
         '======================================================================================
         '======================================================================================
     End Class
 
-
-    Public Class InspectorItem
-        Public Property Category As String
-        Public Property Name As String
-        Public Property Type As String
-        Public Property Value As String
-    End Class
-
-
-
-    '============================================================================================================================
-    ' ===== ВСПОМОГАТЕЛЬНЫЙ КЛАСС =====
-
-    Public Class PlanEntry
-        Implements INotifyPropertyChanged
-
-        ' ==========================================
-        ' 1. ЭТАЛОННЫЙ СПИСОК (НУЖЕН ТОЛЬКО ДЛЯ СРАВНЕНИЯ/ВАЛИДАЦИИ)
-        ' К раскраске в красный он НЕ имеет отношения!
-        ' ==========================================
-        Public Shared ReadOnly ReferenceReasonsList As New List(Of String) From {
-        "На др дорогу", 'обрабатывается при передаче на др дорогу
-        "В технологию",
-        "На удаление",
-        "письмо НЗ-1", 'обрабатывается при передаче на др дорогу
-        "За СЛД",
-        "За заводом",
-        "Корректировка",
-        "в 3 категорию",
-        "за ТЧЭ"
-        }
-
-        Public Shared ReadOnly GreenReasons As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase) From {
-        "На др дорогу",
-        "В технологию",
-        "На удаление",
-        "письмо НЗ-1"
-        }
-
-        Public Shared ReadOnly ReferenceReasons As New HashSet(Of String)(ReferenceReasonsList, StringComparer.OrdinalIgnoreCase)
-
-        Private _description As String = String.Empty
-        Private _isHighlighted As Boolean = False
-        Private _isGreen As Boolean = False
-
-        ' ==========================================
-        ' 2. СВОЙСТВО ОПИСАНИЯ
-        ' ==========================================
-        Public Property Description As String
-            Get
-                Return _description
-            End Get
-            Set(value As String)
-                ' Чистим от пробелов на случай кривого импорта
-                Dim cleanValue As String = If(value, String.Empty).Trim()
-
-                If _description <> cleanValue Then
-                    _description = cleanValue
-                    OnPropertyChanged(NameOf(Description))
-                    OnPropertyChanged(NameOf(DisplayText))
-
-                    ' Запускаем расчет цвета
-                    UpdateIsGreen()
-                End If
-            End Set
-        End Property
-
-        ' ==========================================
-        ' 3. ЛОГИКА КРАСНОГО ЦВЕТА (ТОЛЬКО "На др дорогу"!)
-        ' ==========================================
-        Private Sub UpdateIsGreen()
-
-
-            Dim shouldBeGreen As Boolean = GreenReasons.Contains(_description)
-
-            ' Обновляем свойство. Если было черным, а стало красным - UI обновится.
-            IsGreen = shouldBeGreen
-
-        End Sub
-
-        ' ==========================================
-        ' 4. ОСТАЛЬНЫЕ СВОЙСТВА
-        ' ==========================================
-        Public Property IsHighlighted As Boolean
-            Get
-                Return _isHighlighted
-            End Get
-            Set(value As Boolean)
-                If _isHighlighted <> value Then
-                    _isHighlighted = value
-                    OnPropertyChanged(NameOf(IsHighlighted))
-                End If
-            End Set
-        End Property
-
-        Public Property IsGreen As Boolean
-            Get
-                Return _isGreen
-            End Get
-            Set(value As Boolean)
-                If _isGreen <> value Then
-                    _isGreen = value
-                    OnPropertyChanged(NameOf(IsGreen)) ' <-- Триггер для WPF триггера/DataTrigger
-                End If
-            End Set
-        End Property
-
-        Public ReadOnly Property DisplayText As String
-            Get
-                Return $"План: {_description}"
-            End Get
-        End Property
-
-        Public Event PropertyChanged As PropertyChangedEventHandler Implements INotifyPropertyChanged.PropertyChanged
-
-        Protected Sub OnPropertyChanged(<CallerMemberName> Optional propertyName As String = Nothing)
-            RaiseEvent PropertyChanged(Me, New PropertyChangedEventArgs(propertyName))
-        End Sub
-    End Class
-
-
-    '============================================================================================================================
-    ' ===== ВСПОМОГАТЕЛЬНЫЙ КЛАСС =====
-    Public Class HistoryEntry
-        Implements INotifyPropertyChanged
-
-        Private _eventDate As DateTime = DateTime.Now
-        Private _description As String = String.Empty
-        Private _showDate As Boolean = True ' ← новое свойство
-        Private _isHighlighted As Boolean = False
-        Private _IsMoused As Boolean = False
-        Private _IsRed As Boolean = False
-
-
-
-        Public Property IsHighlighted As Boolean
-            Get
-                Return _isHighlighted
-            End Get
-            Set(value As Boolean)
-                If _isHighlighted <> value Then
-                    _isHighlighted = value
-                    OnPropertyChanged(NameOf(IsHighlighted))
-                End If
-            End Set
-        End Property
-
-        Public Property IsMoused As Boolean
-            Get
-                Return _IsMoused
-            End Get
-            Set(value As Boolean)
-                If _IsMoused <> value Then
-                    _IsMoused = value
-                    OnPropertyChanged(NameOf(IsMoused))
-                End If
-            End Set
-        End Property
-
-        Public Property EventDate As DateTime
-            Get
-                Return _eventDate
-            End Get
-            Set(value As DateTime)
-                If _eventDate <> value Then
-                    _eventDate = value
-                    OnPropertyChanged(NameOf(EventDate))
-                    OnPropertyChanged(NameOf(DisplayText))
-                End If
-            End Set
-        End Property
-
-        Public Property Description As String
-            Get
-                Return _description
-            End Get
-            Set(value As String)
-                If _description <> value Then
-                    _description = value
-                    OnPropertyChanged(NameOf(Description))
-                    OnPropertyChanged(NameOf(DisplayText))
-                    ' ✅ АВТО-РАСЧЁТ при любом изменении описания
-                    Dim shouldBeRed As Boolean = Not String.IsNullOrEmpty(_description) AndAlso _description.Contains("казание пом")
-                    If _IsRed <> shouldBeRed Then
-                        _IsRed = shouldBeRed
-                        OnPropertyChanged(NameOf(IsRed)) ' ← UI мгновенно обновится
-                    End If
-                End If
-            End Set
-        End Property
-
-        Public ReadOnly Property DisplayText As String
-            Get
-                If ShowDate Then
-                    Return $"{EventDate:dd.MM.yyyy}  {Description}"
-                Else
-                    Return $"{Description}"
-                End If
-
-
-            End Get
-        End Property
-
-        Public Property ShowDate As Boolean
-            Get
-                Return _showDate
-            End Get
-            Set(value As Boolean)
-                If _showDate <> value Then
-                    _showDate = value
-                    OnPropertyChanged(NameOf(ShowDate))
-                End If
-            End Set
-        End Property
-
-        Public Property IsRed As Boolean
-            Get
-                Return _IsRed
-            End Get
-            Set(value As Boolean)
-
-                If _IsRed <> value Then
-                    _IsRed = value
-                    OnPropertyChanged(NameOf(IsRed))
-                End If
-            End Set
-        End Property
-
-        Public Event PropertyChanged As PropertyChangedEventHandler Implements INotifyPropertyChanged.PropertyChanged
-        Protected Sub OnPropertyChanged(<Runtime.CompilerServices.CallerMemberName> Optional propertyName As String = Nothing)
-            RaiseEvent PropertyChanged(Me, New PropertyChangedEventArgs(propertyName))
-        End Sub
-    End Class
-    '============================================================================================================================
-
-
-    ''' <summary>
-    ''' Данные о ремонте локомотива
-    ''' </summary>
-    Public Class Remont
-        ''' <summary>Вид ремонта (ТР-1, ТО-2, КР и т.д.)</summary>
-
-        Public Property RepairType As String = String.Empty
-
-        Private _repairPlace As String = String.Empty
-        ''' <summary>Место проведения ремонта</summary>
-        Public Property RepairPlace As String
-            Get
-                Return _repairPlace
-            End Get
-            Set(value As String)
-                If String.IsNullOrWhiteSpace(value) Then
-                    _repairPlace = String.Empty
-                    Return
-                End If
-
-                Dim cleaned = value.Trim()
-                ' Только мусор по краям: точки, запятые, двоеточия, тире
-                cleaned = Regex.Replace(cleaned, "^[.,;:\-\(\)\[\]\s]+|[.,;:\-\(\)\[\]\s]+$", "", RegexOptions.IgnoreCase)
-                ' Нормализуем пробелы
-                cleaned = Regex.Replace(cleaned, "\s+", " ").Trim()
-                _repairPlace = cleaned
-            End Set
-        End Property
-
-        Public Property Mileage As Integer?
-
-        Public Overrides Function ToString() As String
-            Dim mileageStr = If(Mileage.HasValue, $" {Mileage.Value} км", "")
-            Return $"{RepairType}{mileageStr} {RepairPlace}".Trim()
-        End Function
-    End Class
-
-
-
-
-
-
-
-    Public Class MileageToVisibilityConverter
-        Implements IValueConverter
-
-        Public Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
-            ' Скрываем, если Nothing или 0
-            Return If(value IsNot Nothing AndAlso CInt(value) > 0, Visibility.Visible, Visibility.Collapsed)
-        End Function
-
-        Public Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
-            Throw New NotImplementedException()
-        End Function
-    End Class
 
 
 End Namespace

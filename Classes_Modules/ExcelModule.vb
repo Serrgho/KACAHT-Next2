@@ -517,11 +517,6 @@ Namespace Kas
                         o.Nach = NachEXCEL
                         o.KtoZakryl = KtoZakrEXCEL
                         o.ZaKem = "!"   ' ← присаиваем сразу, потом изменим если надо будет
-                        'If o.KtoZakryl?.ToLower.Contains("тр") Then
-
-                        'Else
-
-                        'End If
 
                         o.MestoOTS_TXT = MestoOTS_TXTEXCEL.Replace(" ,", ",")
                         o.IsStation = Not (o.MestoOTS.Contains(" - "))
@@ -579,8 +574,6 @@ Namespace Kas
                             notes.Add("Сохранен")
                         End If
                     End If
-
-
 
                     ' Одной строкой проверяем наличие любого маркера в текущем статусе
                     '"ачато расслед", "ередан друго", "азначен", "ринят к уч"

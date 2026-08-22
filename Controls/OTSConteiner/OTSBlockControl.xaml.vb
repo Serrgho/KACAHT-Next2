@@ -307,68 +307,51 @@ Namespace Kas
 
 
         Private Sub ShowTextualFilterPopup(sender As Object, propName As String, fieldType As String)
+            Dim source = MW.TRowsContainer.OTSContainer.ItemsSource
+            Dim isSorted = Me.SortOrderToggleUC.MYToggle.IsChecked = True
 
+            ' Получаем готовый попап
+            Dim result = FilterPopupHelper.PrepareTextualFilter(sender, propName, fieldType, source, _level0FilterState, isSorted)
+            Dim popup = result.Item1
+            Dim values = result.Item2
 
-            ' Определяем, булевое ли это поле
-            Dim isBooleanField = (fieldType.ToLowerInvariant() = "boolean")
-            Dim popupCtrl As New FilterPopup()
-
-            ' --- БЕРЕМ ИСТОЧНИК ДАННЫХ: для 0-уровня фильтра - это результат 0-уровня фильтрации, но до 1-го (THed)
-            Dim currentSource As IEnumerable(Of Otkaz) = MW.TRowsContainer.OTSContainer.ItemsSource ' 'Me._level0Filtered <-- ИСПРАВЛЕНО: Используем _level0Filtered
-            If currentSource Is Nothing Then
-                ' Если нет данных, можно показать пустой список или "[Все]"
-                popupCtrl.PropertyName = propName
-                popupCtrl.FieldType = fieldType
-                popupCtrl.FilterListBox.ItemsSource = If(isBooleanField, New List(Of String) From {"[Все]"}, New List(Of String) From {"[Все]"})
-                ' ... (логика отображения popupCtrl)
-                Return
-            End If
-
-            Dim values As List(Of String) = Nothing
-
-            If isBooleanField Then ' Получаем значения для булевого поля
-                values = GetBooleanValuesForProperty(currentSource, propName)
-                ' Если ни один бул не встречается (хотя source не пуст), всё равно добавим "[Все]"
-                If values.Count = 0 Then values.Add("[Все]")
-            Else ' Считаем строковым ' Получаем значения для строкового поля
-                values = GetTextualValuesForProperty(currentSource, propName)
-                ' Сортируем значения в зависимости от состояния переключателя
-                Dim isSortByCount As Boolean = SortOrderToggleUC.MYToggle.IsChecked = True
-                values = SortValuesByToggle(values, propName, isSortByCount)
-            End If
-
-            popupCtrl.PropertyName = propName
-            popupCtrl.FieldType = fieldType
-            popupCtrl.FilterListBox.ItemsSource = Nothing ' <-- Очистить
-            popupCtrl.FilterListBox.ItemsSource = values
-
-            ' --- ОБНОВЛЁННОЕ восстановление выделения ---
-            Dim saved = _level0FilterState.GetFilter(propName)
-            ' Вызываем вспомогательный метод
-            RestoreSelection(popupCtrl, saved, isBooleanField, values)
-
-            ' --- Создаём Popup ---
-            Dim popup As New Popup With {
-        .Placement = PlacementMode.Bottom,
-        .PlacementTarget = sender,
-        .StaysOpen = False,
-        .AllowsTransparency = True,
-        .Child = popupCtrl
-    }
-            ' Автоматически включаем/выключаем кнопку КОПИРОВАТЬ в зависимости от наличия данных
+            ' Кнопка копирования (твоя локальная логика)
+            Dim popupCtrl As FilterPopup = CType(popup.Child, FilterPopup)
             If values Is Nothing OrElse values.Count = 0 Then
                 popupCtrl.CopyButton.IsEnabled = False
-                popupCtrl.CopyButton.ToolTip = "Нет данных для копирования"
             Else
                 popupCtrl.CopyButton.IsEnabled = True
-                popupCtrl.CopyButton.ToolTip = $"Скопировать {values.Count} значений в буфер обмена"
+                popupCtrl.CopyButton.ToolTip = $"Скопировать {values.Count} значений"
             End If
 
-            ' --- ОБНОВЛЁННЫЙ обработчик OK ---
-            ' Подписываемся на событие, передавая нужные аргументы через замыкание (closure)
-            AddHandler popupCtrl.OkButt.Click, Sub(s, args) OnPopupOkClicked(s, args, popupCtrl, popup, propName, isBooleanField)
+            ' Твой стандартный обработчик OK (без всяких Action)
+            AddHandler popupCtrl.OkButt.Click, Sub(s, args)
+                                                   Dim selected = OtkazFilterConfig.SafeGetSelectedItems(popupCtrl.FilterListBox)
+                                                   Dim isBoolean = (fieldType.ToLowerInvariant() = "boolean")
 
-            ' --- Открываем Popup ---
+                                                   ' Парсинг (можно тоже вынести в конфиг, но пусть будет тут для наглядности)
+                                                   Dim originalValues = selected.Select(Function(item)
+                                                                                            Dim str = item?.ToString()
+                                                                                            If String.IsNullOrEmpty(str) Then Return str
+                                                                                            If str.Contains(" [") AndAlso str.EndsWith("]") Then
+                                                                                                If isBoolean Then
+                                                                                                    If str.StartsWith("Да ") Then Return "True"
+                                                                                                    If str.StartsWith("Нет ") Then Return "False"
+                                                                                                End If
+                                                                                                Return str.Substring(0, str.IndexOf(" ["))
+                                                                                            ElseIf str.Contains(" (") AndAlso str.EndsWith(")") Then
+                                                                                                Return str.Substring(0, str.IndexOf(" ("))
+                                                                                            End If
+                                                                                            Return str
+                                                                                        End Function).ToList()
+
+                                                   _level0FilterState.SetFilter(propName, originalValues)
+                                                   RaiseEvent FiltersChanged(Me, EventArgs.Empty)
+                                                   UpdateIndicatorForProperty(propName)
+                                                   popup.IsOpen = False
+                                               End Sub
+
+            ' Управление открытием
             If _currentPopup IsNot Nothing Then _currentPopup.IsOpen = False
             _currentPopup = popup
             popup.IsOpen = True
@@ -731,33 +714,6 @@ Namespace Kas
             _baseContext = baseList
             THed.ItemsSource = _level0Filtered
 
-
-            '----------------------------------------------
-
-            '' ✅ Источник всегда — полный список
-            'Dim source = If(OTSList, Enumerable.Empty(Of Otkaz)()).ToList()
-
-            '' ✅ Применяем Level0-фильтры к полному списку
-            'If _level0FilterState.HasActiveFilters() Then
-            '    Dim pred As Func(Of Otkaz, Boolean) = _level0FilterState.BuildPredicate()
-            '    source = source.Where(pred).ToList()
-            'End If
-
-            '_level0Filtered = source
-            '_baseContext = source ' ← Обновляем _baseContext!
-            'THed.ItemsSource = _level0Filtered
-
-            '----------------------------------------------
-
-            'Dim source = If(_baseContext, Enumerable.Empty(Of Otkaz)()).ToList()
-            '' ✅ Используем _level0FilterState — там лежат выбранные значения
-            'If _level0FilterState.HasActiveFilters() Then
-            '    Dim pred As Func(Of Otkaz, Boolean) = _level0FilterState.BuildPredicate()
-            '    source = source.Where(pred).ToList()
-            'End If
-            '_level0Filtered = source
-            '' 🔥 Обязательно обновляем источник для THed
-            'THed.ItemsSource = _level0Filtered
         End Sub
 
         Public Property ItemsSource As IEnumerable(Of Otkaz)
@@ -838,15 +794,7 @@ Namespace Kas
 
 
         Private Sub OnResetFilter(sender As Object, e As EventArgs)
-
             ResetAllFilters()
-
-
-            '' Сбрасываем фильтры в THed (Main уровень)
-            'THed.ClearAllFilters()  ' ← Это правильно - сброс Main
-            'RebuildLevel0Filtered() ' <-- Вот тут!
-            '' Перестраиваем текущий вид (учитывает Main = пустой, Level0 = как есть)
-            'RebuildCurrentView()
         End Sub
 
 
@@ -892,9 +840,6 @@ Namespace Kas
                 End If
             End If
 
-
-
-
             ' 4. Сортируем
             source = source.OrderBy(Function(o) o.Nach).ToList()
 
@@ -904,8 +849,6 @@ Namespace Kas
 
             ' 6. Обновляем Total
             UpdateTotal()
-
-
 
         End Sub
 
@@ -1023,10 +966,6 @@ Namespace Kas
         End Sub
 
         Public Sub ScrollToEnd()
-            'Dim items = CType(OTSContainer.ItemsSource, IList)
-            'If items.Count > 0 Then
-            '    OTSContainer.ScrollIntoView(items(items.Count - 1))
-            'End If
 
             Dim items = TryCast(OTSContainer.ItemsSource, IEnumerable)
             If items Is Nothing Then Return
@@ -1134,7 +1073,6 @@ Namespace Kas
             SerLok0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             SerLokNumLokTXT0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             PlanListText0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
-            'PlanListText
             VidT0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             NumLok0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             PripMash0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
@@ -1323,12 +1261,12 @@ Namespace Kas
             ActiveFiltersContentControl.PopulateFilters(filterDescription)
             ' Открываем Popup
             ActiveFiltersPopup.IsOpen = True
-            ' Получаем описание
-            MW.InfoBLOK.ClearItems()
-            MW.InfoBLOK.AddItem("****************")
-            MW.InfoBLOK.AddItem(filterDescription) ' <-- Вызов метода, который добавляет строку в лог
-            MW.InfoBLOK.AddItem("****************") ' <-- Если нужно добавить разделитель
-            MW.InfoBLOK.ScrollToEnd() ' <-- Прокрутка в конец
+            '' Получаем описание
+            'MW.InfoBLOK.ClearItems()
+            'MW.InfoBLOK.AddItem("****************")
+            'MW.InfoBLOK.AddItem(filterDescription) ' <-- Вызов метода, который добавляет строку в лог
+            'MW.InfoBLOK.AddItem("****************") ' <-- Если нужно добавить разделитель
+            'MW.InfoBLOK.ScrollToEnd() ' <-- Прокрутка в конец
         End Sub
 
 
@@ -1390,17 +1328,17 @@ Namespace Kas
             UpdateShowMarkAllButtonVisibility()
         End Sub
 
-        Private Sub TableVisToggleUC_Click(sender As Object, e As RoutedEventArgs)
-            'Dim ctrl = TryCast(sender, Kas.MYToggleControl)
-            'If ctrl IsNot Nothing Then
+        'Private Sub TableVisToggleUC_Click(sender As Object, e As RoutedEventArgs)
+        '    'Dim ctrl = TryCast(sender, Kas.MYToggleControl)
+        '    'If ctrl IsNot Nothing Then
 
-            '    MW.TabSummary.Visibility = If(ctrl.IsChecked, Visibility.Visible, Visibility.Collapsed)
-            'End If
-        End Sub
+        '    '    MW.TabSummary.Visibility = If(ctrl.IsChecked, Visibility.Visible, Visibility.Collapsed)
+        '    'End If
+        'End Sub
 
-        Private Sub NumSearchToggleUC_Click(sender As Object, e As RoutedEventArgs)
-            'пока оставим для обработки видимости строки поиска по №№ ОТС
-        End Sub
+        'Private Sub NumSearchToggleUC_Click(sender As Object, e As RoutedEventArgs)
+        '    'пока оставим для обработки видимости строки поиска по №№ ОТС
+        'End Sub
 
         Private Sub NumOTSUserTB_FilterRequested(sender As Object, e As EventArgs)
             FindIDOTS()
@@ -1441,49 +1379,6 @@ Namespace Kas
 
             ' 4. Вызываем централизованную фильтрацию
             ChangeFilters()
-
-
-
-
-            '' 3. Находим поисковые строки, которые были найдены в списке отказов
-            'Dim foundNumbers As HashSet(Of String)
-            'If IsLokNeed Then
-            '    foundNumbers = items _
-            '            .Where(Function(o) o IsNot Nothing) _
-            '            .SelectMany(Function(o) filterNumbers.Where(Function(f) Not String.IsNullOrEmpty(o.NumLok) AndAlso o.NumLok.Contains(f))) _
-            '            .Distinct() _
-            '            .ToHashSet()
-            'Else
-            '    foundNumbers = items _
-            '            .Where(Function(o) o IsNot Nothing) _
-            '            .Where(Function(o) filterNumbers.Contains(o.Id)) _
-            '            .Select(Function(o) o.Id) _
-            '            .Distinct() _
-            '            .ToHashSet()
-            'End If
-
-            '' 4. Оставляем только те номера из поиска, которых НЕТ в найденных
-            'Dim notFound = filterNumbers.Where(Function(n) Not foundNumbers.Contains(n)).ToList()
-
-            '' 5. Обновляем текстбокс (только если есть изменения)
-            'If notFound.Count <> filterNumbers.Count Then
-            '    FindOTS.SetItems(notFound)
-            'End If
-
-            '' 6. Фильтруем отображение
-            'Dim filtered As List(Of Otkaz)
-            'If IsLokNeed Then
-            '    filtered = If(filterNumbers.Any(),
-            '         items.Where(Function(o) o IsNot Nothing AndAlso Not String.IsNullOrEmpty(o.NumLok) AndAlso filterNumbers.Any(Function(f) o.NumLok.Contains(f))), items).ToList
-            'Else
-            '    filtered = If(filterNumbers.Any(),
-            '         items.Where(Function(o) o IsNot Nothing AndAlso filterNumbers.Contains(o.Id)), items).ToList
-            'End If
-
-            '' 7. Применяем
-
-            'ItemsSource = filtered
-            'UpdateTotal()
         End Sub
 
 
@@ -1535,9 +1430,6 @@ Namespace Kas
         End Sub
 
         Private Sub DelOKBU_Click(sender As Object, e As RoutedEventArgs)
-            'For Each OTS In OTSList
-            '    OTS.RemoveItemUpdateNote("OK")
-            'Next
             OTSList.ForEach(Sub(o) o.RemoveItemUpdateNote("OK"))
             UpdateTotal()
         End Sub
@@ -1589,7 +1481,6 @@ Namespace Kas
 
 
     End Class
-
 
 
 

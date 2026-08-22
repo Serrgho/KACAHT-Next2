@@ -20,80 +20,9 @@ Namespace Kas
 
         Private Shared Sub OnSearchTermChanged(d As DependencyObject, e As DependencyPropertyChangedEventArgs)
             Dim control = TryCast(d, OTSRowControl)
-            If control IsNot Nothing Then
+            If control IsNot Nothing AndAlso control.DataContext IsNot Nothing Then
                 control.UpdateHighlightedText()
             End If
-        End Sub
-
-        Private Sub UpdateHighlightedText()
-            TxtBLK.Inlines.Clear()
-
-            Dim otkaz = TryCast(DataContext, Otkaz)
-            If otkaz Is Nothing Then Return
-
-            ' 🔥 Защита от Nothing в Opis
-            Dim opisText As String = If(otkaz.Opis, "")
-
-            Dim searchTerm = Me.SearchTerm?.Trim()
-            If String.IsNullOrEmpty(searchTerm) Then
-                ' Просто отображаем текст с переносами
-                Dim lines0 = opisText.Split({vbCrLf, vbCr, vbLf}, StringSplitOptions.None)
-                For i As Integer = 0 To lines0.Length - 1
-                    TxtBLK.Inlines.Add(New Run(lines0(i)))
-                    If i < lines0.Length - 1 Then
-                        TxtBLK.Inlines.Add(New LineBreak())
-                    End If
-                Next
-                Return
-            End If
-
-            ' Разбиваем на строки
-            Dim lines = opisText.Split({vbCrLf, vbCr, vbLf}, StringSplitOptions.None)
-
-            For lineIndex As Integer = 0 To lines.Length - 1
-                Dim line = lines(lineIndex)
-                If String.IsNullOrEmpty(line) Then
-                    ' Пустая строка — просто LineBreak
-                    TxtBLK.Inlines.Add(New LineBreak())
-                    Continue For
-                End If
-
-                Dim cleanLine = line
-                Dim cleanSearch = searchTerm.ToLower()
-                Dim startIndex = 0
-
-                While startIndex < cleanLine.Length
-                    Dim remainingText = cleanLine.Substring(startIndex).ToLower()
-                    Dim index = remainingText.IndexOf(cleanSearch)
-
-                    If index = -1 Then
-                        TxtBLK.Inlines.Add(New Run(cleanLine.Substring(startIndex)))
-                        Exit While
-                    End If
-
-                    ' Часть до совпадения
-                    If index > 0 Then
-                        TxtBLK.Inlines.Add(New Run(cleanLine.Substring(startIndex, index)))
-                    End If
-
-                    ' Совпадение
-                    Dim matchStart = startIndex + index
-                    Dim matchLength = Math.Min(searchTerm.Length, cleanLine.Length - matchStart)
-                    Dim matchText = cleanLine.Substring(matchStart, matchLength)
-                    TxtBLK.Inlines.Add(New Run(matchText) With {
-                        .FontWeight = FontWeights.Bold,
-                        .Foreground = Brushes.Blue
-                    })
-
-                    startIndex = matchStart + matchLength
-                End While
-
-                ' Добавляем перенос, кроме последней строки
-                If lineIndex < lines.Length - 1 Then
-                    TxtBLK.Inlines.Add(New LineBreak())
-                End If
-            Next
-
         End Sub
 
         Sub New()
@@ -102,13 +31,13 @@ Namespace Kas
             InitializeComponent()
 
             ' Добавить код инициализации после вызова InitializeComponent().
-            AddHandler Me.DataContextChanged, AddressOf OnDataContextChanged
+            'AddHandler Me.DataContextChanged, AddressOf OnDataContextChanged
 
         End Sub
 
-        Private Sub OnDataContextChanged(sender As Object, e As DependencyPropertyChangedEventArgs)
-            UpdateHighlightedText()
-        End Sub
+        'Private Sub OnDataContextChanged(sender As Object, e As DependencyPropertyChangedEventArgs)
+        '    UpdateHighlightedText()
+        'End Sub
 
 
         Private Sub TableRowBorder_PreviewMouseDown(sender As Object, e As MouseButtonEventArgs)
@@ -197,39 +126,6 @@ Namespace Kas
                 ShowMSG(MW, "Отказ не выбран", "Внимание", MessageBoxButton.OK)
             End If
 
-
-
-
-
-
-
-
-            'If PointedOtkaz IsNot Nothing Then
-
-            '    ' 1. Ищем среди открытых окон уже существующее окно инспектора
-            '    Dim existingWin As OtkazInspectorWindow = Nothing
-            '    For Each w In Application.Current.Windows
-            '        If TypeOf w Is OtkazInspectorWindow Then
-            '            existingWin = CType(w, OtkazInspectorWindow)
-            '            Exit For
-            '        End If
-            '    Next
-
-            '    ' 2. Если такое окно уже открыто — закрываем его
-            '    If existingWin IsNot Nothing Then
-            '        existingWin.Close()
-            '    End If
-
-            '    ' 3. Создаем и показываем новое окно с актуальными данными PointedOtkaz
-            '    Dim win As New OtkazInspectorWindow(PointedOtkaz)
-            '    win.Owner = Application.Current.MainWindow
-            '    win.Show()
-
-            'Else
-            '    ShowMSG(MW, "Отказ не выбран", "Внимание", MessageBoxButton.OK)
-            '    ' Примечание: если ShowMSG - это ваш метод, убедитесь, что он корректно вызывается. 
-            '    ' Стандартный вызов: MessageBox.Show("Отказ не выбран", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning)
-            'End If
         End Sub
 
 
@@ -475,6 +371,76 @@ Namespace Kas
             End If
         End Sub
 
+        Private Sub UpdateHighlightedText()
+            TxtBLK.Inlines.Clear()
+
+            Dim otkaz = TryCast(DataContext, Otkaz)
+            If otkaz Is Nothing Then Return
+
+            ' 🔥 Защита от Nothing в Opis
+            Dim opisText As String = If(otkaz.Opis, "")
+
+            Dim searchTerm = Me.SearchTerm?.Trim()
+            If String.IsNullOrEmpty(searchTerm) Then
+                ' Просто отображаем текст с переносами
+                Dim lines0 = opisText.Split({vbCrLf, vbCr, vbLf}, StringSplitOptions.None)
+                For i As Integer = 0 To lines0.Length - 1
+                    TxtBLK.Inlines.Add(New Run(lines0(i)))
+                    If i < lines0.Length - 1 Then
+                        TxtBLK.Inlines.Add(New LineBreak())
+                    End If
+                Next
+                Return
+            End If
+
+            ' Разбиваем на строки
+            Dim lines = opisText.Split({vbCrLf, vbCr, vbLf}, StringSplitOptions.None)
+
+            For lineIndex As Integer = 0 To lines.Length - 1
+                Dim line = lines(lineIndex)
+                If String.IsNullOrEmpty(line) Then
+                    ' Пустая строка — просто LineBreak
+                    TxtBLK.Inlines.Add(New LineBreak())
+                    Continue For
+                End If
+
+                Dim cleanLine = line
+                Dim cleanSearch = searchTerm.ToLower()
+                Dim startIndex = 0
+
+                While startIndex < cleanLine.Length
+                    Dim remainingText = cleanLine.Substring(startIndex).ToLower()
+                    Dim index = remainingText.IndexOf(cleanSearch)
+
+                    If index = -1 Then
+                        TxtBLK.Inlines.Add(New Run(cleanLine.Substring(startIndex)))
+                        Exit While
+                    End If
+
+                    ' Часть до совпадения
+                    If index > 0 Then
+                        TxtBLK.Inlines.Add(New Run(cleanLine.Substring(startIndex, index)))
+                    End If
+
+                    ' Совпадение
+                    Dim matchStart = startIndex + index
+                    Dim matchLength = Math.Min(searchTerm.Length, cleanLine.Length - matchStart)
+                    Dim matchText = cleanLine.Substring(matchStart, matchLength)
+                    TxtBLK.Inlines.Add(New Run(matchText) With {
+                        .FontWeight = FontWeights.Bold,
+                        .Foreground = Brushes.Blue
+                    })
+
+                    startIndex = matchStart + matchLength
+                End While
+
+                ' Добавляем перенос, кроме последней строки
+                If lineIndex < lines.Length - 1 Then
+                    TxtBLK.Inlines.Add(New LineBreak())
+                End If
+            Next
+
+        End Sub
 
     End Class
 End Namespace

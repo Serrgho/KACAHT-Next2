@@ -364,44 +364,184 @@
                 Return Function(o) True
             End Try
 
-
-
-
-
         End Function
+
+        ''' <summary>
+        ''' Получает список строк "Значение (Количество)" для текстового свойства.
+        ''' Используется для заполнения ListBox в фильтре.
+        ''' </summary>
+        Public Function GetTextualValuesForProperty(currentSource As IEnumerable(Of Otkaz), propName As String) As List(Of String)
+            Dim selector = GetDisplaySelector(propName)
+            If selector Is Nothing Then Return New List(Of String) From {"[Все]"}
+
+            Dim allValues = currentSource.Select(selector).ToList()
+
+            ' Подсчет пустых значений
+            Dim emptyCount = allValues.Where(Function(v) String.IsNullOrWhiteSpace(CStr(v))).Count
+
+            ' Группировка непустых значений с подсчетом количества
+            Dim nonEmptyGroups = allValues.
+                Where(Function(v) Not String.IsNullOrWhiteSpace(CStr(v))).
+                GroupBy(Function(v) v).
+                Select(Function(g) $"{g.Key} ({g.Count()})")
+
+            Dim result As New List(Of String) From {"[Все]"}
+
+            If emptyCount > 0 Then
+                result.Add($"[ПУСТЫЕ] [{emptyCount}]")
+            End If
+
+            ' Добавляем отсортированные значения
+            result.AddRange(nonEmptyGroups.OrderBy(Function(s) s))
+
+            Return result
+        End Function
+
+        ''' <summary>
+        ''' Получает список строк "Да [N]", "Нет [N]" для булевого свойства.
+        ''' </summary>
+        Public Function GetBooleanValuesForProperty(currentSource As IEnumerable(Of Otkaz), propName As String) As List(Of String)
+            Dim getter As Func(Of Otkaz, Boolean) = GetBooleanGetter(propName)
+            If getter Is Nothing Then Return New List(Of String)
+
+            Dim grouped = currentSource.GroupBy(Function(o) getter(o))
+            Dim values As New List(Of String)
+
+            For Each g In grouped
+                Dim displayText As String = If(g.Key, "Да", "Нет")
+                values.Add($"{displayText} [{g.Count()}]")
+            Next
+
+            ' Сортировка по алфавиту (Да перед Нет)
+            values.Sort()
+
+            If values.Count > 0 Then
+                values.Insert(0, "[Все]")
+            Else
+                values.Add("[Все]")
+            End If
+
+            Return values
+        End Function
+
+        ''' <summary>
+        ''' Сортирует список значений в зависимости от флага isSortByCount.
+        ''' </summary>
+        Public Function SortValuesByToggle(values As List(Of String), propName As String, isSortByCount As Boolean) As List(Of String)
+            ' Убираем "[Все]" временно, чтобы не мешал сортировке
+            Dim allItem As String = Nothing
+            If values.Count > 0 AndAlso values(0) = "[Все]" Then
+                allItem = values(0)
+                values.RemoveAt(0)
+            End If
+
+            If isSortByCount Then
+                ' Сортировка по количеству (убывание), затем по имени
+                values = values.OrderByDescending(Function(s)
+                                                      Dim startIdx = s.IndexOf(" (")
+                                                      Dim endIdx = s.IndexOf(")")
+                                                      If startIdx >= 0 AndAlso endIdx > startIdx Then
+                                                          Dim countStr = s.Substring(startIdx + 2, endIdx - startIdx - 2)
+                                                          Dim countValue As Integer
+                                                          If Integer.TryParse(countStr, countValue) Then
+                                                              Return countValue
+                                                          End If
+                                                      End If
+                                                      Return 0
+                                                  End Function).
+                                  ThenBy(Function(s) s).
+                                  ToList()
+            Else
+                ' Сортировка по имени (алфавит)
+                values = values.OrderBy(Function(s) s).ToList()
+
+                ' Специфическая логика для определенных полей (как было в вашем оригинальном коде)
+                If propName = "ZaKem" OrElse propName = "Zakem_TXT" Then
+                    values = values.OrderBy(Function(s) If(s.StartsWith(UNASSIGNED_MARKER), 0, 1)).ThenBy(Function(s) s).ToList()
+                ElseIf {"DaysOnRassled", "KomplexAsInt", "Kat"}.Contains(propName) Then
+                    ' Для числовых полей сортируем по числу до скобки
+                    values = values.OrderBy(Function(s) Val(If(s.Contains("("), s.Substring(0, s.IndexOf("(")), s))).ToList()
+                End If
+            End If
+
+            ' Возвращаем "[Все]" на первое место
+            If allItem IsNot Nothing Then
+                values.Insert(0, allItem)
+            End If
+
+            Return values
+        End Function
+
+        ''' <summary>
+        ''' Безопасно очищает выделение в ListBox.
+        ''' </summary>
+        Public Sub SafeClearSelection(listBox As ListBox)
+            If listBox.SelectionMode = SelectionMode.Multiple Then
+                listBox.SelectedItems.Clear()
+            Else
+                listBox.SelectedItem = Nothing
+            End If
+        End Sub
+
+        ''' <summary>
+        ''' Безопасно добавляет элемент в выделение ListBox.
+        ''' </summary>
+        Public Sub SafeAddToSelection(listBox As ListBox, item As Object)
+            If listBox.SelectionMode = SelectionMode.Multiple Then
+                listBox.SelectedItems.Add(item)
+            Else
+                listBox.SelectedItem = item
+            End If
+        End Sub
+
+        ''' <summary>
+        ''' Безопасно получает список выделенных элементов.
+        ''' </summary>
+        Public Function SafeGetSelectedItems(listBox As ListBox) As List(Of Object)
+            If listBox.SelectionMode = SelectionMode.Multiple Then
+                Return listBox.SelectedItems.Cast(Of Object)().ToList()
+            Else
+                If listBox.SelectedItem IsNot Nothing Then
+                    Return New List(Of Object) From {listBox.SelectedItem}
+                Else
+                    Return New List(Of Object)
+                End If
+            End If
+        End Function
+
+        ''' <summary>
+        ''' Восстанавливает выделение в Popup на основе сохраненного состояния фильтра.
+        ''' </summary>
+        Public Sub RestoreSelection(popupCtrl As FilterPopup, savedFilterValues As List(Of Object), isBooleanField As Boolean, allValues As List(Of String))
+            SafeClearSelection(popupCtrl.FilterListBox)
+
+            If isBooleanField Then
+                For Each item In savedFilterValues
+                    Dim itemStr = item?.ToString()
+                    If Not String.IsNullOrEmpty(itemStr) Then
+                        ' Ищем "Да [...]" или "Нет [...]"
+                        Dim match = allValues.FirstOrDefault(Function(v) (itemStr.Equals("True", StringComparison.OrdinalIgnoreCase) AndAlso v.StartsWith("Да [")) OrElse
+                        (itemStr.Equals("False", StringComparison.OrdinalIgnoreCase) AndAlso v.StartsWith("Нет ["))
+                    )
+                        If match IsNot Nothing Then SafeAddToSelection(popupCtrl.FilterListBox, match)
+                    End If
+                Next
+            Else
+                ' Строковое поле: ищем совпадение по началу строки "Значение (...)"
+                For Each item In savedFilterValues
+                    Dim originalItem = item?.ToString()
+                    ' Ищем строку, которая начинается с исходного значения и имеет пробел+скобку
+                    Dim match = allValues.FirstOrDefault(Function(v) v.StartsWith(originalItem & " ("))
+                    If match IsNot Nothing Then
+                        SafeAddToSelection(popupCtrl.FilterListBox, match)
+                    End If
+                Next
+            End If
+        End Sub
+
+
+
     End Module
-
-
-
-    Public Class FilterProperties
-
-        ' Attached Property для типа поля
-        Public Shared Function GetFieldType(element As DependencyObject) As String
-            Return CStr(element.GetValue(FieldTypeProperty))
-        End Function
-
-        Public Shared Sub SetFieldType(element As DependencyObject, value As String)
-            element.SetValue(FieldTypeProperty, value)
-        End Sub
-
-        Public Shared ReadOnly FieldTypeProperty As DependencyProperty =
-            DependencyProperty.RegisterAttached("FieldType", GetType(String), GetType(FilterProperties),
-                                                New PropertyMetadata("String")) ' По умолчанию - String
-
-        ' Attached Property для уровня фильтра
-        Public Shared Function GetFilterLevel(element As DependencyObject) As String
-            Return CStr(element.GetValue(FilterLevelProperty))
-        End Function
-
-        Public Shared Sub SetFilterLevel(element As DependencyObject, value As String)
-            element.SetValue(FilterLevelProperty, value)
-        End Sub
-
-        Public Shared ReadOnly FilterLevelProperty As DependencyProperty =
-            DependencyProperty.RegisterAttached("FilterLevel", GetType(String), GetType(FilterProperties),
-                                                New PropertyMetadata("Main")) ' По умолчанию - Main
-
-    End Class
 
 
 End Namespace

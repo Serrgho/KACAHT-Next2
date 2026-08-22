@@ -57,7 +57,7 @@
 				</Grid.ColumnDefinitions>
 
 				<!--пока невидимый переключатель видимости для поиска по №№ ОТС-->
-				<local:MYToggleControl x:Name="NumSearchToggleUC"  MYToggleZagolovok="Поиск по №№ ОТС" IsChecked="False" Click="NumSearchToggleUC_Click" Visibility="Collapsed"/>
+				<!--<local:MYToggleControl x:Name="NumSearchToggleUC"  MYToggleZagolovok="Поиск по №№ ОТС" IsChecked="False" Click="NumSearchToggleUC_Click" Visibility="Collapsed"/>-->
 				<!--=================================================================-->
 
 				<!--<local:MYToggleControl Grid.Column="1" x:Name="TableItemVisToggleUC" Width="80" MYToggleZagolovok="Статистика" Margin="5 1" IsChecked="False" Click="TableVisToggleUC_Click"/>-->

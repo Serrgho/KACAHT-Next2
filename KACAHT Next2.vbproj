@@ -26,6 +26,7 @@
     <Compile Remove="Controls\CalendarControlll\SingleCalendarConteinerPop.xaml.vb" />
     <Compile Remove="Controls\KASANT\CenterReps\JournalViewerRestControl.xaml.vb" />
     <Compile Remove="Controls\KASANT\CenterReps\KasAntRestLoader.vb" />
+    <Compile Remove="Controls\OTSCard\HistoryED\NullToBoolConverter.vb" />
     <Compile Remove="Controls\OTSConteiner\OTSrow\LocationTextBlock.vb" />
     <Compile Remove="Controls\OTSConteiner\StringToHeightConverter.vb" />
     <Compile Remove="Controls\OTSConteiner\TableHeaderr\FiltrBox.xaml.vb" />

@@ -61,15 +61,9 @@ Namespace Kas
             If KtoZakrylIndicator IsNot Nothing Then
                 KtoZakrylIndicator.HeaderRef = Me
             End If
-            'If ZaKemIndicator IsNot Nothing Then
-            '    ZaKemIndicator.HeaderRef = Me
-            'End If
             If Zakem_TXTIndicator IsNot Nothing Then
                 Zakem_TXTIndicator.HeaderRef = Me
             End If
-            'If KomplexAsIntIndicator IsNot Nothing Then
-            '    KomplexAsIntIndicator.HeaderRef = Me
-            'End If
             If PostupIndicator IsNot Nothing Then
                 PostupIndicator.HeaderRef = Me
             End If
@@ -88,17 +82,6 @@ Namespace Kas
                 MarkedIndicator.HeaderRef = Me
             End If
 
-            'If ZakrytIndicator IsNot Nothing Then
-            '    ZakrytIndicator.HeaderRef = Me
-            'End If
-            'If PeredanIndicator IsNot Nothing Then
-            '    PeredanIndicator.HeaderRef = Me
-            'End If
-
-            ' Если есть другие индикаторы (SeriaIndicator и т.д.), сделай то же самое
-            ' If SeriaIndicator IsNot Nothing Then
-            '     SeriaIndicator.HeaderRef = Me
-            ' End If
             ' --------------------------
 
 
@@ -236,72 +219,56 @@ Namespace Kas
 
         Private Sub ShowTextualFilterPopup(sender As Object, propName As String, fieldType As String)
 
-            ' Определяем, булевое ли это поле
-            Dim isBooleanField = (fieldType.ToLowerInvariant() = "boolean")
-            Dim popupCtrl As New FilterPopup()
+            Dim source = MW.TRowsContainer.OTSContainer.ItemsSource
+            Dim isSorted = MW.TRowsContainer.SortOrderToggleUC.MYToggle.IsChecked = True
 
-            ' --- БЕРЕМ ИСТОЧНИК ДАННЫХ: для 0-уровня фильтра - это результат 0-уровня фильтрации, но до 1-го (THed)
-            Dim currentSource As IEnumerable(Of Otkaz) = MW.TRowsContainer.OTSContainer.ItemsSource ' 'Me._level0Filtered <-- ИСПРАВЛЕНО: Используем _level0Filtered
-            If currentSource Is Nothing Then
-                ' Если нет данных, можно показать пустой список или "[Все]"
-                popupCtrl.PropertyName = propName
-                popupCtrl.FieldType = fieldType
-                popupCtrl.FilterListBox.ItemsSource = If(isBooleanField, New List(Of String) From {"[Все]"}, New List(Of String) From {"[Все]"})
-                ' ... (логика отображения popupCtrl)
-                Return
-            End If
+            ' Получаем готовый попап
+            Dim result = FilterPopupHelper.PrepareTextualFilter(sender, propName, fieldType, source, _filterState, isSorted)
+            Dim popup = result.Item1
+            Dim values = result.Item2
 
-            Dim values As List(Of String) = Nothing
-
-            If isBooleanField Then ' Получаем значения для булевого поля
-                values = GetBooleanValuesForProperty(currentSource, propName)
-                ' Если ни один бул не встречается (хотя source не пуст), всё равно добавим "[Все]"
-                If values.Count = 0 Then values.Add("[Все]")
-            Else ' Считаем строковым ' Получаем значения для строкового поля
-                values = GetTextualValuesForProperty(currentSource, propName)
-                ' Сортируем значения в зависимости от состояния переключателя
-                Dim isSortByCount As Boolean = MW.TRowsContainer.SortOrderToggleUC.MYToggle.IsChecked = True
-                values = SortValuesByToggle(values, propName, isSortByCount)
-            End If
-
-            popupCtrl.PropertyName = propName
-            popupCtrl.FieldType = fieldType
-            popupCtrl.FilterListBox.ItemsSource = Nothing ' <-- Очистить
-            popupCtrl.FilterListBox.ItemsSource = values
-
-            ' --- ОБНОВЛЁННОЕ восстановление выделения ---
-            Dim saved = _filterState.GetFilter(propName)
-            ' Вызываем вспомогательный метод
-            RestoreSelection(popupCtrl, saved, isBooleanField, values)
-
-            ' --- Создаём Popup ---
-            Dim popup As New Popup With {
-        .Placement = PlacementMode.Bottom,
-        .PlacementTarget = sender,
-        .StaysOpen = False,
-        .AllowsTransparency = True,
-        .Child = popupCtrl
-    }
-
-
-            ' Автоматически включаем/выключаем кнопку КОПИРОВАТЬ в зависимости от наличия данных
+            ' Кнопка копирования (твоя локальная логика)
+            Dim popupCtrl As FilterPopup = CType(popup.Child, FilterPopup)
             If values Is Nothing OrElse values.Count = 0 Then
                 popupCtrl.CopyButton.IsEnabled = False
-                popupCtrl.CopyButton.ToolTip = "Нет данных для копирования"
             Else
                 popupCtrl.CopyButton.IsEnabled = True
-                popupCtrl.CopyButton.ToolTip = $"Скопировать {values.Count} значений в буфер обмена"
+                popupCtrl.CopyButton.ToolTip = $"Скопировать {values.Count} значений"
             End If
 
+            ' Твой стандартный обработчик OK (без всяких Action)
+            AddHandler popupCtrl.OkButt.Click, Sub(s, args)
+                                                   Dim selected = OtkazFilterConfig.SafeGetSelectedItems(popupCtrl.FilterListBox)
+                                                   Dim isBoolean = (fieldType.ToLowerInvariant() = "boolean")
 
-            ' --- ОБНОВЛЁННЫЙ обработчик OK ---
-            ' Подписываемся на событие, передавая нужные аргументы через замыкание (closure)
-            AddHandler popupCtrl.OkButt.Click, Sub(s, args) OnPopupOkClicked(s, args, popupCtrl, popup, propName, isBooleanField)
+                                                   ' Парсинг (можно тоже вынести в конфиг, но пусть будет тут для наглядности)
+                                                   Dim originalValues = selected.Select(Function(item)
+                                                                                            Dim str = item?.ToString()
+                                                                                            If String.IsNullOrEmpty(str) Then Return str
+                                                                                            If str.Contains(" [") AndAlso str.EndsWith("]") Then
+                                                                                                If isBoolean Then
+                                                                                                    If str.StartsWith("Да ") Then Return "True"
+                                                                                                    If str.StartsWith("Нет ") Then Return "False"
+                                                                                                End If
+                                                                                                Return str.Substring(0, str.IndexOf(" ["))
+                                                                                            ElseIf str.Contains(" (") AndAlso str.EndsWith(")") Then
+                                                                                                Return str.Substring(0, str.IndexOf(" ("))
+                                                                                            End If
+                                                                                            Return str
+                                                                                        End Function).ToList()
 
-            ' --- Открываем Popup ---
+                                                   _filterState.SetFilter(propName, originalValues)
+                                                   RaiseEvent FiltersChanged(Me, EventArgs.Empty)
+                                                   UpdateIndicatorForProperty(propName)
+                                                   popup.IsOpen = False
+                                               End Sub
+
+            ' Управление открытием
             If _currentPopup IsNot Nothing Then _currentPopup.IsOpen = False
             _currentPopup = popup
             popup.IsOpen = True
+
+
 
         End Sub
 
@@ -327,16 +294,6 @@ Namespace Kas
             result.AddRange(nonEmptyGroups.OrderBy(Function(s) s))
             Return result
 
-
-            'Dim selector = OtkazFilterConfig.GetDisplaySelector(propName)
-            'If selector Is Nothing Then Return New List(Of String)
-
-            'Dim grouped = currentSource.GroupBy(selector).Where(Function(g) Not String.IsNullOrEmpty(g.Key))
-            'Dim values = grouped.Select(Function(g) $"{g.Key} [{g.Count()}]").ToList()
-
-            '' ВСЕГДА добавляем [Все] в начало перед сортировкой
-            'values.Insert(0, "[Все]")
-            'Return values
         End Function
 
         ' Получает список строк "Да [N]", "Нет [N]" из источника для булевого свойства
