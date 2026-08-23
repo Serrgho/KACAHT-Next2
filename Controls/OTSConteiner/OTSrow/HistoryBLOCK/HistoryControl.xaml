@@ -64,9 +64,7 @@
 										<Setter TargetName="BoxSymbol" Property="Text" Value="☑"/>
 										<Setter TargetName="BoxSymbol" Property="FontSize" Value="21"/>
 									</Trigger>
-									<!--<Trigger Property="IsMouseOver" Value="True">
-										<Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
-									</Trigger>-->
+									
 								</ControlTemplate.Triggers>
 							</ControlTemplate>
 						</CheckBox.Template>

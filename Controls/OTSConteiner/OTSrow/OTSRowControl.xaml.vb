@@ -158,20 +158,6 @@ Namespace Kas
 
 
 
-
-
-
-
-
-
-
-        Private Sub HistoryPop_Closed(sender As Object, e As EventArgs)
-            If HistoryUC.SelectedEntry IsNot Nothing Then
-                HistoryUC.SelectedEntry.IsHighlighted = False
-                HistoryUC.SelectedEntry = Nothing
-            End If
-        End Sub
-
         Private Sub OborudTB_PreviewMouseRightButtonUp(sender As Object, e As MouseButtonEventArgs)
             MW.EquipmentContent.ResetSelection()
             MW.EquipmentPopup.IsOpen = True
@@ -275,55 +261,18 @@ Namespace Kas
 
 
 
-        Private Sub ListBoxItem_MouseRightButtonDown(sender As Object, e As MouseButtonEventArgs)
+        'Private Sub ListBoxItem_MouseRightButtonDown(sender As Object, e As MouseButtonEventArgs)
+        '    Dim item = TryCast(sender, ListBoxItem)
+        '    If item Is Nothing Then Return
 
-            Dim lbi = CType(sender, ListBoxItem)
-            Dim dc = lbi.DataContext
+        '    'Dim _selectedEntry = DirectCast(item.DataContext, HistoryEntry)
+        '    Dim _selectedEntry = TryCast(item.DataContext, HistoryEntry)
+        '    If _selectedEntry Is Nothing Then Return ' Или выход, если данные не те
 
-            ' ===== ПРАВЫЙ КЛИК ПО ПЛАНУ: спросить и удалить =====
-            If TypeOf dc Is PlanEntry Then
-                Dim plan = CType(dc, PlanEntry)
-                Dim otkaz = TryCast(PlanTxtBLK.DataContext, Otkaz)
-
-                If otkaz IsNot Nothing Then
-
-                    If ShowMSG(MW, $"Удалить план ""{plan.Description}""?",
-                                      "Удаление плана",
-                                      MessageBoxButton.OKCancel,
-                                      MessageBoxImage.Question) Then
-
-                        DeletePlan(otkaz, plan)
-                        'otkaz.Plan.Remove(plan)
-
-
-                        'If otkaz.HasHistoryEntry(plan.DisplayText) Then
-                        '    otkaz.RemoveHistoryEntriesByDescription(plan.DisplayText)
-                        'End If
-                        'If otkaz.HasHistoryEntry(plan.Description) Then
-                        '    otkaz.RemoveHistoryEntriesByDescription(plan.Description)
-                        'End If
-
-                    End If
-                End If
-
-                e.Handled = True ' ← ГАСИМ событие, чтобы не открылся попап добавления!
-                Return
-            End If
-
-
-            e.Handled = True ' ✅ Останавливаем всплытие к родителю
-            'Dim item = DirectCast(sender, ListBoxItem)
-            Dim item = TryCast(sender, ListBoxItem)
-            If item Is Nothing Then Return
-
-            'Dim _selectedEntry = DirectCast(item.DataContext, HistoryEntry)
-            Dim _selectedEntry = TryCast(item.DataContext, HistoryEntry)
-            If _selectedEntry Is Nothing Then Return ' Или выход, если данные не те
-
-            _selectedEntry.IsHighlighted = True
-            HistoryUC.SelectedEntry = _selectedEntry
-            HistoryPop.IsOpen = True
-        End Sub
+        '    _selectedEntry.IsHighlighted = True
+        '    HistoryUC.SelectedEntry = _selectedEntry
+        '    HistoryPop.IsOpen = True
+        'End Sub
 
 
 
@@ -442,6 +391,34 @@ Namespace Kas
 
         End Sub
 
+        Private Sub PlanItem_MouseRightButtonDown(sender As Object, e As MouseButtonEventArgs)
+            Dim lbi = CType(sender, ListBoxItem)
+            Dim dc = lbi.DataContext
+
+            ' ===== ПРАВЫЙ КЛИК ПО ПЛАНУ: спросить и удалить =====
+            If TypeOf dc Is PlanEntry Then
+                Dim plan = CType(dc, PlanEntry)
+                Dim otkaz = TryCast(PlanTxtBLK.DataContext, Otkaz)
+
+                If otkaz IsNot Nothing Then
+
+                    If ShowMSG(MW, $"Удалить план ""{plan.Description}""?",
+                                      "Удаление плана",
+                                      MessageBoxButton.OKCancel,
+                                      MessageBoxImage.Question) Then
+
+                        DeletePlan(otkaz, plan)
+
+                    End If
+                End If
+
+                e.Handled = True ' ← ГАСИМ событие, чтобы не открылся попап добавления!
+                Return
+            End If
+
+
+            e.Handled = True ' ✅ Останавливаем всплытие к родителю
+        End Sub
     End Class
 End Namespace
 

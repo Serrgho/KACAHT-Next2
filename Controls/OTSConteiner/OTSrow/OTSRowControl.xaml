@@ -246,18 +246,8 @@
 							</Border>
 							
                             <TextBlock x:Name="TxtBLK" Margin="2 5" Text="{Binding Opis}" TextAlignment="Justify" FontFamily="Times New Roman" FontSize="17" LineHeight="16.5" Style="{StaticResource ViolTBox}" TextWrapping="Wrap"/>
-
-                            <ListBox x:Name="HistTxtBLK" ItemsSource="{Binding History}" Style="{StaticResource HistoryListBoxStyle}">
-                                <!-- ⚠️ ВАЖНО ПРО СОБЫТИЕ (EventSetter) -->
-                                <!-- Так как стиль вынесен, Handler="..." работать не будет, если метод в коде окна. -->
-                                <!-- Добавить EventSetter локально в стиль ListBoxItem здесь -->
-                                <ListBox.ItemContainerStyle>
-                                    <Style BasedOn="{StaticResource HistoryListBoxItemStyle}" TargetType="ListBoxItem">
-                                        <EventSetter Event="MouseRightButtonUp" Handler="ListBoxItem_MouseRightButtonDown"/>
-										
-									</Style>
-                                </ListBox.ItemContainerStyle>
-                            </ListBox>
+							<local:HistoryOTSControl x:Name="HistList"/>
+							
                         </StackPanel>
 
 						<Border Grid.Column="1" BorderBrush="{StaticResource SplitterBrush}" MouseRightButtonUp="PlanTxtBLK_MouseLeftButtonUp">
@@ -266,7 +256,7 @@
 								<ListBox.ItemContainerStyle>
 
 									<Style TargetType="ListBoxItem" BasedOn="{StaticResource PlanListBoxItemStyle}">
-										<EventSetter Event="MouseRightButtonUp" Handler="ListBoxItem_MouseRightButtonDown"/>
+										<EventSetter Event="MouseRightButtonUp" Handler="PlanItem_MouseRightButtonDown"/>
 										<EventSetter Event="MouseEnter" Handler="PlanItem_MouseEnter"/>
 										<EventSetter Event="MouseLeave" Handler="PlanItem_MouseLeave"/>
 									</Style>
@@ -359,14 +349,14 @@
                            IsHitTestVisible="False"
                            Visibility="Collapsed"/>
 
-		<Popup x:Name="HistoryPop"
+		<!--<Popup x:Name="HistoryPop"
                PlacementTarget="{Binding ElementName=HistTxtBLK}"
                Placement="Right" 
                StaysOpen="False" 
                Closed="HistoryPop_Closed"
                AllowsTransparency="True">
 			<local:HistoryControl x:Name="HistoryUC"  PopupOwner="{Binding ElementName=HistoryPop}"/>
-        </Popup>
+        </Popup>-->
 
 		
 		<Rectangle x:Name="HighlightRect" Style="{StaticResource TableRowBorderStyle}" d:Visibility="Collapsed"/>

@@ -17,7 +17,7 @@
             </ResourceDictionary.MergedDictionaries>
             <!-- Регистрация конвертера -->
             <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
-            <local:NullToBoolConverter x:Key="NullToBoolConverter"/>
+            <!--<local:NullToBoolConverter x:Key="NullToBoolConverter"/>-->
             <local:MileageToVisibilityConverter x:Key="MileageToVisibilityConverter"/>
 			<local:PlaceInfoFormatterConverter x:Key="PlaceFormatterConverter"/>
         </ResourceDictionary>

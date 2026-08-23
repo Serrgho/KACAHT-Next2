@@ -27,11 +27,11 @@ Namespace Kas
                 RaiseEvent PointedOtkazChanged(Nothing, EventArgs.Empty)
 
                 ' ← обновляем видимость вкладки СРАЗУ
-                If Application.Current.MainWindow IsNot Nothing Then
+                'If Application.Current.MainWindow IsNot Nothing Then
 
-                    MW.OTSCard.Visibility = If(_pointedOtkaz IsNot Nothing, Visibility.Visible, Visibility.Collapsed)
-                    MW.OTSCard.Header = If(_pointedOtkaz?.Id, "-----")
-                End If
+                '    MW.OTSCard.Visibility = If(_pointedOtkaz IsNot Nothing, Visibility.Visible, Visibility.Collapsed)
+                '    MW.OTSCard.Header = If(_pointedOtkaz?.Id, "-----")
+                'End If
             End Set
         End Property
 

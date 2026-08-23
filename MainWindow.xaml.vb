@@ -332,7 +332,7 @@ Namespace Kas
 
         Private Sub OnPointedOtkazChanged(sender As Object, e As EventArgs)
             ' Обновляем DataContext карточки
-            OTSInfoCard1.CurrentOtkaz = OTSControlModule.PointedOtkaz
+            'OTSInfoCard1.CurrentOtkaz = OTSControlModule.PointedOtkaz
         End Sub
 
 
@@ -363,16 +363,16 @@ Namespace Kas
 
 
         Private Sub MaiWinn_PreviewMouseDown(sender As Object, e As MouseButtonEventArgs)
-            If e.ChangedButton = MouseButton.XButton1 Then
-                ' Кнопка "Назад" на мыши
-                If OTSCard IsNot Nothing AndAlso OTSCard.Visibility = Visibility.Visible Then
-                    'PointedOtkaz = Nothing
-                    MainTabControl.SelectedItem = MainPage
-                    TRowsContainer.ScrollToPointedOTS()
-                    e.Handled = True
-                    Return
-                End If
-            End If
+            'If e.ChangedButton = MouseButton.XButton1 Then
+            '    ' Кнопка "Назад" на мыши
+            '    If OTSCard IsNot Nothing AndAlso OTSCard.Visibility = Visibility.Visible Then
+            '        'PointedOtkaz = Nothing
+            '        MainTabControl.SelectedItem = MainPage
+            '        TRowsContainer.ScrollToPointedOTS()
+            '        e.Handled = True
+            '        Return
+            '    End If
+            'End If
         End Sub
 
         Private Sub MaiWinn_Closing(sender As Object, e As CancelEventArgs)

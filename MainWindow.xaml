@@ -122,27 +122,14 @@
 							<local:OTSBlockControl x:Name="TRowsContainer" />
 						</Grid>
 					</TabItem>
-					<!---->
-					<!-- Вкладка 2: Сводная статистика --><!--
-					<TabItem Header="Сводная статистика"
-                             x:Name="TabSummary"
-                             Padding="2,2"
-                             FontSize="13"
-							 IsVisibleChanged="TabSummary_IsVisibleChanged"
-                             Visibility="Collapsed">
-
-						<Grid Background="Transparent">
-							--><!--<local:S24Table1 x:Name="S24Table1Ctrl"/>--><!--
-						</Grid>
-					</TabItem>-->
-
-					<TabItem x:Name="OTSCard"
+					
+					<!--<TabItem x:Name="OTSCard"
                              Visibility="Collapsed"
                              Padding="2,2"
                              FontSize="13">
 						<local:OTSInfoCard x:Name="OTSInfoCard1" CurrentOtkaz="{Binding Source={x:Static local:OTSControlModule.BindingPoint}}" />
 
-					</TabItem>
+					</TabItem>-->
 				</TabControl>
 			</Grid>
 		</Grid>
