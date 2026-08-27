@@ -164,34 +164,81 @@ Namespace Kas
                     otkazy.Add(otkaz)
                 Next
 
+
                 Dim worksht2 = package.Workbook.Worksheets("Хрон п_час")
-                Dim KS = worksht2.Dimension?.End.Row
-                Dim PCH As Single
-                Dim DTE As Date
+                If worksht2 Is Nothing Then
+                    MW.InfoBLOK.AddItem("Лист 'Хрон п_час' не найден")
+                Else
+                    Dim KS = worksht2.Dimension?.End.Row
 
-                For i = 2 To KS
-                    With worksht2
-                        PCH = ParseSingle(.Cells(i, 3).Value)
-                        DTE = Set4ToDate(.Cells(i, 1).Value)
+                    If KS.HasValue AndAlso KS.Value >= 2 Then
+                        Dim PCH As Single
+                        Dim DTE As Date
 
-                        Dim IDOTS As String = .Cells(i, 2).Value
-                        If PCH < 0 Then
-                            Try
-                                otkazy.Where(Function(U) U.Id = IDOTS).First.KorPCH += PCH
-                                otkazy.Where(Function(U) U.Id = IDOTS).First.KorDate = DTE
-                                otkazy.Where(Function(U) U.Id = IDOTS).First.KorPCHonDate = PCH
-                                MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
-                            Catch ex As Exception
-                                MW.InfoBLOK.AddItem($"---АШЫПКА!!---{vbCrLf}отказ {IDOTS} из листа корректировок отсутствует в массиве импортированных отказов {vbCrLf} {ex.Message}")
-                            End Try
-                        Else
-                            otkazy.Where(Function(U) U.Id = IDOTS).First.KorDate = DTE
-                            otkazy.Where(Function(U) U.Id = IDOTS).First.KorPCHonDate = PCH
-                            MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
-                        End If
+                        For i = 2 To KS.Value
+                            With worksht2
+                                PCH = ParseSingle(.Cells(i, 3).Value)
+                                DTE = Set4ToDate(.Cells(i, 1).Value)
+                                Dim IDOTS As String = .Cells(i, 2).Value?.ToString()
 
-                    End With
-                Next
+                                ' Ищем отказ по ID
+                                Dim foundOtkaz As Otkaz = otkazy.FirstOrDefault(Function(U) U.Id = IDOTS)
+
+                                If foundOtkaz IsNot Nothing Then
+                                    If PCH < 0 Then
+                                        foundOtkaz.KorPCH += PCH
+                                        foundOtkaz.KorDate = DTE
+                                        foundOtkaz.KorPCHonDate = PCH
+                                        MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
+                                    Else
+                                        foundOtkaz.KorDate = DTE
+                                        foundOtkaz.KorPCHonDate = PCH
+                                        MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
+                                    End If
+                                Else
+                                    MW.InfoBLOK.AddItem($"---ВНИМАНИЕ!--- Отказ {IDOTS} из листа корректировок отсутствует в массиве импортированных отказов")
+                                End If
+                            End With
+                        Next
+                    End If
+                End If
+
+
+
+
+
+
+
+
+
+                'Dim worksht2 = package.Workbook.Worksheets("Хрон п_час")
+                'Dim KS = worksht2.Dimension?.End.Row
+                'Dim PCH As Single
+                'Dim DTE As Date
+
+                'For i = 2 To KS
+                '    With worksht2
+                '        PCH = ParseSingle(.Cells(i, 3).Value)
+                '        DTE = Set4ToDate(.Cells(i, 1).Value)
+
+                '        Dim IDOTS As String = .Cells(i, 2).Value
+                '        If PCH < 0 Then
+                '            Try
+                '                otkazy.Where(Function(U) U.Id = IDOTS).First.KorPCH += PCH
+                '                otkazy.Where(Function(U) U.Id = IDOTS).First.KorDate = DTE
+                '                otkazy.Where(Function(U) U.Id = IDOTS).First.KorPCHonDate = PCH
+                '                MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
+                '            Catch ex As Exception
+                '                MW.InfoBLOK.AddItem($"---АШЫПКА!!---{vbCrLf}отказ {IDOTS} из листа корректировок отсутствует в массиве импортированных отказов {vbCrLf} {ex.Message}")
+                '            End Try
+                '        Else
+                '            otkazy.Where(Function(U) U.Id = IDOTS).First.KorDate = DTE
+                '            otkazy.Where(Function(U) U.Id = IDOTS).First.KorPCHonDate = PCH
+                '            MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
+                '        End If
+
+                '    End With
+                'Next
             End Using
 
             Return otkazy

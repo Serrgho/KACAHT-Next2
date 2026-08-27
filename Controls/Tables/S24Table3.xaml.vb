@@ -61,14 +61,15 @@ Namespace Kas
 
 		' левая часть: отнесенные на ТЧЭ + находящиеся в расследовании (три+ состояния ZaKem)
 		Private Function IsTchState(o As Otkaz) As Boolean
-			Return o.VRassled 'IsUchteno(o) OrElse o.VRassled
+			Return o.VRassled 'OrElse o.IsSaved 
 		End Function
 
 
 		' средняя: в расследовании и более N суток с момента Nach НА СЕГОДНЯ
 		Private Function IsOverDays(o As Otkaz, days As Integer) As Boolean
-			Return o.VRassled AndAlso o.Zakryt = Date.MinValue AndAlso
-		   (Date.Today - o.Nach.Date).Days > days
+			Return o.DaysOnRassled > days AndAlso Not (o.KtoZakryl.ToLower.Contains("трп"))
+			'Return o.VRassled AndAlso o.Zakryt = Date.MinValue AndAlso
+			'  o.DaysOnRassled > days
 		End Function
 
 		' правая: учтено за депо
@@ -91,9 +92,9 @@ Namespace Kas
 
 
 
-		Private Function CntDays(k As Integer?, days As Integer) As Integer
-			Return ByDepo(_cur, k).Count(Function(o) IsOverDays(o, days))
-		End Function
+		'Private Function CntDays(k As Integer?, days As Integer) As Integer
+		'	Return ByDepo(_cur, k).Count(Function(o) IsOverDays(o, days))
+		'End Function
 
 		Private Function CntAttr(k As Integer?, isCurrentYear As Boolean, cat As Func(Of Otkaz, Boolean)) As Integer
 			Dim list = If(isCurrentYear, _cur, _prev)
@@ -195,6 +196,13 @@ Namespace Kas
 			FillRow(7, Nothing)   ' Всего
 		End Sub
 
+
+		' Добавлен новый метод для получения списка отказов, превышающих N суток
+		Private Function ListDays(k As Integer?, days As Integer) As List(Of Otkaz)
+			Return ByDepo(_cur, k).Where(Function(o) IsOverDays(o, days)).ToList()
+		End Function
+
+
 		Private Sub FillRow(row As Integer, k As Integer?)
 			' в расследовании: 1,2 кат / 3 кат / 1-3 кат
 			SetCellList(row, 1, ListInv(k, Cat12))
@@ -202,8 +210,8 @@ Namespace Kas
 			SetCellList(row, 3, ListInv(k, Nothing))
 
 			' более 3-х / более 10 суток
-			SetCell(row, 4, CntDays(k, 3))
-			SetCell(row, 5, CntDays(k, 9))
+			SetCellList(row, 4, ListDays(k, 3))
+			SetCellList(row, 5, ListDays(k, 10))
 			' учтено за депо: тек год / прошлый год
 			SetCellPair(row, 6, ListAttr(k, True, Cat12), CntAttr(k, False, Cat12))
 			SetCellPair(row, 7, ListAttr(k, True, Cat3), CntAttr(k, False, Cat3))

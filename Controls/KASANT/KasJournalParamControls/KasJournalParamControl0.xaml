@@ -14,8 +14,10 @@
 			<ColumnDefinition Width="Auto"/>
 		</Grid.ColumnDefinitions>
 
-		<Button Grid.Column="1" x:Name="btnSetPeriodJournal" Foreground="DarkRed" Content="🛠️Изменить" Style="{StaticResource PopupStyleButton}" Margin="2" Click="btnSetPeriodJournal_Click"  />
-		<Button Grid.Column="0"  x:Name="btnReSetPeriodJournal" Content="🔅Сброс" Style="{StaticResource PopupStyleButton}" Margin="2" Click="btnReSetPeriodJournal_Click"  />
+
+		<Button Grid.Column="0"  x:Name="btnReSetPeriodJournal" Content="🔅Сброс" Style="{StaticResource PopupStyleButtonOrange}" Margin="2" Click="btnReSetPeriodJournal_Click"  />
+		<Button Grid.Column="1" x:Name="btnSetPeriodJournal" Foreground="DarkRed" Content="🛠️Указать" Style="{StaticResource PopupStyleButton}" Margin="2" Click="btnSetPeriodJournal_Click"  />
+		
 		<TextBlock Grid.Column="2" Text="{Binding MWFetcher.NachKon_TXT}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="DarkRed" Padding="2 0" Margin="10 0"/>
 		<!--Style="{StaticResource MyCombo}"-->
 		<ComboBox Grid.Column="3" x:Name="DorTBlock"

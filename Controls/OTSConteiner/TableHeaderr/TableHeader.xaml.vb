@@ -93,7 +93,7 @@ Namespace Kas
         Public Sub ClearAllFilters()
             _filterState.Clear()
             'и снимаем индикаторы
-            Dim knownProperties As String() = {"Kat", "Nach", "PCh", "Istochnik", "KtoZakryl", "ZaKem", "Zakem_TXT", "KomplexAsInt", "Postup", "DaysOnRassled", "Peredan", "UpdateNotes", "Marked"}
+            Dim knownProperties As String() = {"Kat", "Nach", "PCh", "Istochnik", "KtoZakryl", "ZaKem", "Zakem_TXT", "KomplexAsInt", "Postup", "DaysOnRassled", "Peredan", "UpdateNotes", "Marked", "VernulsaOTS"}
 
             For Each prop In knownProperties
                 UpdateIndicatorForProperty(prop)
@@ -497,6 +497,7 @@ Namespace Kas
                                                    Select Case propName
                                                        Case "Nach" : predicate = Function(o As Otkaz) o.Nach > Date.MinValue AndAlso selectedDates.Contains(o.Nach.Date)
                                                        Case "Postup" : predicate = Function(o As Otkaz) o.Postup > Date.MinValue AndAlso selectedDates.Contains(o.Postup.Date)
+                                                       Case "VernulsaOTS" : predicate = Function(o As Otkaz) o.VernulsaOTS > Date.MinValue AndAlso selectedDates.Contains(o.VernulsaOTS.Date)
                                                        Case "Zakryt" : predicate = Function(o As Otkaz) o.Zakryt > Date.MinValue AndAlso selectedDates.Contains(o.Zakryt.Date)
                                                        Case "Sozdan" : predicate = Function(o As Otkaz) o.Sozdan > Date.MinValue AndAlso selectedDates.Contains(o.Sozdan.Date)
                                                        Case "KorDate" : predicate = Function(o As Otkaz) o.KorDate > Date.MinValue AndAlso selectedDates.Contains(o.KorDate.Date)

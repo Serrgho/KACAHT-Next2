@@ -133,31 +133,6 @@ Namespace Kas
                 MessageBox.Show($"Цель для {month}.{year} не найдена. Введите новые данные.", "Информация")
             End If
 
-
-            '    Dim year As Integer = GetSelectedYear()
-            '    Dim month As Integer = GetSelectedMonth()
-
-            '    ' Обновляем год и месяц в текущем объекте
-            '    _goal.Year = year
-            '    _goal.Month = month
-
-            '    Dim allGoals = GoalsStore.Load()
-            '    Dim loadedGoal = allGoals.FirstOrDefault(Function(g) g.Year = year AndAlso g.Month = month)
-
-            'If loadedGoal IsNot Nothing Then
-            '    _goal.T12 = loadedGoal.T12
-            '    _goal.T3 = loadedGoal.T3
-            '    _goal.TR12 = loadedGoal.TR12
-            '    _goal.TR3 = loadedGoal.TR3
-            '    _goal.SLD12 = loadedGoal.SLD12
-            '    _goal.SLD3 = loadedGoal.SLD3
-            '    _goal.Factory12 = loadedGoal.Factory12
-            '    _goal.Factory3 = loadedGoal.Factory3
-            'Else
-            '    ResetGoalFields()   ' крайний случай: данных не оказалось
-            '    MessageBox.Show($"Цель для {month}.{year} не найдена. Введите новые данные.", "Информация")
-            'End If
-
         End Sub
 
         Private Sub BtnSave_Click(sender As Object, e As RoutedEventArgs)
@@ -175,7 +150,7 @@ Namespace Kas
 
             If GetTotalValue() = 0 Then
                 If existing Is Nothing Then
-                    MessageBox.Show($"Данных за {month}.{year} нет — сохранять нечего.", "Информация")
+                    ShowMSG(Me, $"Данных за {month}.{year} нет — сохранять нечего.", "Информация")
                     Return
                 End If
 

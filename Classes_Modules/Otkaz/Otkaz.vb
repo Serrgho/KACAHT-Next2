@@ -144,10 +144,29 @@ Namespace Kas
             Get
                 Return _Kat
             End Get
+            'Set(value As Integer)
+            '    If _Kat = value Then Return
+
+            '    Dim oldKat As Integer = _Kat
+            '    _Kat = value
+
+            '    ' Если категория изменилась на 3 (или больше), а PCh было > 0, фиксируем корректировку
+            '    If value > 2 AndAlso oldKat <= 2 AndAlso _PCh.HasValue AndAlso _PCh.Value > 0F Then
+            '        Dim oldValue As Single = _PCh.Value
+            '        SetKorPCH(oldValue, 0F)
+            '        _PCh = 0F
+            '        OnPropertyChanged(NameOf(PCh))
+            '        FormattedPCh = "0.00"
+            '    End If
+
+            '    OnPropertyChanged(NameOf(Kat))
+            '    OnPropertyChanged(NameOf(PCh)) ' Уведомляем что PCh мог измениться из-за смены категории
+            'End Set
             Set
                 If _Kat <> Value Then
                     _Kat = Value
                     OnPropertyChanged(NameOf(Kat))
+
                 End If
             End Set
         End Property
@@ -1237,12 +1256,9 @@ Namespace Kas
 
 
         Private _VernulsaOTS As Date
-        ' 1. Регулярка для даты в начале строки (добавлен ^ для скорости и безопасности)
-        Private Shared ReadOnly DateRegex As New Regex("^\d{2}\.\d{2}\.\d{4}", RegexOptions.Compiled)
 
-        ' 2. Регулярка для извлечения кода депо ОТКУДА (после слова "передан" до первой запятой)
-        ' СТАЛО (работает с дефисами):
-        Private Shared ReadOnly DepotRegex As New Regex("передан\s+([А-Я\-]+),", RegexOptions.Compiled)
+
+
 
         ''' <summary>
         ''' (20) Дата поступления ОТС
@@ -1271,7 +1287,7 @@ Namespace Kas
         <Description("Потери п/часов ОТС")>
         Public Property PCh As Single
             Get
-                If Kat >= 3 Then Return 0
+                If Kat > 2 Then Return 0
                 Return _PCh.GetValueOrDefault(0)
 
             End Get
@@ -2749,18 +2765,50 @@ Namespace Kas
             Return Nothing
         End Function
 
+
+
+
+        ' 1. Регулярка для даты в начале строки (добавлен ^ для скорости и безопасности)
+        Private Shared ReadOnly DateRegex As New Regex("^\d{2}\.\d{2}\.\d{4}", RegexOptions.Compiled)
+
+        ' 2. Регулярка для извлечения кода депо ОТКУДА (после слова "передан" до первой запятой)
+        ' СТАЛО (работает с дефисами):
+        Private Shared ReadOnly DepotRegex As New Regex("передан\s+([А-Я][А-Я\-0-9]*)\s*(?:=>|,)\s*([А-Я][А-Я\-0-9]*)", RegexOptions.Compiled)
+
+
+
+
+
+
         ' ═══════════════════════════════════════════════════════════
         ' ФИЛЬТР ЗАПИСИ
         ' ═══════════════════════════════════════════════════════════
         Private Function IsRelevantHistoryEntry(text As String) As Boolean
+
+
             If String.IsNullOrEmpty(text) Then Return False
 
             If text.Contains("поступил") Then Return True
 
             If text.Contains("передан") Then
                 Dim match As Match = DepotRegex.Match(text)
-                If match.Success AndAlso match.Groups(1).Value <> "КРАС" Then
-                    Return True
+                If match.Success Then
+                    Dim depotFrom As String = match.Groups(1).Value
+                    Dim depotTo As String = match.Groups(2).Value
+
+                    ' Вариант 1: ТР/ТРПУ передаёт на наше депо (ТЧЭ)
+                    If depotFrom.StartsWith("ТР", StringComparison.OrdinalIgnoreCase) AndAlso
+                       depotTo.StartsWith("ТЧЭ", StringComparison.OrdinalIgnoreCase) Then
+                        Return True
+                    End If
+
+                    ' Вариант 2: Другая дорога (не КРАС и не ТЧЭ) передаёт нам
+                    If depotFrom <> "КРАС" AndAlso
+                       Not depotFrom.StartsWith("ТЧЭ", StringComparison.OrdinalIgnoreCase) AndAlso
+                       depotFrom.Length > 1 AndAlso
+                       Me.Uchet Then
+                        Return True
+                    End If
                 End If
             End If
 

@@ -78,7 +78,11 @@ Namespace Kas
             If My.Settings.OldYJSON = "" Then Exit Sub
             Dim oldY As List(Of Otkaz) = StorageModule.LoadFromJson(My.Settings.OldYJSON)
 
-            Dim fullCurY = GetFullCurrentYearOtkazy(OTSList, oldY, Fetcher.NachDat, Fetcher.KonDat)
+            Dim nachDateTime = AddTimeToDate(Fetcher.NachDat, Fetcher.NachTim)
+            Dim konDateTime = AddTimeToDate(Fetcher.KonDat, Fetcher.KonTim, Fetcher.KonMinut)
+
+            Dim fullCurY = GetFullCurrentYearOtkazy(OTSList, oldY, nachDateTime, konDateTime)
+            'Dim fullCurY = GetFullCurrentYearOtkazy(OTSList, oldY, Fetcher.NachDat, Fetcher.KonDat)
 
             ' спросили ОДИН раз
             Dim useOneTable As Boolean = AskOneTable()
@@ -121,9 +125,10 @@ Namespace Kas
         Private Sub btnS24T2Show_Click(sender As Object, e As RoutedEventArgs)
             If My.Settings.OldYJSON = "" Then Exit Sub
             Dim oldY As List(Of Otkaz) = StorageModule.LoadFromJson(My.Settings.OldYJSON)
-
+            Dim nachDateTime = AddTimeToDate(Fetcher.NachDat, Fetcher.NachTim)
+            Dim konDateTime = AddTimeToDate(Fetcher.KonDat, Fetcher.KonTim, Fetcher.KonMinut)
             ' Для основных таблиц: фильтруем по периоду
-            Dim fullCurY = GetFullCurrentYearOtkazy(OTSList, oldY, Fetcher.NachDat, Fetcher.KonDat)
+            Dim fullCurY = GetFullCurrentYearOtkazy(OTSList, oldY, nachDateTime, konDateTime)
             ' Для "с начала года": берём всё без фильтрации
             Dim ytdOtkazy = GetYearToDateOtkazy(OTSList, oldY)
 

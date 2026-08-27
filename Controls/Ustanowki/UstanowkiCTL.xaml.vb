@@ -87,7 +87,7 @@ Namespace Kas
         .HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
         .VerticalScrollBarVisibility = ScrollBarVisibility.Auto
     }
-            w.ShowDialog()
+            w.Show()
         End Sub
 
         Private Sub BtnGoalsOtherRailsEditor_Click(sender As Object, e As RoutedEventArgs)
@@ -98,7 +98,7 @@ Namespace Kas
             w.SizeToContent = SizeToContent.WidthAndHeight
             w.Background = CType(FindResource("AppBackBrush"), Brush)
             w.Content = New RoadGoalsEditor()
-            w.ShowDialog()
+            w.Show()
         End Sub
     End Class
 End Namespace

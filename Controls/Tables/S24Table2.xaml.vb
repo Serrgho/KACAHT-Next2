@@ -352,24 +352,52 @@ Namespace Kas
             TxtMonthHoursDiff.ToolTip = $"{F2(totalHoursAll)} − {F2(transferPlanHours)} (план) − {F2(prevYearMonthHours)}"
 
             ' ===== блок «Nм ТГ / Nм ПГ» =====
+
+
             Dim currentWindow = _ytdRaw.Where(Function(o) o.KomplexAsInt > 0 AndAlso
-                                      o.Nach.Date >= curWindowStart AndAlso
-                                      o.Nach.Date <= curWindowEnd)
+                              o.Nach.Date >= curWindowStart AndAlso
+                              o.Nach.Date <= curWindowEnd)
             Dim previousYearWindow = _prevRaw.Where(Function(o) o.KomplexAsInt > 0 AndAlso
-                                        o.Nach.Date >= prevWindowStart AndAlso
-                                        o.Nach.Date <= prevWindowEnd)
+                                o.Nach.Date >= prevWindowStart AndAlso
+                                o.Nach.Date <= prevWindowEnd)
 
             Dim currentWindowHoursAll = currentWindow.Sum(Function(o) CSng(o.PCh))
             Dim currentWindowPlanHours = currentWindow.Where(Function(o) HasTransferPlan(o)).Sum(Function(o) CSng(o.PCh))
-            Dim currentWindowHoursWithoutPlan = currentWindowHoursAll - currentWindowPlanHours
             Dim previousYearWindowHours = previousYearWindow.Sum(Function(o) CSng(o.PCh))
+
+            ' ТГ ост = все часы − план передачи − прошлый год  (как в верхнем блоке)
+            Dim ytdDiff = currentWindowHoursAll - currentWindowPlanHours - previousYearWindowHours
 
             TxtYtdMonthCur.Text = $"{monthNumber}м ТГ"
             TxtYtdMonthPrev.Text = $"{monthNumber}м ПГ"
-            TxtYtdHoursCur.Text = F2(currentWindowHoursWithoutPlan)
+            TxtYtdHoursCur.Text = F2(currentWindowHoursAll - currentWindowPlanHours)   ' часы без плана
             TxtYtdHoursPrev.Text = F2(previousYearWindowHours)
-            TxtYtdHoursDiff.Text = F2(currentWindowHoursWithoutPlan - previousYearWindowHours)
-            TxtYtdHoursDiff.ToolTip = $"{F2(currentWindowHoursAll)} ({curWindowStart:dd.MM.yy}-{curWindowEnd:dd.MM.yy}) − {F2(currentWindowPlanHours)} (план) − {F2(previousYearWindowHours)} ({prevWindowStart:dd.MM.yy}-{prevWindowEnd:dd.MM.yy})"
+            TxtYtdHoursDiff.Text = F2(ytdDiff)
+            TxtYtdHoursDiff.ToolTip = $"{F2(currentWindowHoursAll)} ({curWindowStart:dd.MM.yy}-{curWindowEnd:dd.MM.yy}) " &
+                              $"− {F2(currentWindowPlanHours)} (план) " &
+                              $"− {F2(previousYearWindowHours)} ({prevWindowStart:dd.MM.yy}-{prevWindowEnd:dd.MM.yy}) " &
+                              $"= {F2(ytdDiff)}"
+
+
+
+            'Dim currentWindow = _ytdRaw.Where(Function(o) o.KomplexAsInt > 0 AndAlso
+            '                          o.Nach.Date >= curWindowStart AndAlso
+            '                          o.Nach.Date <= curWindowEnd)
+            'Dim previousYearWindow = _prevRaw.Where(Function(o) o.KomplexAsInt > 0 AndAlso
+            '                            o.Nach.Date >= prevWindowStart AndAlso
+            '                            o.Nach.Date <= prevWindowEnd)
+
+            'Dim currentWindowHoursAll = currentWindow.Sum(Function(o) CSng(o.PCh))
+            'Dim currentWindowPlanHours = currentWindow.Where(Function(o) HasTransferPlan(o)).Sum(Function(o) CSng(o.PCh))
+            'Dim currentWindowHoursWithoutPlan = currentWindowHoursAll - currentWindowPlanHours
+            'Dim previousYearWindowHours = previousYearWindow.Sum(Function(o) CSng(o.PCh))
+
+            'TxtYtdMonthCur.Text = $"{monthNumber}м ТГ"
+            'TxtYtdMonthPrev.Text = $"{monthNumber}м ПГ"
+            'TxtYtdHoursCur.Text = F2(currentWindowHoursWithoutPlan)
+            'TxtYtdHoursPrev.Text = F2(previousYearWindowHours)
+            'TxtYtdHoursDiff.Text = F2(currentWindowHoursWithoutPlan - previousYearWindowHours)
+            'TxtYtdHoursDiff.ToolTip = $"{F2(currentWindowHoursAll)} ({curWindowStart:dd.MM.yy}-{curWindowEnd:dd.MM.yy}) − {F2(currentWindowPlanHours)} (план) − {F2(previousYearWindowHours)} ({prevWindowStart:dd.MM.yy}-{prevWindowEnd:dd.MM.yy})"
 
             ' ===== цели по количеству =====
             TxtOtsMonthPrev.Text = $"ОТС {monthNameShort} ПГ"

@@ -257,6 +257,8 @@ Namespace Kas
         ' БЛОК 4. ГЛАВНАЯ ПРОЦЕДУРА: 1 EXCEL -> 1 PDF 
         ' =====================================================================
         Public Sub GenerateAllReports(otsList As List(Of Otkaz))
+
+
             Try
                 ExcelPackage.License.SetNonCommercialPersonal("СергейВалерьевич")
                 Dim periodText As String = $"с {Fetcher.NachDat:dd.MM.yyyy} по {Fetcher.KonDat:dd.MM.yyyy}"

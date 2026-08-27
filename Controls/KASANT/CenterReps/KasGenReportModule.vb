@@ -577,6 +577,7 @@ Namespace Kas
 
                     Dim GenOTS As Otkaz = GetNewOTSWithParams(rec)
                     GenOTS.Dlit = ToDecimalHours(rec.Duration)
+
                     If Not IsRightIstocnik(GenOTS.Istochnik) Then GenOTS.AddUpdateNote("От кого ОТС")
                     GenOTS.AddUpdateNote("Дата поступления")
                     'GenOTS.UpdateNotes += String.Join("; ", notes)
@@ -586,6 +587,7 @@ Namespace Kas
                     If o.Postup = Date.MinValue Then
                         SetTrainsAndOborudLev(o, rec, SetPCH:=True)
                     Else
+
                         'молча добавить в историю если изменилось количество поездов
                         If rec.TotalTrains <> o.TotalTrainsKol Then
                             Dim fd As String

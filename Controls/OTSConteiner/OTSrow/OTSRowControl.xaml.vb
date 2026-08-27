@@ -51,10 +51,12 @@ Namespace Kas
 
 
         Private Sub OpenCalendarForDateField(sender As Object, e As MouseButtonEventArgs)
+            If sender.name = "PostupField" Then
+                ActionUC.OpenCalendarForProperty("Postup")
+                'OpenCalendarForProperty("Postup", ActionUC)
+                e.Handled = True
+            End If
 
-            ActionUC.OpenCalendarForProperty("Postup")
-            'OpenCalendarForProperty("Postup", ActionUC)
-            e.Handled = True
 
 
         End Sub

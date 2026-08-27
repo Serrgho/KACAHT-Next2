@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
-             mc:Ignorable="d"
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas" 
+			 mc:Ignorable="d"
              MinWidth="640"
              Background="{StaticResource AppBackBrush}">
 	<UserControl.Resources>
@@ -75,18 +75,19 @@
 				<RowDefinition Height="Auto"/>
 				<!-- 7: Всего -->
 			</Grid.RowDefinitions>
-
-			<!-- Заголовки -->
-			<TextBlock Grid.Row="0" Grid.Column="0" Text="Депо" FontWeight="Bold" Padding="5"/>
-			<TextBlock Grid.Row="0" Grid.Column="1" Text="ТЧЭ" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
-			<TextBlock Grid.Row="0" Grid.Column="2" Text="СЛД" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
-			<TextBlock Grid.Row="0" Grid.Column="3" Text="Заводы" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
-			<TextBlock Grid.Row="0" Grid.Column="4" Text="ТР" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
-			<TextBlock Grid.Row="0" Grid.Column="5" Text="Всего" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
-
 			<!-- Суточное пороговое количество (НОВОЕ) -->
-			<TextBlock Grid.Row="1" Grid.Column="0" Text="Суточное пороговое кол-во" VerticalAlignment="Center" Padding="5" FontWeight="Bold"/>
-			<TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding DailyThreshold, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}" Width="170" HorizontalAlignment="Left" Margin="5,2,2,2"/>
+			<TextBlock Grid.Row="0" Grid.Column="0" Text="Суточное пороговое кол-во" VerticalAlignment="Center" Margin="5,2,2,12" FontWeight="Bold"/>
+			<TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding DailyThreshold, Converter={StaticResource ZeroTextConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GoalTextBoxStyle}" Width="170" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,2,2,12"/>
+			
+			<!-- Заголовки -->
+			<TextBlock Grid.Row="1" Grid.Column="0" Text="Депо" FontWeight="Bold" Padding="5"/>
+			<TextBlock Grid.Row="1" Grid.Column="1" Text="ТЧЭ" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
+			<TextBlock Grid.Row="1" Grid.Column="2" Text="СЛД" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
+			<TextBlock Grid.Row="1" Grid.Column="3" Text="Заводы" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
+			<TextBlock Grid.Row="1" Grid.Column="4" Text="ТР" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
+			<TextBlock Grid.Row="1" Grid.Column="5" Text="Всего" FontWeight="Bold" HorizontalAlignment="Center" Padding="5"/>
+
+			
 
 			<!-- Боготол (теперь Row="2") -->
 			<TextBlock Grid.Row="2" Grid.Column="0" Text="Боготол" VerticalAlignment="Center" Padding="5"/>

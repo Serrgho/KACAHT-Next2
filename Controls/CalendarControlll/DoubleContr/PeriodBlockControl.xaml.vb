@@ -127,6 +127,8 @@
 
         Private Sub But23_Checked(sender As Object, e As RoutedEventArgs)
             CurrentTimeMode = TimeMode.From00To2359
+            Fetcher.KonTim = 23
+            Fetcher.KonMinut = 59
         End Sub
 
     End Class

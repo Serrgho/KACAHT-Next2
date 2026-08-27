@@ -220,7 +220,10 @@ Namespace Kas
         ' ✅ Новый метод: сам берет даты из Fetcher
         <Extension()>
         Public Function IsInPeriod(d As Date) As Boolean
-            Return d >= Fetcher.NachDat AndAlso d <= Fetcher.KonDat
+            Dim nachDateTime = Fetcher.NachDat.Date.AddHours(Fetcher.NachTim)
+            Dim konDateTime = Fetcher.KonDat.Date.AddHours(Fetcher.KonTim).AddMinutes(Fetcher.KonMinut)
+            Return d >= nachDateTime AndAlso d <= konDateTime
+            'Return d >= Fetcher.NachDat AndAlso d <= Fetcher.KonDat
         End Function
 
         ' ✅ И его версия для Nullable Date (на всякий случай)
@@ -243,7 +246,9 @@ Namespace Kas
             Return d >= startDateTime AndAlso d <= endDateTime
         End Function
 
-
+        Public Function AddTimeToDate(baseDate As Date, hours As Integer, Optional minutes As Integer = 0) As Date
+            Return baseDate.Date.AddHours(hours).AddMinutes(minutes)
+        End Function
 
 
         '(Base64 + Reverse)

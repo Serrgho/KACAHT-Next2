@@ -58,13 +58,14 @@
                 </WrapPanel>
                 <Label Style="{StaticResource LabSty}" Content="Комплекс" />
                 <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" MinWidth="120" >
-                     <local:Yarlyk x:Name="OTSInKomplYAR" HeaderText="Учт. в комплексе" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="RassForTCH" HeaderText="В расслед. на ТЧЭ" MouseDown="YarlykPressHandler"/>
+                    <local:Yarlyk x:Name="OTSInKomplYAR" HeaderText="Учт. в комплексе" MouseDown="YarlykPressHandler"/>
 					<local:Yarlyk x:Name="SohrYAR" HeaderText="Сохранено" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="OTS_ON_TCH" HeaderText="Отнесены на ТЧ" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="OTS_ON_TRPU" HeaderText="Отнесены на ТРПУ" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="OTS_ON_SLD" HeaderText="Отнесены на СЛД" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="OTS_ON_Zavod_and_Proch" HeaderText="Отнесены на Заводы_и_проч." MouseDown="YarlykPressHandler"/>
+					<local:Yarlyk x:Name="RassForTCH" HeaderText="В расслед. на ТЧЭ" MouseDown="YarlykPressHandler"/>
+					
+                    <local:Yarlyk x:Name="OTS_ON_TCH" HeaderText="Учт. за ТЧ" MouseDown="YarlykPressHandler"/>
+					<local:Yarlyk x:Name="OTS_ON_TRPU" HeaderText="Учт. за ТРПУ" MouseDown="YarlykPressHandler"/>
+					<local:Yarlyk x:Name="OTS_ON_SLD" HeaderText="Учт. за СЛД" MouseDown="YarlykPressHandler"/>
+					<local:Yarlyk x:Name="OTS_ON_Zavod_and_Proch" HeaderText="Учт. за Заводы_и_Проч." MouseDown="YarlykPressHandler"/>
                     
                 </WrapPanel>
 

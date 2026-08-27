@@ -65,6 +65,9 @@ Namespace Kas
         Public KorrZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.KorDate.IsInPeriod)
         Public WithPassZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.HasPass AndAlso ((o.VRassled) OrElse (o.IsSaved)) AndAlso (Not (o.MestoOTS_Dor?.ToLower Like "*расноя*") AndAlso (Not o.KtoZakryl?.ToLower Like "трпу*")))
 
+        Public UpTo10DaysZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.DaysOnRassled > 9 AndAlso o.ZaKem?.ToLower <> "тр")
+
+
         'Функция, которая создаёт предикат под конкретный KtoRass
         Public Function GetVRassZaPeriod(ktoRass As String) As Func(Of Otkaz, Boolean)
             ' Возвращаем стандартный Func(Of Otkaz, Boolean), но внутри используем ktoRass

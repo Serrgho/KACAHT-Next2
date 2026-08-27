@@ -2955,8 +2955,7 @@ Namespace Kas
 
                 If records.Count = 0 Then
                     MW.InfoBLOK.AddItem("⚠ Отказы с признаком корпоративного нарушения не найдены")
-                    MessageBox.Show("Отказы с признаком корпоративного нарушения не найдены за выбранный период.",
-                "КАСАНТ", MessageBoxButton.OK, MessageBoxImage.Information)
+                    ShowMSG(MW, "Отказы с признаком корпоративного нарушения не найдены за выбранный период.", "КАСАНТ")
                     Return
                 End If
 
@@ -2996,6 +2995,11 @@ Namespace Kas
             Fetcher.NachTim, Fetcher.KonTim, Fetcher.DorOfOTS, Fetcher.KonMinut)
 
                 Dim records = Await Fetcher.FetchAllJournalPagesAsync(journalUrl)
+                If records.Count = 0 Then
+                    MW.InfoBLOK.AddItem("⚠ Отказы с признаком события не найдены")
+                    ShowMSG(MW, "Отказы с признаком события не найдены за выбранный период.", "КАСАНТ")
+                    Return
+                End If
                 ShowJournalPopup(records, btn, Fetcher.DorOfOTS, Events:=True)
 
                 MW.InfoBLOK.AddItem($"  [Журнал] Загружено: {records.Count} событий")

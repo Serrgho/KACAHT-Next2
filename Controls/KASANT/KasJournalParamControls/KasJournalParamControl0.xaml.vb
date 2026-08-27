@@ -46,7 +46,7 @@ Namespace Kas
 
                 .KonDat = Today.Date
                 MW.JourParam.ParamTimeCTL.But23.IsChecked = True
-                'MW.expPoyasnilka.btnDailyPoyasnShow.Visibility = Visibility.Collapsed
+                DorTBlock.SelectedIndex = 12
             End With
 
         End Sub

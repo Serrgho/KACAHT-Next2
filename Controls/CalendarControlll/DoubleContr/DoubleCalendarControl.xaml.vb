@@ -216,6 +216,7 @@ Namespace Kas
                     ' Благодаря INotifyPropertyChanged текст на кнопке обновится АВТОМАТИЧЕСКИ
                     Fetcher.NachDat = adjustedDates.Item1
                     Fetcher.KonDat = adjustedDates.Item2
+                    My.Settings.TimeMode = "From00To2359"
                     'Fetcher.KonMinut = 0
                     ' Логируем (опционально)
                     Tx = $"Период для КАСАНТ обновлен: {Fetcher.NachKon_TXT} {Fetcher.NachTim}-{Fetcher.KonTim}"
