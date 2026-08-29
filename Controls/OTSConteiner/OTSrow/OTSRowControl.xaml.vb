@@ -1,4 +1,5 @@
-﻿Imports System.Text.RegularExpressions
+﻿Imports System.Collections.ObjectModel
+Imports System.Text.RegularExpressions
 Imports System.Windows.Controls.Primitives
 Imports System.Windows.Forms
 Imports System.Windows.Threading
@@ -261,25 +262,6 @@ Namespace Kas
             End If
         End Sub
 
-
-
-        'Private Sub ListBoxItem_MouseRightButtonDown(sender As Object, e As MouseButtonEventArgs)
-        '    Dim item = TryCast(sender, ListBoxItem)
-        '    If item Is Nothing Then Return
-
-        '    'Dim _selectedEntry = DirectCast(item.DataContext, HistoryEntry)
-        '    Dim _selectedEntry = TryCast(item.DataContext, HistoryEntry)
-        '    If _selectedEntry Is Nothing Then Return ' Или выход, если данные не те
-
-        '    _selectedEntry.IsHighlighted = True
-        '    HistoryUC.SelectedEntry = _selectedEntry
-        '    HistoryPop.IsOpen = True
-        'End Sub
-
-
-
-
-
         Private Sub PlanItem_MouseEnter(sender As Object, e As Input.MouseEventArgs)
             Dim item = TryCast(sender, ListBoxItem)
             If item Is Nothing Then Return
@@ -421,6 +403,117 @@ Namespace Kas
 
             e.Handled = True ' ✅ Останавливаем всплытие к родителю
         End Sub
+
+
+
+        Private _remontPopup As Popup
+        Private _remontEditor As RemontEditor
+
+        Private Sub DaNaLok_MouseRightButtonUp(sender As Object, e As MouseButtonEventArgs)
+
+            If PointedOtkaz Is Nothing Then Return
+
+            If _remontPopup IsNot Nothing AndAlso _remontPopup.IsOpen Then
+                CloseRemontPopup()
+                Return
+            End If
+
+            _remontEditor = New RemontEditor()
+
+            If PointedOtkaz.DaNaLok Is Nothing Then
+                PointedOtkaz.DaNaLok = New ObservableCollection(Of Remont)()
+            End If
+            _remontEditor.BindTo(PointedOtkaz.DaNaLok)
+
+            AddHandler _remontEditor.Cancelled, AddressOf RemontEditor_Cancelled
+
+            _remontPopup = New Popup With {
+                .Child = _remontEditor,
+                .Placement = PlacementMode.MousePoint,
+                .StaysOpen = False,
+                .AllowsTransparency = True
+            }
+
+            ' Ключевая строка — ловим закрытие по клику мимо
+            AddHandler _remontPopup.Closed, AddressOf RemontPopup_Closed
+
+            _remontPopup.IsOpen = True
+            e.Handled = True
+        End Sub
+
+        Private Sub RemontPopup_Closed(sender As Object, e As EventArgs)
+            CloseRemontPopup()
+        End Sub
+
+        Private Sub RemontEditor_Cancelled(sender As Object, e As EventArgs)
+            CloseRemontPopup()
+        End Sub
+
+        Private Sub CloseRemontPopup()
+            If _remontPopup IsNot Nothing Then
+                RemoveHandler _remontPopup.Closed, AddressOf RemontPopup_Closed
+                If _remontEditor IsNot Nothing Then
+                    RemoveHandler _remontEditor.Cancelled, AddressOf RemontEditor_Cancelled
+                End If
+                _remontPopup.IsOpen = False
+                _remontPopup = Nothing
+                _remontEditor = Nothing
+            End If
+        End Sub
+
+        '        If PointedOtkaz Is Nothing Then Return
+
+        '        ' Если уже открыт — закрываем
+        '        If _remontPopup IsNot Nothing AndAlso _remontPopup.IsOpen Then
+        '            CloseRemontPopup()
+        '            Return
+        '        End If
+
+        '        ' Создаём редактор
+        '        _remontEditor = New RemontEditor()
+
+        '        ' Привязываем к DaNaLok текущего отказа
+        '        If PointedOtkaz.DaNaLok Is Nothing Then
+        '            PointedOtkaz.DaNaLok = New ObservableCollection(Of Remont)()
+        '        End If
+        '        _remontEditor.BindTo(PointedOtkaz.DaNaLok)
+
+        '        AddHandler _remontEditor.Cancelled, AddressOf RemontEditor_Cancelled
+
+        '        ' Popup с закрытием по клику мимо
+        '        _remontPopup = New Popup With {
+        '    .Child = _remontEditor,
+        '    .Placement = PlacementMode.MousePoint,
+        '    .StaysOpen = False,
+        '    .AllowsTransparency = True
+        '}
+
+        '        _remontPopup.IsOpen = True
+        '        e.Handled = True
+        'End Sub
+
+        'Private Sub RemontEditor_Cancelled(sender As Object, e As EventArgs)
+        '    CloseRemontPopup()
+        'End Sub
+
+        'Private Sub CloseRemontPopup()
+        '    If _remontPopup IsNot Nothing Then
+        '        If _remontEditor IsNot Nothing Then
+        '            RemoveHandler _remontEditor.Cancelled, AddressOf RemontEditor_Cancelled
+        '        End If
+        '        _remontPopup.IsOpen = False
+        '        _remontPopup = Nothing
+        '        _remontEditor = Nothing
+        '    End If
+        'End Sub
+
+
+
+
+
+
+
+
     End Class
 End Namespace
 

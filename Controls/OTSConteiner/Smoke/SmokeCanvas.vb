@@ -11,12 +11,6 @@ Namespace Kas
     Public Class SmokeCanvas
         Inherits Canvas
 
-
-
-
-
-
-
         ' --- СРЕДА (воздух) ---
         Public Property AirFriction As Single = 0.975F          ' трение среды: 0.95 кисель … 0.99 вакуум
         Public Property SmokeBuoyancy As Single = 1.5F          ' плавучесть: 0 выкл, 1.5 свеча, 5 костёр
@@ -197,7 +191,7 @@ Namespace Kas
                                            _image.Height = Me.ActualHeight
                                        End Sub
 
-            'AddHandler Me.MouseMove, AddressOf SmokeCanvas_MouseMove
+            'AddHandler Me.MouseDown, AddressOf SmokeCanvas_MouseMove
             AddHandler Me.Unloaded, Sub() StopSmoke()
         End Sub
         Public Sub StartSmoke()
@@ -231,10 +225,7 @@ Namespace Kas
         End Sub
 
         Private Sub SmokeCanvas_MouseUp(sender As Object, e As MouseButtonEventArgs)
-            If e.ChangedButton = MouseButton.Left Then
-                _isMouseDown = False
-            End If
-
+            _isMouseDown = False
         End Sub
 
 
@@ -372,7 +363,8 @@ Namespace Kas
             DoRings()         ' колечки
             AddVorticity()    ' возвращает мелкие завитки
             StepPhysics()     ' шаг физики
-            DrawFluid()       ' вывод дыма
+            DrawFluid()
+
             'UpdateCandle()    ' наклон пламени за ветром
             'DrawCandle()      ' пламя
             'DrawCandleGlow()  ' свечение
@@ -457,7 +449,7 @@ Namespace Kas
         End Sub
 
         ''' <summary>Честная подача мыши по зажатию ЛКМ.</summary>
-        Private Sub FeedMouse()
+        Public Sub FeedMouse()
             If Mouse.LeftButton = MouseButtonState.Pressed Then
                 If _frameCounter Mod SmokePulseInterval = 0 Then
                     Dim pos = Mouse.GetPosition(_image)
@@ -483,8 +475,8 @@ Namespace Kas
                 End If
                 _lastMouseX = 1
             Else
-                _lastMouseX = -1
-                _lastMouseY = -1
+            _lastMouseX = -1
+            _lastMouseY = -1
             End If
         End Sub
 

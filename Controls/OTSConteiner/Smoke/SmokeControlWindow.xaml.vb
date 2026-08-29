@@ -140,6 +140,8 @@ Namespace Kas
             GC.Collect()
             GC.WaitForPendingFinalizers()
         End Sub
+
+
     End Class
 End Namespace
 

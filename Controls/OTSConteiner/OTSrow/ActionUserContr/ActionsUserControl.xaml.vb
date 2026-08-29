@@ -375,24 +375,13 @@ Namespace Kas
             ElseIf border.Name = "CategoryChangeItem" Then
                 '"Восстановлен" RestoredItem RestoredTB.Text Vosstanovlen
                 Dim NKat As String = Replace(CategoryChangeTB.Text, "кат ", "")
-                PointedOtkaz.History.Add(New HistoryEntry With {.ShowDate = False, .EventDate = Now, .Description = $"Изменена категория с {PointedOtkaz.Kat} на {NKat}"})
+                'PointedOtkaz.History.Add(New HistoryEntry With {.ShowDate = False, .EventDate = Now, .Description = $"Изменена категория с {PointedOtkaz.Kat} на {NKat}"})
                 PointedOtkaz.Kat = CInt(NKat)
                 PointedOtkaz.RemoveItemUpdateNote(CategoryChangeTB.Text)
                 e.Handled = True
             ElseIf border.Name = "PCHChangeItem" Then
                 Dim NPCH As Single = CSng(Replace(PCHChangeTB.Text, "п/ч ", ""))
-                'Dim Delta As Single = NPCH - PointedOtkaz.PCh
-                'Delta = CSng(Math.Round(Delta, 2))
-                'NPCH = CSng(Math.Round(NPCH, 2))
-                'PointedOtkaz.History.Add(New HistoryEntry With {.ShowDate = True, .EventDate = Now, .Description = $"корректировка п/часов с {PointedOtkaz.PCh} до {NPCH} на {Delta:+0.00;-0.00;0}"})
-
                 PointedOtkaz.PCh = NPCH
-                ''не забываем про KorPCH
-                'If Delta < 0 Then
-                '    OpenCalendarForProperty("KorDate")
-                '    PointedOtkaz.KorPCH += Delta
-                'End If
-
                 PointedOtkaz.RemoveItemUpdateNote(PCHChangeTB.Text)
                 e.Handled = True
             Else

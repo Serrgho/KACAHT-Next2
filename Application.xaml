@@ -18,7 +18,7 @@
             <!-- Регистрация конвертера -->
             <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
             <!--<local:NullToBoolConverter x:Key="NullToBoolConverter"/>-->
-            <local:MileageToVisibilityConverter x:Key="MileageToVisibilityConverter"/>
+            <local:MileageToVisibilityConverter x:Key="MileageVisibilityConverter"/>
 			<local:PlaceInfoFormatterConverter x:Key="PlaceFormatterConverter"/>
         </ResourceDictionary>
     </Application.Resources>

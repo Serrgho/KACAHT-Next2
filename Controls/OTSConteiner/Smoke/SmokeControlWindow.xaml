@@ -179,7 +179,7 @@
 		SmokeContrast="200"  MouseContrast="300"  SmokeAgeReveal="8"  CeilingAbsorb="0.08"
 		SmokeSourceRadius="8" SmokeSourcePoints="30" SmokeTurbulence="0"
 		SmokeWobbleForce="2" GustPeakBase="5"     GustChance="0.015"
-		RingStrength="120"   RingChance="0.02" />
+		RingStrength="120"   RingChance="0.02"  />
 
 	</Grid>
 </Window>

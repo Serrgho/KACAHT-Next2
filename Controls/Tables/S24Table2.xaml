@@ -336,7 +336,7 @@
 						<TextBlock Style="{StaticResource CellStyle}" x:Name="TxtMonthHoursCur"/>
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<TextBlock Style="{StaticResource LeftTextStyle}" Text="ТГ ост"/>
+						<TextBlock Style="{StaticResource LeftTextStyle}" Text="тек. год ост"/>
 						<TextBlock Style="{StaticResource CellStyle}" x:Name="TxtMonthHoursDiff"/>
 
 						<TextBlock x:Name="PgLab" Style="{StaticResource LeftTextStyle}" Text="П.Г."/>
@@ -346,7 +346,7 @@
 				</StackPanel>
 				<!-- ▲▲▲ ▲▲▲ -->
 				<!-- с начала года -->
-				<TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" Style="{StaticResource HeaderTextStyle}" Text="с нач года часы"/>
+				<TextBlock x:Name="HeaderWithPeriodStart" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" Style="{StaticResource HeaderTextStyle}" Text="с нач года часы"/>
 
 				<TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource HeaderTextStyle}" x:Name="TxtYtdMonthCur"/>
 				<TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource HeaderTextStyle}" x:Name="TxtYtdMonthPrev"/>
@@ -355,7 +355,7 @@
 				<TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtYtdHoursCur"/>
 				<TextBlock Grid.Row="5" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtYtdHoursPrev"/>
 
-				<TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource LeftTextStyle}" Text="ТГ ост"/>
+				<TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource LeftTextStyle}" Text="тек. год ост"/>
 				<TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtYtdHoursDiff"/>
 		 			
 	   				
@@ -559,8 +559,8 @@
 				</Border>
 			</Grid>
 
-
-			<Grid Grid.Row="1" Grid.Column="2" x:Name="IzmRightGrid" Margin="0,2,0,0" VerticalAlignment="Bottom">
+			<StackPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="4" x:Name="MonthBlock1" Margin="0,2,0,0" VerticalAlignment="Bottom">
+				<Grid  x:Name="IzmRightGrid" >
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="Auto"/>
@@ -586,18 +586,16 @@
 				<TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource LeftTextStyle}" x:Name="TxtOtsYtdGoal"/>
 				<TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtOtsYtdGoalVal"/>
 
-				<!--<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LeftTextStyle}" Text="Цель часы (месяц)"/>
-				<TextBox Grid.Row="2" Grid.Column="1" Width="80" Margin="2"/>
-				<TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource LeftTextStyle}" Text="Цель часы (год)"/>
-				<TextBox Grid.Row="2" Grid.Column="3" Width="80" Margin="2"/>-->
 
-				<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LeftTextStyle}" Text="Цель часы (месяц)"/>
+					<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LeftTextStyle}" x:Name="HeaderHoursMonthGoal" Text="Цель часы (месяц)" Visibility="Collapsed"/>
 				<TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtHoursMonthGoalVal"/>
-				<TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource LeftTextStyle}" Text="Цель часы (год)"/>
+					<TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource LeftTextStyle}" x:Name="HeaderHoursYtdGoal" Text="Цель часы (период)" Visibility="Collapsed"/>
 				<TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtHoursYtdGoalVal"/>
 
 
 			</Grid>
+			</StackPanel>
+			
 
 
 
@@ -751,47 +749,49 @@
 				</Border>
 			</Grid>
 
+			<StackPanel x:Name="DorBlock" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4"  VerticalAlignment="Bottom" Margin="0,2,0,0">
+				<Grid  x:Name="OtherRailsGrid">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto"/>
+						<ColumnDefinition Width="Auto"/>
+						<ColumnDefinition Width="Auto"/>
+						<ColumnDefinition Width="Auto"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
 
-			<Grid Grid.Row="2" Grid.Column="2" x:Name="OtherRailsGrid" Margin="0,2,0,0" VerticalAlignment="Bottom">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="Auto"/>
-					<ColumnDefinition Width="Auto"/>
-					<ColumnDefinition Width="Auto"/>
-					<ColumnDefinition Width="Auto"/>
-				</Grid.ColumnDefinitions>
-				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto"/>
-					<RowDefinition Height="Auto"/>
-					<RowDefinition Height="Auto"/>
-					<RowDefinition Height="Auto"/>
-					<RowDefinition Height="Auto"/>
-				</Grid.RowDefinitions>
+					<!-- дороги -->
+					<TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource HeaderTextStyle}" Text="ВСЖД"/>
+					<TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource HeaderTextStyle}" Text="ЗАБЖД"/>
+					<TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource HeaderTextStyle}" Text="ДВЖД"/>
 
-				<!-- дороги -->
-				<TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource HeaderTextStyle}" Text="ВСЖД"/>
-				<TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource HeaderTextStyle}" Text="ЗАБЖД"/>
-				<TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource HeaderTextStyle}" Text="ДВЖД"/>
+					<TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="ОТС цель"/>
+					<TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadVsjdCelOts"/>
+					<TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadZabdCelOts"/>
+					<TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadDvdCelOts"/>
 
-				<TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="ОТС цель"/>
-				<TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadVsjdCelOts"/>
-				<TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadZabdCelOts"/>
-				<TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadDvdCelOts"/>
+					<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="ОТС факт"/>
+					<TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadVsjd"/>
+					<TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadZabd"/>
+					<TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadDvd"/>
 
-				<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="ОТС факт"/>
-				<TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadVsjd"/>
-				<TextBlock Grid.Row="2" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadZabd"/>
-				<TextBlock Grid.Row="2" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadDvd"/>
+					<TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="П/Ч цель"/>
+					<TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadVsjdCelPch"/>
+					<TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadZabdCelPch"/>
+					<TextBlock Grid.Row="3" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadDvdCelPch"/>
 
-				<TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="П/Ч цель"/>
-				<TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadVsjdCelPch"/>
-				<TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadZabdCelPch"/>
-				<TextBlock Grid.Row="3" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadDvdCelPch"/>
-
-				<TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="П/Ч факт"/>
-				<TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadHoursVsjd"/>
-				<TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadHoursZabd"/>
-				<TextBlock Grid.Row="4" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadHoursDvd"/>
-			</Grid>
+					<TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="П/Ч факт"/>
+					<TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource CellStyle}" x:Name="TxtRoadHoursVsjd"/>
+					<TextBlock Grid.Row="4" Grid.Column="2" Style="{StaticResource CellStyle}" x:Name="TxtRoadHoursZabd"/>
+					<TextBlock Grid.Row="4" Grid.Column="3" Style="{StaticResource CellStyle}" x:Name="TxtRoadHoursDvd"/>
+				</Grid>
+			</StackPanel>
+			
 
 		</Grid>
 		

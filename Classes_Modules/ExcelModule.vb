@@ -93,13 +93,6 @@ Namespace Kas
                         .PasPCH = UniversalToHours(worksheet.Cells(row, 56).Value) ' (56) время задержки пасс.
                         .PrigPCH = UniversalToHours(worksheet.Cells(row, 57).Value) ' (57) время задержки приг. 
                         .GruzPCH = UniversalToHours(worksheet.Cells(row, 58).Value) ' (58) время задержки груз.
-
-
-                        '.Dlit = ParseHoursFromExcelMinutes(worksheet.Cells(row, 55).Value) ' (55) продолжит-сть задержки
-                        '.PasPCH = ParseHoursFromExcelMinutes(worksheet.Cells(row, 56).Value) ' (56) время задержки пасс.
-                        '.PrigPCH = ParseHoursFromExcelMinutes(worksheet.Cells(row, 57).Value) ' (57) время задержки приг. 
-                        '.GruzPCH = ParseHoursFromExcelMinutes(worksheet.Cells(row, 58).Value) ' (58) время задержки груз. 
-
                         '==================================
 
                         '======= даты ===========================
@@ -108,10 +101,7 @@ Namespace Kas
                         .Zakryt = ToDate(worksheet.Cells(row, 22).Value) ' (22) закрыт
                         .Postup = ToDate(worksheet.Cells(row, 20).Value) ' (20) поступил
                         .Sozdan = ToDate(worksheet.Cells(row, 52).Value) ' (52) Дата создания ОТС
-
                         '==================================
-
-
 
                         '============ локомотив/бригада ======================
                         .SerLokExact = ParseString(worksheet.Cells(row, 9).Value) ' (9) Серия локомотива точная
@@ -121,8 +111,6 @@ Namespace Kas
                         .Mash = ParseString(worksheet.Cells(row, 59).Value) ' (59) машинист
                         .PripMash = ParseString(worksheet.Cells(row, 60).Value) ' (60) приписка машиниста
                         '==================================
-
-
 
                         '==================================
                         .Istochnik = ParseString(worksheet.Cells(row, 6).Value) ' (6) От кого поступил ОТС
@@ -137,9 +125,7 @@ Namespace Kas
                         .MestoOTS_TXT = ParseString(worksheet.Cells(row, 8).Value)  ' (8) Место отказа с поездами
                         '==================================
 
-
                         '========== признаки =====================================
-                        '.IsStation = ParseFlag(worksheet.Cells(row, 23).Value)
                         .IsStation = Not (.MestoOTS.Contains(" - "))
                         .ISDanger = ParseFlag(worksheet.Cells(row, 47).Value)
                         .ISKorp = ParseFlag(worksheet.Cells(row, 53).Value)
@@ -203,42 +189,6 @@ Namespace Kas
                     End If
                 End If
 
-
-
-
-
-
-
-
-
-                'Dim worksht2 = package.Workbook.Worksheets("Хрон п_час")
-                'Dim KS = worksht2.Dimension?.End.Row
-                'Dim PCH As Single
-                'Dim DTE As Date
-
-                'For i = 2 To KS
-                '    With worksht2
-                '        PCH = ParseSingle(.Cells(i, 3).Value)
-                '        DTE = Set4ToDate(.Cells(i, 1).Value)
-
-                '        Dim IDOTS As String = .Cells(i, 2).Value
-                '        If PCH < 0 Then
-                '            Try
-                '                otkazy.Where(Function(U) U.Id = IDOTS).First.KorPCH += PCH
-                '                otkazy.Where(Function(U) U.Id = IDOTS).First.KorDate = DTE
-                '                otkazy.Where(Function(U) U.Id = IDOTS).First.KorPCHonDate = PCH
-                '                MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
-                '            Catch ex As Exception
-                '                MW.InfoBLOK.AddItem($"---АШЫПКА!!---{vbCrLf}отказ {IDOTS} из листа корректировок отсутствует в массиве импортированных отказов {vbCrLf} {ex.Message}")
-                '            End Try
-                '        Else
-                '            otkazy.Where(Function(U) U.Id = IDOTS).First.KorDate = DTE
-                '            otkazy.Where(Function(U) U.Id = IDOTS).First.KorPCHonDate = PCH
-                '            MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
-                '        End If
-
-                '    End With
-                'Next
             End Using
 
             Return otkazy

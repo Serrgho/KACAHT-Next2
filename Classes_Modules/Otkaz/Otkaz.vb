@@ -144,29 +144,14 @@ Namespace Kas
             Get
                 Return _Kat
             End Get
-            'Set(value As Integer)
-            '    If _Kat = value Then Return
-
-            '    Dim oldKat As Integer = _Kat
-            '    _Kat = value
-
-            '    ' Если категория изменилась на 3 (или больше), а PCh было > 0, фиксируем корректировку
-            '    If value > 2 AndAlso oldKat <= 2 AndAlso _PCh.HasValue AndAlso _PCh.Value > 0F Then
-            '        Dim oldValue As Single = _PCh.Value
-            '        SetKorPCH(oldValue, 0F)
-            '        _PCh = 0F
-            '        OnPropertyChanged(NameOf(PCh))
-            '        FormattedPCh = "0.00"
-            '    End If
-
-            '    OnPropertyChanged(NameOf(Kat))
-            '    OnPropertyChanged(NameOf(PCh)) ' Уведомляем что PCh мог измениться из-за смены категории
-            'End Set
             Set
                 If _Kat <> Value Then
+                    History.Add(New HistoryEntry With {.ShowDate = False, .EventDate = Now, .Description = $"Изменена категория с {_Kat} на {Value}"})
                     _Kat = Value
                     OnPropertyChanged(NameOf(Kat))
-
+                    If Kat = 3 Then
+                        PCh = 0
+                    End If
                 End If
             End Set
         End Property
@@ -2440,10 +2425,20 @@ Namespace Kas
             cleanedOpis = Regex.Replace(cleanedOpis, "^\s*[-,;:]+\s*|\s*[-,;:]+\s*$", "").Trim()
 
             ' 8. Обновляем свойства
+
+
+
             _DaNaLok.Clear()
+
+
+
             For Each repair In repairsList
+
                 _DaNaLok.Add(repair)
             Next
+
+
+
             OnPropertyChanged(NameOf(DaNaLok))
 
             If _Opis <> cleanedOpis Then
@@ -2569,6 +2564,11 @@ Namespace Kas
         Private _remDataFullMatch As String = String.Empty
 
         Private Function ExtractRemontData(source As String) As List(Of Remont)
+
+
+
+
+
             Dim result As New List(Of Remont)
 
             If String.IsNullOrEmpty(source) Then Return result
@@ -2617,9 +2617,13 @@ Namespace Kas
                 End If
 
                 Dim repair As New Remont With {.RepairType = repairType}
-
+                '' === ДОБАВИТЬ ЭТУ СТРОКУ ===
+                '' Передаем сырой блок текста, чтобы класс сам нашел пробег
+                'repair.ExtractMileageFromSource(block)
+                ' ============================
                 If repairType = "ТО-2" Then
                     repair.Mileage = Nothing
+
                     repair.RepairPlace = CleanRepairPlace(block, isTO2:=True)
                 Else
                     Dim mileageMatch = Regex.Match(block, "(\d+(?:\s+\d+)*)\s*км", RegexOptions.IgnoreCase)
@@ -2631,6 +2635,7 @@ Namespace Kas
                             block = block.Remove(mileageMatch.Index, mileageMatch.Length).Trim()
                         End If
                     End If
+
                     repair.RepairPlace = CleanRepairPlace(block, isTO2:=False)
                 End If
 

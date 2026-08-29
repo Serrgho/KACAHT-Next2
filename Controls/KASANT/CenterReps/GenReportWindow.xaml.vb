@@ -7,9 +7,9 @@ Namespace Kas
 	Partial Public Class GenReportWindow
 		Inherits Window
         Private _searchTimer As New System.Windows.Threading.DispatcherTimer()
-        Private _allData As List(Of Kas.KasGenReportModule.GenReportRow)
-		Private _filteredData As ObservableCollection(Of Kas.KasGenReportModule.GenReportRow)
-		Sub New()
+        Private _allData As List(Of GenReportRow)
+        Private _filteredData As ObservableCollection(Of GenReportRow)
+        Sub New()
 
 			' Этот вызов является обязательным для конструктора.
 			InitializeComponent()
@@ -31,9 +31,9 @@ Namespace Kas
         End Sub
 
 
-        Public Sub LoadData(data As List(Of Kas.KasGenReportModule.GenReportRow))
+        Public Sub LoadData(data As List(Of GenReportRow))
             _allData = data
-            _filteredData = New ObservableCollection(Of Kas.KasGenReportModule.GenReportRow)(data)
+            _filteredData = New ObservableCollection(Of GenReportRow)(data)
             dgReport.ItemsSource = _filteredData
             UpdateCount()
             txtStatus.Text = $"✅ Загружено: {data.Count} записей в {DateTime.Now:HH:mm:ss}"
@@ -68,7 +68,7 @@ Namespace Kas
 
             Dim term = If(txtSearch.Text, "").Trim().ToLower()
 
-            Dim filtered As IEnumerable(Of Kas.KasGenReportModule.GenReportRow)
+            Dim filtered As IEnumerable(Of GenReportRow)
 
             If String.IsNullOrEmpty(term) Then
                 filtered = _allData
@@ -86,7 +86,7 @@ Namespace Kas
                                           End Function)
             End If
 
-            _filteredData = New ObservableCollection(Of Kas.KasGenReportModule.GenReportRow)(filtered)
+            _filteredData = New ObservableCollection(Of GenReportRow)(filtered)
             dgReport.ItemsSource = _filteredData
             UpdateCount()
         End Sub
@@ -104,7 +104,7 @@ Namespace Kas
 
         Private Sub dgReport_MouseDoubleClick(sender As Object, e As Input.MouseButtonEventArgs)
             ' 1️⃣ Получаем запись из текущей ячейки (работает при SelectionUnit="Cell")
-            Dim rec = TryCast(dgReport.CurrentCell.Item, Kas.KasGenReportModule.GenReportRow)
+            Dim rec = TryCast(dgReport.CurrentCell.Item, GenReportRow)
             If rec Is Nothing OrElse rec.ViolId Is Nothing Then Return
 
             ' 2️⃣ Проверяем, что клик именно по колонке "ID отказа" (ViolId)

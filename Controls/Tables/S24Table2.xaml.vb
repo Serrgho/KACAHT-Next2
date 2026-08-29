@@ -311,6 +311,9 @@ Namespace Kas
                 curWindowEnd = New Date(periodEndDate.Year, lastMonthOfPeriod, Date.DaysInMonth(periodEndDate.Year, lastMonthOfPeriod))
                 prevWindowStart = prevPeriod.Start.Date
                 prevWindowEnd = New Date(previousYear, prevPeriod.End.Month, Date.DaysInMonth(previousYear, prevPeriod.End.Month))
+                'MonthBlock1.Visibility = Visibility.Collapsed
+                DorBlock.Visibility = Visibility.Collapsed
+                HeaderWithPeriodStart.Text = "Часы с начала периода"
             Else
                 ' один месяц: с начала года до конца месяца периода
                 monthNumber = periodEndDate.Month
@@ -318,6 +321,9 @@ Namespace Kas
                 curWindowEnd = periodEndDate.Date
                 prevWindowStart = New Date(previousYear, 1, 1)
                 prevWindowEnd = New Date(previousYear, lastMonthOfPeriod, Date.DaysInMonth(previousYear, lastMonthOfPeriod))
+                'MonthBlock1.Visibility = Visibility.Visible
+                HeaderWithPeriodStart.Text = "Часы с начала года"
+                DorBlock.Visibility = Visibility.Visible
             End If
 
             Dim monthNameShort = Ru.DateTimeFormat.GetAbbreviatedMonthName(periodEndDate.Month).TrimEnd("."c).ToUpper()
@@ -344,7 +350,7 @@ Namespace Kas
             End If
 
             MonthHoursLab.Text = If(IsMultiMonth, "период часы", "месяц часы")
-            PgLab.Text = If(IsMultiMonth, "П.Г. (период)", "П.Г.")
+            PgLab.Text = If(IsMultiMonth, "Прош. год (период)", "Прош. год")
 
             TxtMonthHoursCur.Text = F2(hoursWithoutTransferPlan)
             TxtMonthHoursDiff.Text = F2(hoursWithoutTransferPlan - prevYearMonthHours)
@@ -368,8 +374,8 @@ Namespace Kas
             ' ТГ ост = все часы − план передачи − прошлый год  (как в верхнем блоке)
             Dim ytdDiff = currentWindowHoursAll - currentWindowPlanHours - previousYearWindowHours
 
-            TxtYtdMonthCur.Text = $"{monthNumber}м ТГ"
-            TxtYtdMonthPrev.Text = $"{monthNumber}м ПГ"
+            TxtYtdMonthCur.Text = $"{monthNumber}м тек. год"
+            TxtYtdMonthPrev.Text = $"{monthNumber}м прош. год"
             TxtYtdHoursCur.Text = F2(currentWindowHoursAll - currentWindowPlanHours)   ' часы без плана
             TxtYtdHoursPrev.Text = F2(previousYearWindowHours)
             TxtYtdHoursDiff.Text = F2(ytdDiff)
@@ -379,45 +385,33 @@ Namespace Kas
                               $"= {F2(ytdDiff)}"
 
 
-
-            'Dim currentWindow = _ytdRaw.Where(Function(o) o.KomplexAsInt > 0 AndAlso
-            '                          o.Nach.Date >= curWindowStart AndAlso
-            '                          o.Nach.Date <= curWindowEnd)
-            'Dim previousYearWindow = _prevRaw.Where(Function(o) o.KomplexAsInt > 0 AndAlso
-            '                            o.Nach.Date >= prevWindowStart AndAlso
-            '                            o.Nach.Date <= prevWindowEnd)
-
-            'Dim currentWindowHoursAll = currentWindow.Sum(Function(o) CSng(o.PCh))
-            'Dim currentWindowPlanHours = currentWindow.Where(Function(o) HasTransferPlan(o)).Sum(Function(o) CSng(o.PCh))
-            'Dim currentWindowHoursWithoutPlan = currentWindowHoursAll - currentWindowPlanHours
-            'Dim previousYearWindowHours = previousYearWindow.Sum(Function(o) CSng(o.PCh))
-
-            'TxtYtdMonthCur.Text = $"{monthNumber}м ТГ"
-            'TxtYtdMonthPrev.Text = $"{monthNumber}м ПГ"
-            'TxtYtdHoursCur.Text = F2(currentWindowHoursWithoutPlan)
-            'TxtYtdHoursPrev.Text = F2(previousYearWindowHours)
-            'TxtYtdHoursDiff.Text = F2(currentWindowHoursWithoutPlan - previousYearWindowHours)
-            'TxtYtdHoursDiff.ToolTip = $"{F2(currentWindowHoursAll)} ({curWindowStart:dd.MM.yy}-{curWindowEnd:dd.MM.yy}) − {F2(currentWindowPlanHours)} (план) − {F2(previousYearWindowHours)} ({prevWindowStart:dd.MM.yy}-{prevWindowEnd:dd.MM.yy})"
-
-            ' ===== цели по количеству =====
-            TxtOtsMonthPrev.Text = $"ОТС {monthNameShort} ПГ"
-            TxtOtsMonthPrevVal.Text = _prev.Where(Function(o) o.KomplexAsInt > 0).Count.ToString()
-            TxtOtsMonthGoal.Text = $"Цель {monthNameShort} ТГ"
-            TxtOtsMonthGoalVal.Text = GoalCountSum(New Date(currentYear, periodEndDate.Month, 1), periodEndDate).ToString()
-
-            TxtOtsYtdPrev.Text = $"ОТС {monthNumber}м ПГ"
-            TxtOtsYtdPrevVal.Text = previousYearWindow.Count().ToString()
-            TxtOtsYtdGoal.Text = $"Цель {monthNumber}м ТГ"
-            TxtOtsYtdGoalVal.Text = GoalCountSum(curWindowStart, curWindowEnd).ToString()
-
             ' ===== цели по часам =====
             Dim monthGoalHours = GoalHoursSum(New Date(currentYear, periodEndDate.Month, 1), periodEndDate)
             Dim periodGoalHours = GoalHoursSum(curWindowStart, curWindowEnd)
 
-            TxtHoursMonthGoalVal.Text = If(monthGoalHours = 0, "", F2(monthGoalHours))
-            TxtHoursYtdGoalVal.Text = If(periodGoalHours = 0, "", F2(periodGoalHours))
 
-            ' ===== дороги: цель и факт из JSON =====
+
+
+            If Not IsMultiMonth Then
+                HeaderHoursMonthGoal.Visibility = Visibility.Visible
+                TxtHoursMonthGoalVal.Text = If(monthGoalHours = 0, "", F2(monthGoalHours))
+                ' ===== цели по количеству =====
+                SetRoadGoalCells(periodEndDate)
+
+            Else
+                HeaderHoursYtdGoal.Visibility = Visibility.Visible
+                TxtHoursYtdGoalVal.Text = If(periodGoalHours = 0, "", F2(periodGoalHours))
+            End If
+        End Sub
+
+
+
+
+        ''' <summary>
+        ''' ===== дороги: цель и факт из JSON =====
+        ''' </summary>
+        ''' <param name="periodEndDate"></param>
+        Private Sub SetRoadGoalCells(periodEndDate As Date)
             Dim roadGoals = RoadGoalsStore.Load()
             Dim roadGoalsForMonth = roadGoals?.FirstOrDefault(Function(x) x.Year = periodEndDate.Year AndAlso x.Month = periodEndDate.Month)
 
@@ -436,8 +430,8 @@ Namespace Kas
             TxtRoadHoursVsjd.Text = If(roadGoalsForMonth Is Nothing OrElse roadGoalsForMonth.VsjdHoursFact = 0, "", F2(roadGoalsForMonth.VsjdHoursFact))
             TxtRoadHoursZabd.Text = If(roadGoalsForMonth Is Nothing OrElse roadGoalsForMonth.ZabdHoursFact = 0, "", F2(roadGoalsForMonth.ZabdHoursFact))
             TxtRoadHoursDvd.Text = If(roadGoalsForMonth Is Nothing OrElse roadGoalsForMonth.DvdHoursFact = 0, "", F2(roadGoalsForMonth.DvdHoursFact))
-
         End Sub
+
 
 
         Private Function HasTransferPlan(o As Otkaz) As Boolean
