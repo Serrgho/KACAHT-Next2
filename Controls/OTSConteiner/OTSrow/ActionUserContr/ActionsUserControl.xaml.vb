@@ -64,7 +64,7 @@ Namespace Kas
                                 End If
 
                                 If Not IsNothing(Entry) Then
-                                    DeletePlan(PointedOtkaz, PointedOtkaz.GetPlanEntryByDescription(Entry.Description))
+                                    PointedOtkaz.DeletePlan(Entry)
                                 End If
                                 '=================================================
                                 'сначала за кем, потом в историю, а потом уже убираем ItemUpdateNote
@@ -112,7 +112,7 @@ Namespace Kas
                                 End If
 
                                 If Not IsNothing(Entry) Then
-                                    DeletePlan(PointedOtkaz, PointedOtkaz.GetPlanEntryByDescription(Entry.Description))
+                                    PointedOtkaz.DeletePlan(Entry)
                                 End If
                                 '=================================================
 
@@ -174,10 +174,10 @@ Namespace Kas
                             If IsNothing(Entry) Then
                                 Entry = PointedOtkaz.GetPlanEntryByDescription("письмо НЗ-1")
                                 If Not IsNothing(Entry) Then
-                                    DeletePlan(PointedOtkaz, PointedOtkaz.GetPlanEntryByDescription("письмо НЗ-1"))
+                                    PointedOtkaz.DeletePlan(Entry)
                                 End If
                             Else
-                                DeletePlan(PointedOtkaz, PointedOtkaz.GetPlanEntryByDescription("На др дорогу"))
+                                PointedOtkaz.DeletePlan(Entry)
                             End If
 
                             PreText += $"  ({DorPr(0)}, {DorPr(1)})"
@@ -186,7 +186,7 @@ Namespace Kas
 
                             Entry = PointedOtkaz.GetPlanEntryByDescription("На др дорогу")
                             If Not IsNothing(Entry) Then
-                                DeletePlan(PointedOtkaz, PointedOtkaz.GetPlanEntryByDescription("На др дорогу"))
+                                PointedOtkaz.DeletePlan(Entry)
                             End If
 
                             PreText = $"{PointedOtkaz.ZaKem}"

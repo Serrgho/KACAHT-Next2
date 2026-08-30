@@ -146,7 +146,10 @@ Namespace Kas
             End Get
             Set
                 If _Kat <> Value Then
-                    History.Add(New HistoryEntry With {.ShowDate = False, .EventDate = Now, .Description = $"Изменена категория с {_Kat} на {Value}"})
+                    If _Kat > 0 Then
+                        History.Add(New HistoryEntry With {.ShowDate = False, .EventDate = Now, .Description = $"Изменена категория с {_Kat} на {Value}"})
+                    End If
+
                     _Kat = Value
                     OnPropertyChanged(NameOf(Kat))
                     If Kat = 3 Then
@@ -1774,6 +1777,7 @@ Namespace Kas
             Get
                 Return GetKomplexOTS()
             End Get
+
         End Property
 
 
@@ -2266,6 +2270,21 @@ Namespace Kas
 
 
 #End Region
+
+
+
+        Public Sub DeletePlan(Plent As PlanEntry)
+
+            Plan.Remove(Plent)
+
+            If HasHistoryEntry(Plent.DisplayText) Then
+                RemoveHistoryEntriesByDescription(Plent.DisplayText)
+            End If
+            If HasHistoryEntry(Plent.Description) Then
+                RemoveHistoryEntriesByDescription(Plent.Description)
+            End If
+        End Sub
+
 
 
         ''' <summary>

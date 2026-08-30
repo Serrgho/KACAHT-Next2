@@ -1,5 +1,7 @@
 ﻿
 
+Imports System.Text
+
 Namespace Kas
 
 	Partial Public Class S24Table3
@@ -196,7 +198,6 @@ Namespace Kas
 			FillRow(7, Nothing)   ' Всего
 		End Sub
 
-
 		' Добавлен новый метод для получения списка отказов, превышающих N суток
 		Private Function ListDays(k As Integer?, days As Integer) As List(Of Otkaz)
 			Return ByDepo(_cur, k).Where(Function(o) IsOverDays(o, days)).ToList()
@@ -216,7 +217,244 @@ Namespace Kas
 			SetCellPair(row, 6, ListAttr(k, True, Cat12), CntAttr(k, False, Cat12))
 			SetCellPair(row, 7, ListAttr(k, True, Cat3), CntAttr(k, False, Cat3))
 			SetCellPair(row, 8, ListAttr(k, True, Nothing), CntAttr(k, False, Nothing))
+
+			' ======================================
+
+			' Подписка на выделение столбцов для ВСЕХ ячеек данных
+			If row >= 2 AndAlso row <= 6 Then
+				For col As Integer = 1 To 8
+					Dim border = FindChildByGridCoords(MainGrid, row, col)
+					If border IsNot Nothing Then
+						Dim tb = TryCast(border.Child, TextBlock)
+						If tb IsNot Nothing Then
+							' Обязательно для корректной работы MouseEnter
+							tb.Background = Brushes.Transparent
+
+							AddHandler tb.MouseEnter, AddressOf Cell_MouseEnterForSelection
+							AddHandler tb.MouseLeave, AddressOf Cell_MouseLeaveForSelection
+							AddHandler tb.PreviewMouseLeftButtonDown, AddressOf Cell_PreviewMouseDownForSelection
+							AddHandler tb.MouseRightButtonDown, AddressOf CopyColumnToClipboard_Click
+						End If
+					End If
+				Next
+			End If
 		End Sub
+
+		' Список ячеек текущего выделенного столбца
+		Private _selectedCells As New List(Of TextBlock)()
+
+		' Цвет выделения (синий, полупрозрачный, как в Excel)
+		Private ReadOnly SelectionBrush As New SolidColorBrush(Color.FromArgb(60, 128, 128, 128))
+		Private ReadOnly DefaultBrush As New SolidColorBrush(Colors.Transparent)
+
+
+		''' <summary>
+		''' Ищет Border в MainGrid по заданным строке и колонке
+		''' </summary>
+		Private Function FindChildByGridCoords(grid As Grid, row As Integer, col As Integer) As Border
+			For Each child In grid.Children
+				If TypeOf child Is Border Then
+					Dim b = CType(child, Border)
+					If Grid.GetRow(b) = row AndAlso Grid.GetColumn(b) = col Then
+						Return b
+					End If
+				End If
+			Next
+			Return Nothing
+		End Function
+
+
+
+
+
+
+
+
+
+
+		''' <summary>
+		''' Копирует ВЫДЕЛЕННЫЙ СТОЛБЕЦ в буфер обмена (вертикальный список)
+		''' </summary>
+		Private Sub CopyColumnToClipboard_Click(sender As Object, e As MouseButtonEventArgs)
+
+
+			If _selectedCells.Count = 0 Then
+				MessageBox.Show("Сначала выделите столбец мышью!", "Внимание",
+						MessageBoxButton.OK, MessageBoxImage.Warning)
+				e.Handled = True
+				Return
+			End If
+
+			' Определяем номер выделенной колонки
+			Dim firstCell = _selectedCells.FirstOrDefault()
+			Dim parentBorder = TryCast(firstCell?.Parent, Border)
+			Dim selectedCol As Integer = If(parentBorder IsNot Nothing, Grid.GetColumn(parentBorder), -1)
+
+			Dim sb As New System.Text.StringBuilder()
+
+			Dim sortedCells = _selectedCells.OrderBy(Function(c)
+														 Dim b = TryCast(c.Parent, Border)
+														 If b IsNot Nothing Then Return Grid.GetRow(b)
+														 Return 0
+													 End Function).ToList()
+
+			For i As Integer = 0 To sortedCells.Count - 1
+				Dim cellText As String = sortedCells(i).Text
+
+				' === ИСПРАВЛЕНИЕ: ЗНАЧЕНИЕ + ПУСТОЙ TAB ДЛЯ ОБЪЕДИНЕННЫХ КОЛОНОК ===
+				If selectedCol = 1 OrElse selectedCol = 2 Then
+					' Одно значение + таб + пустота. Excel не разъединяет ячейку!
+					sb.Append(cellText & vbTab)
+				Else
+					' Обычные колонки - просто значение
+					sb.Append(cellText)
+				End If
+				' ================================================================
+
+				If i < sortedCells.Count - 1 Then sb.Append(vbCrLf)
+			Next
+
+			Clipboard.SetText(sb.ToString())
+			e.Handled = True
+		End Sub
+
+
+
+
+		''' <summary>
+		''' Подсвечивает весь столбец (строки 2-6) указанной колонки
+		''' </summary>
+		Private Sub HighlightColumn(col As Integer)
+			' Снимаем предыдущее выделение
+			For Each cell In _selectedCells
+				cell.Background = DefaultBrush
+			Next
+			_selectedCells.Clear()
+
+			' Если колонка вне диапазона данных - выходим
+			If col < 1 OrElse col > 8 Then Return
+
+			' Собираем и красим ячейки нового столбца
+			For r As Integer = 2 To 6
+				Dim border = FindChildByGridCoords(MainGrid, r, col)
+				If border IsNot Nothing Then
+					Dim tb = TryCast(border.Child, TextBlock)
+					If tb IsNot Nothing Then
+						tb.Background = SelectionBrush
+						_selectedCells.Add(tb)
+					End If
+				End If
+			Next
+		End Sub
+
+		''' <summary>
+		''' Полная очистка выделения
+		''' </summary>
+		Private Sub ClearSelection()
+			For Each cell In _selectedCells
+				cell.Background = DefaultBrush
+			Next
+			_selectedCells.Clear()
+		End Sub
+
+		''' <summary>
+		''' При наведении на любую ячейку - подсвечиваем её столбец
+		''' </summary>
+		Private Sub Cell_MouseEnterForSelection(sender As Object, e As MouseEventArgs)
+			Dim tb = TryCast(sender, TextBlock)
+			If tb Is Nothing Then Return
+
+			Dim parentBorder = TryCast(tb.Parent, Border)
+			If parentBorder Is Nothing Then Return
+
+			Dim col = Grid.GetColumn(parentBorder)
+			HighlightColumn(col)
+		End Sub
+
+		''' <summary>
+		''' При уходе мыши с таблицы - снимаем выделение
+		''' </summary>
+		Private Sub Cell_MouseLeaveForSelection(sender As Object, e As MouseEventArgs)
+
+			' Если выделения нет - выходить нечего
+			If _selectedCells.Count = 0 Then Return
+
+			Dim mousePos = Mouse.GetPosition(MainGrid)
+
+			' Берем первую (верхнюю) и последнюю (нижнюю) ячейку из текущего выделения
+			' _selectedCells уже отсортирован по строкам в HighlightColumn
+			Dim firstCell = _selectedCells.First()
+			Dim lastCell = _selectedCells.Last()
+
+			Dim parentFirst = TryCast(firstCell.Parent, Border)
+			Dim parentLast = TryCast(lastCell.Parent, Border)
+
+			If parentFirst Is Nothing OrElse parentLast Is Nothing Then Return
+
+			' Вычисляем реальные границы выделенного блока в координатах MainGrid
+			Dim topLeft = parentFirst.TranslatePoint(New Point(0, 0), MainGrid)
+			Dim bottomRight = parentLast.TranslatePoint(
+				New Point(parentLast.ActualWidth, parentLast.ActualHeight), MainGrid)
+
+			Dim blockRect = New Rect(topLeft, bottomRight)
+
+			' Красим обратно в прозрачный ТОЛЬКО если курсор реально покинул весь блок
+			If Not blockRect.Contains(mousePos) Then
+				For Each cell In _selectedCells
+					cell.Background = DefaultBrush
+				Next
+				_selectedCells.Clear()
+			End If
+
+
+
+			'Dim pos = Mouse.GetPosition(MainGrid)
+			'' Проверяем, действительно ли курсор покинул границы Grid
+			'If pos.X < 0 OrElse pos.Y < 0 OrElse
+			' pos.X > MainGrid.ActualWidth OrElse pos.Y > MainGrid.ActualHeight Then
+			'	ClearSelection()
+			'End If
+		End Sub
+
+		''' <summary>
+		''' Фиксируем выделение столбца при клике ЛКМ
+		''' </summary>
+		Private Sub Cell_PreviewMouseDownForSelection(sender As Object, e As MouseButtonEventArgs)
+			Dim tb = TryCast(sender, TextBlock)
+			If tb Is Nothing Then Return
+
+			Dim parentBorder = TryCast(tb.Parent, Border)
+			If parentBorder Is Nothing Then Return
+
+			Dim col = Grid.GetColumn(parentBorder)
+			HighlightColumn(col)
+		End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		Sub New()
 			' Этот вызов является обязательным для конструктора.

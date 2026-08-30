@@ -26,8 +26,9 @@
 			<Setter Property="Padding" Value="4,2"/>
 		</Style>
 		<Style x:Key="GoalTextStyle" TargetType="TextBlock" BasedOn="{StaticResource HeaderTextStyle}">
-			<Setter Property="Foreground" Value="Red"/>
-			<Setter Property="FontWeight" Value="Normal"/>
+			<Setter Property="Foreground" Value="White"/>
+			<Setter Property="Background" Value="DarkGray"/>
+			<Setter Property="FontWeight" Value="Bold"/>
 		</Style>
 	</UserControl.Resources>
 
@@ -445,7 +446,7 @@
 
 			<!-- ================= СТРОКА 6: Цель 12 мес.2024 ================= -->
 			<Border Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource HeaderBorder}">
-				<TextBlock x:Name="LblGoal" Style="{StaticResource HeaderTextStyle}"/>
+				<TextBlock x:Name="LblGoal" Style="{StaticResource GoalTextStyle}"/>
 			</Border>
 			<Border Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="2" Style="{StaticResource CellBorder}">
 				<TextBlock x:Name="R7C3" Style="{StaticResource GoalTextStyle}"/>

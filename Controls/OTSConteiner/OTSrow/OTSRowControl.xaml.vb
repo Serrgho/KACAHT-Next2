@@ -3,6 +3,7 @@ Imports System.Text.RegularExpressions
 Imports System.Windows.Controls.Primitives
 Imports System.Windows.Forms
 Imports System.Windows.Threading
+Imports iText.IO.Util.IntHashtable
 
 Namespace Kas
     Partial Public Class OTSRowControl
@@ -390,9 +391,7 @@ Namespace Kas
                                       "Удаление плана",
                                       MessageBoxButton.OKCancel,
                                       MessageBoxImage.Question) Then
-
-                        DeletePlan(otkaz, plan)
-
+                        PointedOtkaz.DeletePlan(plan)
                     End If
                 End If
 

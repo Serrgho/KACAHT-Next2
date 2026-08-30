@@ -75,6 +75,10 @@ Namespace Kas
 
 
         Private Sub btnS24Show_Click(sender As Object, e As RoutedEventArgs)
+
+
+
+
             If My.Settings.OldYJSON = "" Then Exit Sub
             Dim oldY As List(Of Otkaz) = StorageModule.LoadFromJson(My.Settings.OldYJSON)
 
@@ -82,44 +86,107 @@ Namespace Kas
             Dim konDateTime = AddTimeToDate(Fetcher.KonDat, Fetcher.KonTim, Fetcher.KonMinut)
 
             Dim fullCurY = GetFullCurrentYearOtkazy(OTSList, oldY, nachDateTime, konDateTime)
-            'Dim fullCurY = GetFullCurrentYearOtkazy(OTSList, oldY, Fetcher.NachDat, Fetcher.KonDat)
 
-            ' спросили ОДИН раз
             Dim useOneTable As Boolean = AskOneTable()
 
+            ' ===== 0. ЗАГОЛОВОК ОТЧЕТА =====
+            Dim header As New ReportHeader()
+            header.SetReportDate(Today.Date)  ' Используем дату начала периода для заголовка
+
+            ' ===== СОЗДАНИЕ СПИСКОВ ТАБЛИЦ =====
             Dim tables1 = BuildTableList(Of S24Table1)(
-                Function(st, en) New S24Table1(fullCurY, oldY, st, en),
-                useOneTable)
+        Function(st, en) New S24Table1(fullCurY, oldY, st, en), useOneTable)
+
+            Dim tables5 = BuildTableList(Of S24Table5)(
+        Function(st, en) New S24Table5(fullCurY, oldY, st, en), useOneTable)
 
             Dim tables3 = BuildTableList(Of S24Table3)(
-                Function(st, en) New S24Table3(fullCurY, oldY, st, en),
-                useOneTable)
+        Function(st, en) New S24Table3(fullCurY, oldY, st, en), useOneTable)
 
             Dim tables4 = BuildTableList(Of S24Table4)(
-                Function(st, en) New S24Table4(fullCurY, st, en),
-                useOneTable)
+        Function(st, en) New S24Table4(fullCurY, st, en), useOneTable)
 
-            ' ▼▼▼ ВОТ ТУТ, в кнопке: табл.1 своей строкой, табл.3+табл.4 парой в один ряд ▼▼▼
+            Dim tables6 = BuildTableList(Of S24Table6)(
+        Function(st, en) New S24Table6(fullCurY, st, en), useOneTable)
+
+            ' Таблица 7: ОТС 1 категории
+            Dim tables7 = BuildTableList(Of S24Table7)(
+        Function(st, en) New S24Table7(fullCurY, st, en), useOneTable)
+
+            ' Таблица 8: Корректировки ОТС 1,2 категории
+            Dim tables8 = BuildTableList(Of S24Table8)(
+        Function(st, en) New S24Table8(fullCurY, st, en), useOneTable)
+
+            ' ===== СБОРКА ИНТЕРФЕЙСА =====
             Dim all As New List(Of FrameworkElement)
-            Dim maxN = Math.Max(tables1.Count, Math.Max(tables3.Count, tables4.Count))
+
+            ' 1. Сначала добавляем ЗАГОЛОВОК
+            all.Add(header)
+
+
+            Dim maxN = Math.Max(tables1.Count, Math.Max(tables5.Count, Math.Max(tables3.Count, tables4.Count)))
 
             For i = 0 To maxN - 1
-                If i < tables1.Count Then all.Add(tables1(i))
 
+
+                ' Таблица 1 по центру страницы
+                If i < tables1.Count Then
+                    Dim t1Container As New StackPanel With {
+        .HorizontalAlignment = HorizontalAlignment.Center,
+        .VerticalAlignment = VerticalAlignment.Top
+    }
+                    t1Container.Children.Add(tables1(i))
+                    all.Add(t1Container)
+                End If
+
+
+                '' 1. Таблица 1 (отдельно)
+                'If i < tables1.Count Then all.Add(tables1(i))
+
+                ' 2. Таблица 5 (над парными)
+                If i < tables5.Count Then all.Add(tables5(i))
+
+                ' 3. Парные T3 + T4
                 Dim pair As New StackPanel With {
-                    .Orientation = Orientation.Horizontal,
-                    .VerticalAlignment = VerticalAlignment.Top,
-                    .Margin = New Thickness(0, 10, 0, 0)
-                }
+            .Orientation = Orientation.Horizontal,
+            .VerticalAlignment = VerticalAlignment.Top,
+            .Margin = New Thickness(50, 5, 50, 0)
+        }
                 If i < tables3.Count Then pair.Children.Add(tables3(i))
                 If i < tables4.Count Then
-                    tables4(i).Margin = New Thickness(20, 0, 0, 0)
+                    tables4(i).Margin = New Thickness(50, 0, 0, 0)
                     pair.Children.Add(tables4(i))
                 End If
                 If pair.Children.Count > 0 Then all.Add(pair)
             Next
 
+            ' 4. Тройка: T6 (План) + T7 (ОТС 1 кат) + T8 (Корректировки) — ПО ЦЕНТРУ
+            Dim pairPlans As New StackPanel With {
+        .Orientation = Orientation.Horizontal,
+        .HorizontalAlignment = HorizontalAlignment.Center,
+        .VerticalAlignment = VerticalAlignment.Top,
+        .Margin = New Thickness(50, 5, 50, 0)
+    }
+
+            If tables6.Count > 0 Then pairPlans.Children.Add(tables6(0))
+
+            If tables7.Count > 0 Then
+                tables7(0).Margin = New Thickness(50, 5, 50, 0)
+                pairPlans.Children.Add(tables7(0))
+            End If
+
+            ' === ТАБЛИЦА 8: ТРЕТИЙ ЭЛЕМЕНТ СПРАВА ОТ T7 ===
+            If tables8.Count > 0 Then
+                tables8(0).Margin = New Thickness(50, 5, 50, 0)
+                pairPlans.Children.Add(tables8(0))
+            End If
+
+            If pairPlans.Children.Count > 0 Then all.Add(pairPlans)
+
             ShowInWindow(all, $"Справка {Fetcher.NachDat.ToString("yy")}")
+
+
+
         End Sub
 
         Private Sub btnS24T2Show_Click(sender As Object, e As RoutedEventArgs)
@@ -234,7 +301,7 @@ Namespace Kas
         .WindowStartupLocation = WindowStartupLocation.CenterScreen,
         .SizeToContent = SizeToContent.WidthAndHeight,
         .MaxWidth = SystemParameters.PrimaryScreenWidth,
-        .MaxHeight = SystemParameters.PrimaryScreenHeight / 2
+        .MaxHeight = SystemParameters.PrimaryScreenHeight
     }
 
             win.Content = scroller

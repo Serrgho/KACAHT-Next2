@@ -77,17 +77,44 @@ Namespace Kas
 		End Function
 
 
+		' Список ячеек, которые образуют единый подсвечиваемый блок
+		Private _highlightCells As New List(Of TextBlock)()
+
+		' Цвет подсветки (серый, полупрозрачный)
+		Private ReadOnly HighlightBrush As New SolidColorBrush(Color.FromArgb(60, 128, 128, 128))
+		Private ReadOnly DefaultBrush As New SolidColorBrush(Colors.Transparent)
+
+
+
+
 		' ===== ЯЧЕЙКИ =====
 		Private Sub BuildDataRows()
+
+			_highlightCells.Clear()
+
 			For row As Integer = 2 To 7
 				For col As Integer = 1 To 12
 					Dim b As New Border()
-					'b.Style = CType(FindResource(If(col = 5 OrElse col = 10, "TotalBorder", "CellBorder")), Style)
 					b.Style = CType(FindResource(If(row = 7 OrElse col = 5 OrElse col = 10, "TotalBorder", "CellBorder")), Style)
 
 					Dim t As New TextBlock()
 					t.Style = CType(FindResource("CellStyle"), Style)
+
+					' КРИТИЧЕСКИ ВАЖНО: Без прозрачного фона MouseEnter сработает только на тексте!
+					t.Background = Brushes.Transparent
+
+					If row >= 2 AndAlso row <= 6 AndAlso col >= 1 AndAlso col <= 4 Then
+						' Вешаем обработчики ТОЛЬКО на ячейки диапазона
+						AddHandler t.MouseEnter, AddressOf Block_MouseEnter
+						AddHandler t.MouseLeave, AddressOf Block_MouseLeave
+
+						' Добавляем в общий список для групповой покраски
+						_highlightCells.Add(t)
+					End If
+
 					AddHandler t.MouseLeftButtonDown, AddressOf FactCell_Click
+					AddHandler t.MouseRightButtonDown, AddressOf CopyBlockToClipboard_Click
+
 					b.Child = t
 					Grid.SetRow(b, row)
 					Grid.SetColumn(b, col)
@@ -95,8 +122,73 @@ Namespace Kas
 					_cells(row, col) = t
 				Next
 			Next
+
 		End Sub
 
+
+		' При входе на ЛЮБУЮ ячейку диапазона - красим ВСЕ ячейки списка
+		Private Sub Block_MouseEnter(sender As Object, e As MouseEventArgs)
+			For Each cell In _highlightCells
+				cell.Background = HighlightBrush
+			Next
+		End Sub
+
+		' При выходе с ЛЮБОЙ ячейки - гасим ВСЕ
+		' Проверка координат нужна, чтобы подсветка не мигала при переходе между соседними ячейками
+		Private Sub Block_MouseLeave(sender As Object, e As MouseEventArgs)
+			Dim mousePos = Mouse.GetPosition(MainGrid)
+			Dim firstCell = _cells(2, 1)
+			Dim lastCell = _cells(6, 4)
+
+			Dim topLeft = firstCell.TranslatePoint(New Point(0, 0), MainGrid)
+			Dim bottomRight = lastCell.TranslatePoint(
+		New Point(lastCell.ActualWidth, lastCell.ActualHeight), MainGrid)
+
+			Dim blockRect = New Rect(topLeft, bottomRight)
+
+			' Красим обратно в прозрачный ТОЛЬКО если курсор реально покинул весь блок
+			If Not blockRect.Contains(mousePos) Then
+				For Each cell In _highlightCells
+					cell.Background = DefaultBrush
+				Next
+			End If
+		End Sub
+
+
+
+
+
+
+
+
+		''' <summary>
+		''' Копирует весь диапазон ячеек (2,1)-(6,4) в буфер обмена в формате TSV (для Excel)
+		''' </summary>
+		Private Sub CopyBlockToClipboard_Click(sender As Object, e As MouseButtonEventArgs)
+			Dim sb As New System.Text.StringBuilder()
+
+			' Проходим по диапазону строк 2..6
+			For r As Integer = 2 To 6
+				' Проходим по диапазону колонок 1..4
+				For c As Integer = 1 To 4
+					Dim cellText As String = _cells(r, c).Text
+					' Если текст пустой, оставляем пустую строку (для Excel это будет пустая ячейка)
+					sb.Append(cellText)
+
+					' Добавляем табуляцию после каждого столбца, кроме последнего
+					If c < 4 Then sb.Append(vbTab)
+				Next
+
+				' Добавляем перенос строки после каждой строки, кроме последней
+				If r < 6 Then sb.Append(vbCrLf)
+			Next
+
+			' Кладем в буфер обмена
+			Clipboard.SetText(sb.ToString())
+
+			' Блокируем стандартное меню
+			e.Handled = True
+		End Sub
 
 		Private Sub FactCell_Click(sender As Object, e As MouseButtonEventArgs)
 			Dim tb = TryCast(sender, TextBlock) : If tb Is Nothing Then Return
@@ -314,6 +406,7 @@ Namespace Kas
 			' Добавить код инициализации после вызова InitializeComponent().
 
 		End Sub
+
 
 	End Class
 

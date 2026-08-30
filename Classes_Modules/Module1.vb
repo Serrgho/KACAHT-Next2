@@ -640,74 +640,9 @@ Namespace Kas
             Next
         End Sub
 
-        Public Sub DeletePlan(OTS As Otkaz, Plent As PlanEntry)
 
-            OTS.Plan.Remove(Plent)
-
-            If OTS.HasHistoryEntry(Plent.DisplayText) Then
-                OTS.RemoveHistoryEntriesByDescription(Plent.DisplayText)
-            End If
-            If OTS.HasHistoryEntry(Plent.Description) Then
-                OTS.RemoveHistoryEntriesByDescription(Plent.Description)
-            End If
-        End Sub
 
     End Module
-
-
-    Public Class BorderExtensions
-        ' ✅ Было: GetType(Object) → Стало: GetType(Boolean)
-        Public Shared ReadOnly HasTextProperty As DependencyProperty =
-        DependencyProperty.RegisterAttached(
-            "HasText",
-            GetType(Boolean), ' <-- Ключевое исправление
-            GetType(BorderExtensions),
-            New FrameworkPropertyMetadata(False, FrameworkPropertyMetadataOptions.Inherits)
-        )
-
-        Public Shared Sub SetHasText(element As DependencyObject, value As Boolean)
-            element.SetValue(HasTextProperty, value)
-        End Sub
-
-        Public Shared Function GetHasText(element As DependencyObject) As Boolean
-            Return DirectCast(element.GetValue(HasTextProperty), Boolean)
-        End Function
-    End Class
-
-
-    Public Class IsNotEmptyConverter
-        Implements IValueConverter
-
-        Public Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
-            ' 1. Null/UnsetValue
-            If value Is Nothing OrElse value Is DependencyProperty.UnsetValue Then Return False
-
-            ' 2. Дата
-            If TypeOf value Is DateTime Then
-                Return DirectCast(value, DateTime) <> DateTime.MinValue
-            End If
-
-            ' 3. Строка
-            Dim strValue As String = TryCast(value, String)
-            If strValue IsNot Nothing Then
-                If String.IsNullOrWhiteSpace(strValue) OrElse
-                   strValue = "!" OrElse
-                   strValue.Contains("---") Then
-                    Return False
-                End If
-                Return True
-            End If
-
-            ' 4. Остальные типы (числа, объекты и т.д.)
-            Return True
-        End Function
-
-        Public Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
-            Throw New NotImplementedException() ' Односторонний конвертер
-        End Function
-
-    End Class
-
 
 
 

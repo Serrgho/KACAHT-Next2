@@ -29,12 +29,13 @@
 			<Setter Property="VerticalAlignment" Value="Center"/>
 			<Setter Property="Padding" Value="3,1"/>
 		</Style>
+		
 	</UserControl.Resources>
 
 	<StackPanel>
 		<TextBlock x:Name="LblCaption" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center" Margin="0,0,0,5"/>
 
-		<Grid x:Name="MainGrid">
+		<Grid x:Name="MainGrid" >
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="130"/>
 				<ColumnDefinition Width="65"/>
@@ -133,6 +134,8 @@
 			<Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TotalBorder}">
 				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Всего:"/>
 			</Border>
+																								
 		</Grid>
+		
 	</StackPanel>
 </UserControl>

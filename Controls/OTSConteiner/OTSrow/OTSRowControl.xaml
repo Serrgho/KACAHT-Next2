@@ -296,11 +296,11 @@
 
 
 
-			<Border Grid.Column="12" 
-        Background="Transparent"
-        MouseRightButtonUp="DaNaLok_MouseRightButtonUp">
-        
-            <ItemsControl Grid.Column="12" ItemsSource="{Binding DaNaLok}" VerticalAlignment="Center" Margin="3"  >
+			<Border Grid.Column="12"
+                    local:BorderExtensions.HasText="{Binding DaNaLok.Count, Converter={StaticResource IsNotEmptyConverter}}" Style="{StaticResource ActiveBorderStyle}"
+                    MouseRightButtonUp="DaNaLok_MouseRightButtonUp">
+
+				<ItemsControl Grid.Column="12" ItemsSource="{Binding DaNaLok}" VerticalAlignment="Center" Margin="3"  >
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
 						<StackPanel Orientation="Vertical" Margin="0 5">

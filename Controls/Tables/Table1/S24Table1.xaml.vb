@@ -285,6 +285,233 @@ Namespace Kas
             Return data
         End Function
 
+
+
+        ' Список ячеек текущей активной группы для подсветки
+        Private _highlightGroup As New List(Of TextBlock)()
+        ' Словарь: TextBlock -> индекс группы в HighlightGroups (для мгновенного поиска)
+        Private _cellToGroupIndex As New Dictionary(Of TextBlock, Integer)()
+
+        ' Цвет подсветки (серый, полупрозрачный)
+        Private ReadOnly GroupHighlightBrush As New SolidColorBrush(Color.FromArgb(60, 128, 128, 128))
+        Private ReadOnly DefaultBrush As New SolidColorBrush(Colors.Transparent)
+
+        ' Описание групп: (StartRow, StartCol, EndRow, EndCol) - КООРДИНАТЫ GRID
+        Private ReadOnly HighlightGroups As Integer(,) = {
+    {2, 6, 3, 8},   ' Т
+    {2, 10, 3, 12}, ' ТР
+    {2, 14, 3, 16}, ' СЛД
+    {2, 18, 3, 20}  ' Заводы
+}
+
+
+
+
+        Private Sub InitGroupHighlighting()
+            _highlightGroup.Clear()
+            _cellToGroupIndex.Clear()
+
+            For g As Integer = 0 To HighlightGroups.GetUpperBound(0)
+                Dim gridR1 = HighlightGroups(g, 0)
+                Dim gridC1 = HighlightGroups(g, 1)
+                Dim gridR2 = HighlightGroups(g, 2)
+                Dim gridC2 = HighlightGroups(g, 3)
+
+                ' Перевод координат Grid в индексы RowCellsMap
+                Dim mapR1 = gridR1 + 1
+                Dim mapR2 = gridR2 + 1
+                Dim mapC1 = gridC1 - 2
+                Dim mapC2 = gridC2 - 2
+
+                Dim groupCells As New List(Of TextBlock)()
+
+                For mapRow As Integer = mapR1 To mapR2
+                    If RowCellsMap.ContainsKey(mapRow) Then
+                        Dim cellsInRow = RowCellsMap(mapRow)
+                        For idx As Integer = mapC1 To mapC2
+                            If idx >= 0 AndAlso idx < cellsInRow.Length Then
+                                Dim tb = cellsInRow(idx)
+                                If tb IsNot Nothing Then
+                                    ' Защита от дубликатов
+                                    If Not _cellToGroupIndex.ContainsKey(tb) Then
+                                        tb.Background = Brushes.Transparent
+                                        AddHandler tb.MouseEnter, AddressOf Group_MouseEnter
+                                        AddHandler tb.MouseLeave, AddressOf Group_MouseLeave
+                                        AddHandler tb.MouseRightButtonDown, AddressOf CopyGroupToClipboard_Click
+                                    End If
+
+                                    groupCells.Add(tb)
+                                    _cellToGroupIndex(tb) = g ' Запоминаем ИНДЕКС ГРУППЫ
+                                End If
+                            End If
+                        Next
+                    End If
+                Next
+            Next
+        End Sub
+
+
+
+
+
+
+        ''' <summary>
+        ''' При наведении - подсвечиваем группу ПО ИНДЕКСУ ИЗ МАССИВА
+        ''' </summary>
+        Private Sub Group_MouseEnter(sender As Object, e As MouseEventArgs)
+            Dim tb = TryCast(sender, TextBlock)
+            If tb Is Nothing Then Return
+
+            Dim groupIdx As Integer = -1
+            If _cellToGroupIndex.TryGetValue(tb, groupIdx) Then
+                ' Гасим предыдущую подсветку
+                For Each cell In _highlightGroup
+                    cell.Background = DefaultBrush
+                Next
+
+                ' Собираем ячейки заново по индексу группы (гарантированно правильный набор)
+                _highlightGroup.Clear()
+                Dim r1 = HighlightGroups(groupIdx, 0) + 1
+                Dim c1 = HighlightGroups(groupIdx, 1) - 2
+                Dim r2 = HighlightGroups(groupIdx, 2) + 1
+                Dim c2 = HighlightGroups(groupIdx, 3) - 2
+
+                For mapRow As Integer = r1 To r2
+                    If RowCellsMap.ContainsKey(mapRow) Then
+                        Dim cellsInRow = RowCellsMap(mapRow)
+                        For idx As Integer = c1 To c2
+                            If idx >= 0 AndAlso idx < cellsInRow.Length Then
+                                Dim cellTb = cellsInRow(idx)
+                                If cellTb IsNot Nothing Then
+                                    cellTb.Background = GroupHighlightBrush
+                                    _highlightGroup.Add(cellTb)
+                                End If
+                            End If
+                        Next
+                    End If
+                Next
+            End If
+        End Sub
+
+        ''' <summary>
+        ''' При уходе мыши - БЕЗОПАСНАЯ очистка без обращений к пустым коллекциям
+        ''' </summary>
+        Private Sub Group_MouseLeave(sender As Object, e As MouseEventArgs)
+            ' ПРОВЕРКА НА ПУСТОТУ ПЕРЕД ЛЮБЫМИ ДЕЙСТВИЯМИ
+            If _highlightGroup.Count = 0 Then Return
+
+            Dim mousePos = Mouse.GetPosition(MainGrid)
+
+            ' Берем границы из МАССИВА, а не из коллекции
+            ' Находим индекс текущей группы через любую ячейку
+            Dim firstCell = _highlightGroup(0) ' Безопасно, т.к. проверили Count > 0
+            Dim groupIdx As Integer = -1
+            If Not _cellToGroupIndex.TryGetValue(firstCell, groupIdx) Then Return
+
+            Dim gridR1 = HighlightGroups(groupIdx, 0)
+            Dim gridC1 = HighlightGroups(groupIdx, 1)
+            Dim gridR2 = HighlightGroups(groupIdx, 2)
+            Dim gridC2 = HighlightGroups(groupIdx, 3)
+
+            ' Находим реальные Border'ы для расчета границ (используем Map-индексы)
+            Dim mapR1 = gridR1 + 1
+            Dim mapC1 = gridC1 - 2
+            Dim mapR2 = gridR2 + 1
+            Dim mapC2 = gridC2 - 2
+
+            Dim topLeftBorder As Border = Nothing
+            Dim bottomRightBorder As Border = Nothing
+
+            If RowCellsMap.ContainsKey(mapR1) AndAlso RowCellsMap.ContainsKey(mapR2) Then
+                Dim row1Cells = RowCellsMap(mapR1)
+                Dim row2Cells = RowCellsMap(mapR2)
+
+                If mapC1 >= 0 AndAlso mapC1 < row1Cells.Length Then
+                    topLeftBorder = TryCast(row1Cells(mapC1).Parent, Border)
+                End If
+                If mapC2 >= 0 AndAlso mapC2 < row2Cells.Length Then
+                    bottomRightBorder = TryCast(row2Cells(mapC2).Parent, Border)
+                End If
+            End If
+
+            If topLeftBorder IsNot Nothing AndAlso bottomRightBorder IsNot Nothing Then
+                Dim topLeft = topLeftBorder.TranslatePoint(New Point(0, 0), MainGrid)
+                Dim bottomRight = bottomRightBorder.TranslatePoint(
+            New Point(bottomRightBorder.ActualWidth, bottomRightBorder.ActualHeight), MainGrid)
+
+                Dim blockRect = New Rect(topLeft, bottomRight)
+
+                ' Красим обратно ТОЛЬКО если курсор реально покинул блок
+                If Not blockRect.Contains(mousePos) Then
+                    For Each cell In _highlightGroup
+                        cell.Background = DefaultBrush
+                    Next
+                    _highlightGroup.Clear()
+                End If
+            Else
+                ' Если границы не удалось получить - просто гасим подсветку
+                For Each cell In _highlightGroup
+                    cell.Background = DefaultBrush
+                Next
+                _highlightGroup.Clear()
+            End If
+        End Sub
+
+        ''' <summary>
+        ''' Копирует ТЕКУЩУЮ ПОДСВЕЧЕННУЮ ГРУППУ в буфер обмена
+        ''' Формат: TSV (табуляция между столбцами, перенос между строками)
+        ''' </summary>
+        Private Sub CopyGroupToClipboard_Click(sender As Object, e As MouseButtonEventArgs)
+            If _highlightGroup.Count = 0 Then
+                MessageBox.Show("Наведите мышь на группу данных (Комплекс, Т, ТР...) перед копированием!",
+                        "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning)
+                e.Handled = True
+                Return
+            End If
+
+            Dim sb As New System.Text.StringBuilder()
+
+            ' Сортируем ячейки: сначала по строке, потом по колонке
+            Dim sortedCells = _highlightGroup.OrderBy(Function(c)
+                                                          Dim b = TryCast(c.Parent, Border)
+                                                          If b IsNot Nothing Then
+                                                              Return Grid.GetRow(b) * 100 + Grid.GetColumn(b)
+                                                          End If
+                                                          Return 0
+                                                      End Function).ToList()
+
+            ' Определяем границы группы для правильного форматирования
+            Dim minRow = sortedCells.Min(Function(c) Grid.GetRow(TryCast(c.Parent, Border)))
+            Dim maxRow = sortedCells.Max(Function(c) Grid.GetRow(TryCast(c.Parent, Border)))
+            Dim minCol = sortedCells.Min(Function(c) Grid.GetColumn(TryCast(c.Parent, Border)))
+            Dim maxCol = sortedCells.Max(Function(c) Grid.GetColumn(TryCast(c.Parent, Border)))
+
+            ' Формируем TSV матрицу
+            For r As Integer = minRow To maxRow
+                Dim rowStarted As Boolean = False
+                For c As Integer = minCol To maxCol
+                    ' Находим ячейку в отсортированном списке
+                    Dim cell = sortedCells.FirstOrDefault(Function(x)
+                                                              Dim b = TryCast(x.Parent, Border)
+                                                              Return b IsNot Nothing AndAlso
+                                                             Grid.GetRow(b) = r AndAlso
+                                                             Grid.GetColumn(b) = c
+                                                          End Function)
+
+                    Dim text As String = If(cell IsNot Nothing, cell.Text, "")
+
+                    If rowStarted Then sb.Append(vbTab)
+                    sb.Append(text)
+                    rowStarted = True
+                Next
+                If r < maxRow Then sb.Append(vbCrLf)
+            Next
+
+            Clipboard.SetText(sb.ToString())
+            e.Handled = True
+        End Sub
+
+
         ' ==================== ЗАГРУЗКА ====================
 
         Private Sub S24Table1_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
@@ -365,7 +592,8 @@ Namespace Kas
                 Dim rowFullMonth = BuildTableRowData(fullMonthOtkazy, tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav, isCat1, isCat2, isCat3)
                 FillRowMerged(10, rowFullMonth, allNormal:=True)
             End If
-
+            ' ▼▼▼ ИНИЦИАЛИЗАЦИЯ ПОДСВЕТКИ ГРУПП (В САМОМ КОНЦЕ!) ▼▼▼
+            InitGroupHighlighting()
         End Sub
 
 
@@ -654,150 +882,16 @@ Namespace Kas
                 rowCells(i).Text = If(values(i) = "0", "", values(i))
                 rowCells(i).Tag = Nothing
                 rowCells(i).Cursor = Cursors.Arrow
-                'rowCells(i).FontWeight = FontWeights.Bold ' Цели выделяем жирным
-                'rowCells(i).Foreground = Brushes.Black
+
             Next
         End Sub
 
     End Class
 
 
-    Public Class TableRowData
 
-        ' ===== БАЗОВЫЕ СПИСКИ (заполняются вручную) =====
-        ' Т
-        Public Property T1List As List(Of Otkaz) = Nothing
-        Public Property T2List As List(Of Otkaz) = Nothing
-        Public Property T3List As List(Of Otkaz) = Nothing
 
-        ' ТР
-        Public Property TR1List As List(Of Otkaz) = Nothing
-        Public Property TR2List As List(Of Otkaz) = Nothing
-        Public Property TR3List As List(Of Otkaz) = Nothing
 
-        ' СЛД
-        Public Property SLD1List As List(Of Otkaz) = Nothing
-        Public Property SLD2List As List(Of Otkaz) = Nothing
-        Public Property SLD3List As List(Of Otkaz) = Nothing
-
-        ' Заводы
-        Public Property Factory1List As List(Of Otkaz) = Nothing
-        Public Property Factory2List As List(Of Otkaz) = Nothing
-        Public Property Factory3List As List(Of Otkaz) = Nothing
-
-        ' ===== ВЫЧИСЛЯЕМЫЕ СПИСКИ (ReadOnly) =====
-
-        ' ----- Т -----
-        Public ReadOnly Property T12List As List(Of Otkaz)
-            Get
-                Return T1List?.Concat(T2List).ToList()
-            End Get
-        End Property
-
-        Public ReadOnly Property T13List As List(Of Otkaz)
-            Get
-                Return T1List?.Concat(T2List)?.Concat(T3List).ToList()
-            End Get
-        End Property
-
-        ' ----- ТР -----
-        Public ReadOnly Property TR12List As List(Of Otkaz)
-            Get
-                Return TR1List?.Concat(TR2List).ToList()
-            End Get
-        End Property
-
-        Public ReadOnly Property TR13List As List(Of Otkaz)
-            Get
-                Return TR1List?.Concat(TR2List)?.Concat(TR3List).ToList()
-            End Get
-        End Property
-
-        ' ----- СЛД -----
-        Public ReadOnly Property SLD12List As List(Of Otkaz)
-            Get
-                Return SLD1List?.Concat(SLD2List).ToList()
-            End Get
-        End Property
-
-        Public ReadOnly Property SLD13List As List(Of Otkaz)
-            Get
-                Return SLD1List?.Concat(SLD2List)?.Concat(SLD3List).ToList()
-            End Get
-        End Property
-
-        ' ----- Заводы -----
-        Public ReadOnly Property Factory12List As List(Of Otkaz)
-            Get
-                Return Factory1List?.Concat(Factory2List).ToList()
-            End Get
-        End Property
-
-        Public ReadOnly Property Factory13List As List(Of Otkaz)
-            Get
-                Return Factory1List?.Concat(Factory2List).Concat(Factory3List).ToList()
-            End Get
-        End Property
-
-        ' ----- КОМПЛЕКС (агрегат) -----
-        Public ReadOnly Property Complex1List As List(Of Otkaz)
-            Get
-                Return T1List?.Concat(TR1List)?.Concat(SLD1List)?.Concat(Factory1List)?.ToList()
-            End Get
-        End Property
-
-        Public ReadOnly Property Complex2List As List(Of Otkaz)
-            Get
-                Return T2List?.Concat(TR2List)?.Concat(SLD2List)?.Concat(Factory2List)?.ToList()
-            End Get
-        End Property
-
-        Public ReadOnly Property Complex3List As List(Of Otkaz)
-            Get
-                Return T3List?.Concat(TR3List)?.Concat(SLD3List)?.Concat(Factory3List)?.ToList()
-            End Get
-        End Property
-
-        Public ReadOnly Property Complex12List As List(Of Otkaz)
-            Get
-                Return Complex1List?.Concat(Complex2List).ToList()
-            End Get
-        End Property
-
-        Public ReadOnly Property Complex13List As List(Of Otkaz)
-            Get
-                Return Complex1List?.Concat(Complex2List)?.Concat(Complex3List)?.ToList()
-            End Get
-        End Property
-    End Class
-
-    'Этот класс отличается от TableRowData тем, что хранит готовые строковые значения (например, "+3", "-15.38%"), а не списки отказов. Он используется только для строк 8 и 9, где drill-down не нужен
-    Public Class TableRowNumericData
-        ' ===== Комплекс =====
-        Public Property Complex12 As String = ""
-        Public Property Complex3 As String = ""
-        Public Property Complex13 As String = ""
-
-        ' ===== Т =====
-        Public Property T12 As String = ""
-        Public Property T3 As String = ""
-        Public Property T13 As String = ""
-
-        ' ===== ТР =====
-        Public Property TR12 As String = ""
-        Public Property TR3 As String = ""
-        Public Property TR13 As String = ""
-
-        ' ===== СЛД =====
-        Public Property SLD12 As String = ""
-        Public Property SLD3 As String = ""
-        Public Property SLD13 As String = ""
-
-        ' ===== Заводы =====
-        Public Property Factory12 As String = ""
-        Public Property Factory3 As String = ""
-        Public Property Factory13 As String = ""
-    End Class
 
 
 

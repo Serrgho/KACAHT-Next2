@@ -18,7 +18,7 @@ Namespace Kas
         Public OTSInKomplex As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.Uchet)
         Public OTSOutNotPeredanKomplex As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso (Not o.Uchet AndAlso (Not o.ZaKemCode?.ToLower Like "*дорог*") AndAlso (Not o.ZaKemCode?.ToLower Like "*ехнолог*")))
 
-        Public UpTo10DaysRassled As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso (o.DaysOnRassled > 9 And o.Uchet And o.ZaKem?.ToLower <> "тр"))
+        Public UpTo10DaysRassled As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso (o.DaysOnRassled > 10 And o.Uchet And o.ZaKem?.ToLower <> "тр"))
         Public UpTo10DaysZakryt As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso ((o.Zakryt - o.Nach).Days > 10 And o.Uchet And o.ZaKem?.ToLower <> "тр"))
         Public UpTo10DaysonCreateZakryt As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso ((o.Zakryt - o.Sozdan).Days > 10 And o.Uchet And o.ZaKem?.ToLower <> "тр"))
 
