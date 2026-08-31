@@ -52,7 +52,7 @@
 
 			<!-- Шапка -->
 			<Border Grid.Row="0" Grid.Column="0" Style="{StaticResource HeaderBorder}">
-				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Депо"/>
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Комплекс"/>
 			</Border>
 			<Border Grid.Row="0" Grid.Column="1" Style="{StaticResource HeaderBorder}">
 				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="в границах Крас" TextWrapping="NoWrap"/>

@@ -304,12 +304,22 @@ Namespace Kas
     {2, 18, 3, 20}  ' Заводы
 }
 
-
+        ' Добавь поле для хранения границ текущей активной группы
+        Private _currentGroupBounds As Rect?
 
 
         Private Sub InitGroupHighlighting()
+
+
             _highlightGroup.Clear()
             _cellToGroupIndex.Clear()
+            _currentGroupBounds = Nothing
+
+            RemoveHandler MainGrid.MouseLeave, AddressOf MainGrid_MouseLeave
+            AddHandler MainGrid.MouseLeave, AddressOf MainGrid_MouseLeave
+
+            RemoveHandler MainGrid.MouseMove, AddressOf MainGrid_MouseMove
+            AddHandler MainGrid.MouseMove, AddressOf MainGrid_MouseMove
 
             For g As Integer = 0 To HighlightGroups.GetUpperBound(0)
                 Dim gridR1 = HighlightGroups(g, 0)
@@ -317,7 +327,6 @@ Namespace Kas
                 Dim gridR2 = HighlightGroups(g, 2)
                 Dim gridC2 = HighlightGroups(g, 3)
 
-                ' Перевод координат Grid в индексы RowCellsMap
                 Dim mapR1 = gridR1 + 1
                 Dim mapR2 = gridR2 + 1
                 Dim mapC1 = gridC1 - 2
@@ -332,7 +341,6 @@ Namespace Kas
                             If idx >= 0 AndAlso idx < cellsInRow.Length Then
                                 Dim tb = cellsInRow(idx)
                                 If tb IsNot Nothing Then
-                                    ' Защита от дубликатов
                                     If Not _cellToGroupIndex.ContainsKey(tb) Then
                                         tb.Background = Brushes.Transparent
                                         AddHandler tb.MouseEnter, AddressOf Group_MouseEnter
@@ -341,24 +349,131 @@ Namespace Kas
                                     End If
 
                                     groupCells.Add(tb)
-                                    _cellToGroupIndex(tb) = g ' Запоминаем ИНДЕКС ГРУППЫ
+                                    _cellToGroupIndex(tb) = g
                                 End If
                             End If
                         Next
                     End If
                 Next
             Next
+
+
+
+
+
+            '_highlightGroup.Clear()
+            '_cellToGroupIndex.Clear()
+
+            '' === ДОБАВИТЬ: Подписка на уход мыши со ВСЕГО Grid'а ===
+            'AddHandler MainGrid.MouseLeave, AddressOf MainGrid_MouseLeave
+            '' =======================================================
+
+            'For g As Integer = 0 To HighlightGroups.GetUpperBound(0)
+            '    Dim gridR1 = HighlightGroups(g, 0)
+            '    Dim gridC1 = HighlightGroups(g, 1)
+            '    Dim gridR2 = HighlightGroups(g, 2)
+            '    Dim gridC2 = HighlightGroups(g, 3)
+
+            '    ' Перевод координат Grid в индексы RowCellsMap
+            '    Dim mapR1 = gridR1 + 1
+            '    Dim mapR2 = gridR2 + 1
+            '    Dim mapC1 = gridC1 - 2
+            '    Dim mapC2 = gridC2 - 2
+
+            '    Dim groupCells As New List(Of TextBlock)()
+
+            '    For mapRow As Integer = mapR1 To mapR2
+            '        If RowCellsMap.ContainsKey(mapRow) Then
+            '            Dim cellsInRow = RowCellsMap(mapRow)
+            '            For idx As Integer = mapC1 To mapC2
+            '                If idx >= 0 AndAlso idx < cellsInRow.Length Then
+            '                    Dim tb = cellsInRow(idx)
+            '                    If tb IsNot Nothing Then
+            '                        ' Защита от дубликатов
+            '                        If Not _cellToGroupIndex.ContainsKey(tb) Then
+            '                            tb.Background = Brushes.Transparent
+            '                            AddHandler tb.MouseEnter, AddressOf Group_MouseEnter
+            '                            AddHandler tb.MouseLeave, AddressOf Group_MouseLeave
+            '                            AddHandler tb.MouseRightButtonDown, AddressOf CopyGroupToClipboard_Click
+
+
+
+            '                            ' =========================================================
+
+            '                        End If
+
+            '                        groupCells.Add(tb)
+            '                        _cellToGroupIndex(tb) = g ' Запоминаем ИНДЕКС ГРУППЫ
+            '                    End If
+            '                End If
+            '            Next
+            '        End If
+            '    Next
+            'Next
         End Sub
 
+        ''' <summary>
+        ''' При уходе мыши за пределы ВСЕЙ таблицы - принудительно гасим подсветку
+        ''' </summary>
+        Private Sub MainGrid_MouseLeave(sender As Object, e As MouseEventArgs)
+            If _highlightGroup.Count = 0 Then Return
+
+            For Each cell In _highlightGroup
+                cell.Background = DefaultBrush
+            Next
+            _highlightGroup.Clear()
+            _currentGroupBounds = Nothing
 
 
 
+
+            'If _highlightGroup.Count = 0 Then Return
+
+            'For Each cell In _highlightGroup
+            '    cell.Background = DefaultBrush
+            'Next
+            '_highlightGroup.Clear()
+        End Sub
+
+        ''' <summary>
+        ''' При движении мыши по Grid'у: если курсор не над ячейкой активной группы - гасим подсветку
+        ''' </summary>
+        Private Sub MainGrid_MouseMove(sender As Object, e As MouseEventArgs)
+
+            If _highlightGroup.Count = 0 OrElse Not _currentGroupBounds.HasValue Then Return
+
+            Dim mousePos = Mouse.GetPosition(MainGrid)
+
+            ' Если курсор ВЫШЕЛ за пределы кэшированного прямоугольника группы - гасим
+            If Not _currentGroupBounds.Value.Contains(mousePos) Then
+                For Each cell In _highlightGroup
+                    cell.Background = DefaultBrush
+                Next
+                _highlightGroup.Clear()
+                _currentGroupBounds = Nothing
+            End If
+
+
+            'If _highlightGroup.Count = 0 Then Return
+
+            'Dim tb = TryCast(e.OriginalSource, TextBlock)
+
+            '' Если мышь не над TextBlock ИЛИ этот TextBlock не входит в текущую подсвеченную группу - гасим
+            'If tb Is Nothing OrElse Not _highlightGroup.Contains(tb) Then
+            '    For Each cell In _highlightGroup
+            '        cell.Background = DefaultBrush
+            '    Next
+            '    _highlightGroup.Clear()
+            'End If
+        End Sub
 
 
         ''' <summary>
         ''' При наведении - подсвечиваем группу ПО ИНДЕКСУ ИЗ МАССИВА
         ''' </summary>
         Private Sub Group_MouseEnter(sender As Object, e As MouseEventArgs)
+
+
             Dim tb = TryCast(sender, TextBlock)
             If tb Is Nothing Then Return
 
@@ -369,7 +484,7 @@ Namespace Kas
                     cell.Background = DefaultBrush
                 Next
 
-                ' Собираем ячейки заново по индексу группы (гарантированно правильный набор)
+                ' Собираем ячейки группы
                 _highlightGroup.Clear()
                 Dim r1 = HighlightGroups(groupIdx, 0) + 1
                 Dim c1 = HighlightGroups(groupIdx, 1) - 2
@@ -390,7 +505,61 @@ Namespace Kas
                         Next
                     End If
                 Next
+
+                ' === КАЛИБРУЕМ ГРАНИЦЫ ПРЯМО ЗДЕСЬ ===
+                If _highlightGroup.Count > 0 Then
+                    Dim firstCell = _highlightGroup(0)
+                    Dim lastCell = _highlightGroup(_highlightGroup.Count - 1)
+                    Dim parentFirst = TryCast(firstCell.Parent, Border)
+                    Dim parentLast = TryCast(lastCell.Parent, Border)
+
+                    If parentFirst IsNot Nothing AndAlso parentLast IsNot Nothing Then
+                        Dim topLeft = parentFirst.TranslatePoint(New Point(0, 0), MainGrid)
+                        Dim bottomRight = parentLast.TranslatePoint(
+                            New Point(parentLast.ActualWidth, parentLast.ActualHeight), MainGrid)
+                        _currentGroupBounds = New Rect(topLeft, bottomRight)
+                    End If
+                End If
+                ' ======================================
             End If
+
+
+
+
+
+
+            'Dim tb = TryCast(sender, TextBlock)
+            'If tb Is Nothing Then Return
+
+            'Dim groupIdx As Integer = -1
+            'If _cellToGroupIndex.TryGetValue(tb, groupIdx) Then
+            '    ' Гасим предыдущую подсветку
+            '    For Each cell In _highlightGroup
+            '        cell.Background = DefaultBrush
+            '    Next
+
+            '    ' Собираем ячейки заново по индексу группы (гарантированно правильный набор)
+            '    _highlightGroup.Clear()
+            '    Dim r1 = HighlightGroups(groupIdx, 0) + 1
+            '    Dim c1 = HighlightGroups(groupIdx, 1) - 2
+            '    Dim r2 = HighlightGroups(groupIdx, 2) + 1
+            '    Dim c2 = HighlightGroups(groupIdx, 3) - 2
+
+            '    For mapRow As Integer = r1 To r2
+            '        If RowCellsMap.ContainsKey(mapRow) Then
+            '            Dim cellsInRow = RowCellsMap(mapRow)
+            '            For idx As Integer = c1 To c2
+            '                If idx >= 0 AndAlso idx < cellsInRow.Length Then
+            '                    Dim cellTb = cellsInRow(idx)
+            '                    If cellTb IsNot Nothing Then
+            '                        cellTb.Background = GroupHighlightBrush
+            '                        _highlightGroup.Add(cellTb)
+            '                    End If
+            '                End If
+            '            Next
+            '        End If
+            '    Next
+            'End If
         End Sub
 
         ''' <summary>

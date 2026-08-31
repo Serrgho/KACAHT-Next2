@@ -22,7 +22,7 @@ Namespace Kas
             Dim monthName As String = MonthGenitive(reportDate.Month - 1)
             Dim year As Integer = reportDate.Year
 
-            LblDate.Text = $"{day} {monthName} {year}г."
+            LblDate.Text = $"на {day} {monthName} {year}г."
         End Sub
     End Class
 End Namespace

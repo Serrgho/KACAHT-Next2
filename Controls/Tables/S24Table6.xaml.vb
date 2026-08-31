@@ -75,7 +75,7 @@ Namespace Kas
                 If tb IsNot Nothing Then
                     ' Заполняем данные (только часы)
                     Select Case col
-                        Case 1 : tb.Text = PlanHours(list, "др дорогу")
+                        Case 1 : tb.Text = PlanHours(list, "дорог")
                         Case 2 : tb.Text = PlanHours(list, "технолог")
                         Case 3 : tb.Text = PlanHours(list, "корректировка")
                         Case 4 : tb.Text = PlanHoursAny(list)
@@ -93,11 +93,7 @@ Namespace Kas
                     ' ================================================================
                 End If
             Next
-            '' Теперь передаем только строки с часами
-            'CType(FindName($"PlanR{row}C1"), TextBlock).Text = PlanHours(list, "др дорогу")
-            'CType(FindName($"PlanR{row}C2"), TextBlock).Text = PlanHours(list, "технолог")
-            'CType(FindName($"PlanR{row}C3"), TextBlock).Text = PlanHours(list, "корректировка")
-            'CType(FindName($"PlanR{row}C4"), TextBlock).Text = PlanHoursAny(list)
+
         End Sub
 
 
@@ -117,7 +113,7 @@ Namespace Kas
 
             ' === ЖЕСТКИЙ ДИАПАЗОН: Строки 1-5, Колонка col ===
             ' Если колонка не входит в диапазон (1-4) - выходим сразу
-            If col < 1 OrElse col > 4 Then Return
+            If col < 1 OrElse col > 3 Then Return
 
             For r As Integer = 1 To 5
                 Dim tbName As String = $"PlanR{r}C{col}"
@@ -242,35 +238,6 @@ Namespace Kas
         End Sub
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         ''' <summary>
         ''' Возвращает ТОЛЬКО сумму часов. Если 0 - возвращает пустую строку.
         ''' </summary>
@@ -324,114 +291,6 @@ Namespace Kas
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        '        Private _cur As List(Of Otkaz)
-        '        Private _periodEnd As Date?
-        '        Private Shared ReadOnly Ru As CultureInfo = CultureInfo.GetCultureInfo("ru-RU")
-
-        '        Public Sub New(currentYearOtkazy As List(Of Otkaz),
-        '                       Optional periodStart As Date? = Nothing,
-        '                       Optional periodEnd As Date? = Nothing)
-
-        '            InitializeComponent()
-        '            _periodEnd = periodEnd
-
-        '            ' Фильтрация по периоду (аналогично другим таблицам)
-        '            If periodStart.HasValue AndAlso periodEnd.HasValue Then
-        '                Dim nextDayAfterEnd = periodEnd.Value.Date.AddDays(1)
-        '                _cur = currentYearOtkazy.Where(Function(o)
-        '                                                   Dim d = o.Nach.Date
-        '                                                   Return d >= periodStart.Value.Date AndAlso d < nextDayAfterEnd
-        '                                               End Function).ToList()
-        '            Else
-        '                _cur = currentYearOtkazy
-        '            End If
-        '        End Sub
-
-        '        Private Sub S24Table6_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        '            Try
-        '                If _cur Is Nothing Then Return
-
-        '                ' Обновляем заголовок с периодом
-        '                If _periodEnd.HasValue Then
-        '                    Dim monthName = Ru.DateTimeFormat.GetMonthName(_periodEnd.Value.Month)
-        '                    LblCaption.Text = $"План корректировки за {monthName} {_periodEnd.Value.Year} (ОТС/ЧАС)"
-        '                End If
-
-        '                FillPlanTable()
-        '            Catch ex As Exception
-        '                MessageBox.Show(ex.ToString(), "Ошибка в S24Table6")
-        '            End Try
-        '        End Sub
-
-        '#Region "ЛОГИКА ПЛАНОВ (ИЗ S24TABLE2)"
-
-        '        Private Sub FillPlanTable()
-        '            Dim kmp = {1, 2, 3, 5, 7}
-
-        '            For i = 0 To 4
-        '                CType(FindName($"LblPlanR{i + 1}"), TextBlock).Text = Otkaz.GetTCHE_Name(kmp(i))
-        '                FillPlanRow(i + 1, _cur.Where(Function(o) o.KomplexAsInt = kmp(i)).ToList())
-        '            Next
-
-        '            ' Всего — по всем комплексным
-        '            FillPlanRow(6, _cur.Where(Function(o) o.KomplexAsInt > 0).ToList())
-        '        End Sub
-
-        '        Private Sub FillPlanRow(row As Integer, list As List(Of Otkaz))
-        '            CType(FindName($"PlanR{row}C1"), TextBlock).Text = PlanPair(list, "др дорогу")
-        '            CType(FindName($"PlanR{row}C2"), TextBlock).Text = PlanPair(list, "технолог")
-        '            CType(FindName($"PlanR{row}C3"), TextBlock).Text = PlanPair(list, "корректировка")
-        '            CType(FindName($"PlanR{row}C4"), TextBlock).Text = PlanPairAny(list)
-        '        End Sub
-
-        '        Private Function PlanPair(list As List(Of Otkaz), pattern As String) As String
-        '            Dim q = list.Where(Function(o) HasPlan(o, pattern)).ToList()
-        '            If q.Count = 0 Then Return ""
-        '            Return $"{q.Count}/{F2(q.Sum(Function(o) CSng(o.PCh)))}"
-        '        End Function
-
-        '        Private Function PlanPairAny(list As List(Of Otkaz)) As String
-        '            Dim q = list.Where(Function(o) HasPlan(o, "др дорогу") OrElse
-        '                                           HasPlan(o, "технолог") OrElse
-        '                                           HasPlan(o, "корректировка")).ToList()
-        '            If q.Count = 0 Then Return ""
-        '            Return $"{q.Count}/{F2(q.Sum(Function(o) CSng(o.PCh)))}"
-        '        End Function
-
-        '        Private Function HasPlan(o As Otkaz, pattern As String) As Boolean
-        '            Return o.Plan IsNot Nothing AndAlso
-        '                   o.Plan.Any(Function(p) p.Description IsNot Nothing AndAlso
-        '                                          p.Description.ToLower().Contains(pattern))
-        '        End Function
-
-        '        Private Function F2(v As Double) As String
-        '            Return v.ToString("F2", Ru)
-        '        End Function
-
-        '#End Region
 
     End Class
 

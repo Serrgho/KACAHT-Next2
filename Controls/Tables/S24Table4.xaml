@@ -64,7 +64,7 @@
 
 			<!-- ШАПКА -->
 			<Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource HeaderBorder}">
-				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Депо"/>
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Комплекс"/>
 			</Border>
 			<Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="5" Style="{StaticResource HeaderBorder}">
 				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Факт, час"/>

@@ -328,10 +328,20 @@ Namespace Kas
 
             Dim monthNameShort = Ru.DateTimeFormat.GetAbbreviatedMonthName(periodEndDate.Month).TrimEnd("."c).ToUpper()
 
-            ' ===== блок «с учетом плана передачи» =====
+
+            ' ===== блок «с учетом планов корректировки» =====
             Dim totalHoursAll = HoursSum(_cur, excludePlan:=False)
-            Dim hoursWithoutTransferPlan = HoursSum(_cur, excludePlan:=True)
-            Dim transferPlanHours = totalHoursAll - hoursWithoutTransferPlan
+            Dim hoursWithoutPlan = HoursSum(_cur, excludePlan:=True)
+            Dim allPlanHours = totalHoursAll - hoursWithoutPlan
+
+
+            '' ===== блок «с учетом плана передачи» =====
+            'Dim totalHoursAll = HoursSum(_cur, excludePlan:=False)
+            'Dim hoursWithoutTransferPlan = HoursSum(_cur, excludePlan:=True)
+            'Dim transferPlanHours = totalHoursAll - hoursWithoutTransferPlan
+
+
+
 
             ' прошлый год для «П.Г.»: 1 месяц — весь месяц; несколько — тот же период прошлого года
             Dim prevYearMonthHours As Single
@@ -352,10 +362,22 @@ Namespace Kas
             MonthHoursLab.Text = If(IsMultiMonth, "период часы", "месяц часы")
             PgLab.Text = If(IsMultiMonth, "Прош. год (период)", "Прош. год")
 
-            TxtMonthHoursCur.Text = F2(hoursWithoutTransferPlan)
-            TxtMonthHoursDiff.Text = F2(hoursWithoutTransferPlan - prevYearMonthHours)
+
+
+            TxtMonthHoursCur.Text = F2(hoursWithoutPlan)
+            TxtMonthHoursDiff.Text = F2(hoursWithoutPlan - prevYearMonthHours)
             TxtMonthHoursPrev.Text = F2(prevYearMonthHours)
-            TxtMonthHoursDiff.ToolTip = $"{F2(totalHoursAll)} − {F2(transferPlanHours)} (план) − {F2(prevYearMonthHours)}"
+
+            '' Детализация по трем типам планов для тултипа
+            'Dim transferH = _cur.Where(Function(o) o.KomplexAsInt > 0 AndAlso HasTransferPlan(o)).Sum(Function(o) CSng(o.PCh))
+            'Dim techH = _cur.Where(Function(o) o.KomplexAsInt > 0 AndAlso HasTechPlan(o)).Sum(Function(o) CSng(o.PCh))
+            'Dim corrH = _cur.Where(Function(o) o.KomplexAsInt > 0 AndAlso HasCorrPlan(o)).Sum(Function(o) CSng(o.PCh))
+
+            'TxtMonthHoursDiff.ToolTip = $"{F2(totalHoursAll)} − {F2(transferH)} (др.дорога) − {F2(techH)} (технолог) − {F2(corrH)} (корректировка) − {F2(prevYearMonthHours)} (прош.год)"
+
+
+
+            TxtMonthHoursDiff.ToolTip = $"{F2(totalHoursAll)} − {F2(allPlanHours)} (планы) − {F2(prevYearMonthHours)} (прош.год)"
 
             ' ===== блок «Nм ТГ / Nм ПГ» =====
 
@@ -368,7 +390,12 @@ Namespace Kas
                                 o.Nach.Date <= prevWindowEnd)
 
             Dim currentWindowHoursAll = currentWindow.Sum(Function(o) CSng(o.PCh))
-            Dim currentWindowPlanHours = currentWindow.Where(Function(o) HasTransferPlan(o)).Sum(Function(o) CSng(o.PCh))
+
+            Dim currentWindowPlanHours = currentWindow.Where(Function(o) IsExcludablePlan(o)).Sum(Function(o) CSng(o.PCh))
+            'Dim currentWindowPlanHours = currentWindow.Where(Function(o) HasTransferPlan(o)).Sum(Function(o) CSng(o.PCh))
+
+
+
             Dim previousYearWindowHours = previousYearWindow.Sum(Function(o) CSng(o.PCh))
 
             ' ТГ ост = все часы − план передачи − прошлый год  (как в верхнем блоке)
@@ -379,10 +406,21 @@ Namespace Kas
             TxtYtdHoursCur.Text = F2(currentWindowHoursAll - currentWindowPlanHours)   ' часы без плана
             TxtYtdHoursPrev.Text = F2(previousYearWindowHours)
             TxtYtdHoursDiff.Text = F2(ytdDiff)
+
+            'Dim ytdTransferH = currentWindow.Where(Function(o) HasTransferPlan(o)).Sum(Function(o) CSng(o.PCh))
+            'Dim ytdTechH = currentWindow.Where(Function(o) HasTechPlan(o)).Sum(Function(o) CSng(o.PCh))
+            'Dim ytdCorrH = currentWindow.Where(Function(o) HasCorrPlan(o)).Sum(Function(o) CSng(o.PCh))
+
+            'TxtYtdHoursDiff.ToolTip = $"{F2(currentWindowHoursAll)} ({curWindowStart:dd.MM.yy}-{curWindowEnd:dd.MM.yy}) " &
+            '              $"− {F2(currentWindowPlanHours)} (др.дорога: {F2(ytdTransferH)} + технолог: {F2(ytdTechH)} + корректировка: {F2(ytdCorrH)}) " &
+            '              $"− {F2(previousYearWindowHours)} ({prevWindowStart:dd.MM.yy}-{prevWindowEnd:dd.MM.yy}) " &
+            '              $"= {F2(ytdDiff)}"
+
+
             TxtYtdHoursDiff.ToolTip = $"{F2(currentWindowHoursAll)} ({curWindowStart:dd.MM.yy}-{curWindowEnd:dd.MM.yy}) " &
-                              $"− {F2(currentWindowPlanHours)} (план) " &
-                              $"− {F2(previousYearWindowHours)} ({prevWindowStart:dd.MM.yy}-{prevWindowEnd:dd.MM.yy}) " &
-                              $"= {F2(ytdDiff)}"
+              $"− {F2(currentWindowPlanHours)} (планы) " &
+              $"− {F2(previousYearWindowHours)} ({prevWindowStart:dd.MM.yy}-{prevWindowEnd:dd.MM.yy}) " &
+              $"= {F2(ytdDiff)}"
 
 
             ' ===== цели по часам =====
@@ -434,15 +472,30 @@ Namespace Kas
 
 
 
-        Private Function HasTransferPlan(o As Otkaz) As Boolean
-            Return o.Plan IsNot Nothing AndAlso
-                   o.Plan.Any(Function(p) String.Equals(p.Description, "На др дорогу", StringComparison.OrdinalIgnoreCase))
-        End Function
+        'Private Function HasTransferPlan(o As Otkaz) As Boolean
+        '    Return o.Plan IsNot Nothing AndAlso
+        '           o.Plan.Any(Function(p) String.Equals(p.Description, "На др дорогу", StringComparison.OrdinalIgnoreCase))
+        'End Function
 
         Private Function HoursSum(list As IEnumerable(Of Otkaz), excludePlan As Boolean) As Double
-            Dim q = list.Where(Function(o) o.KomplexAsInt > 0)      ' ← только отнесённые на комплексы
-            If excludePlan Then q = q.Where(Function(o) Not HasTransferPlan(o))
+
+            Dim q = list.Where(Function(o) o.KomplexAsInt > 0)
+            If excludePlan Then
+                q = q.Where(Function(o) Not IsExcludablePlan(o))
+            End If
             Return q.Sum(Function(o) CSng(o.PCh))
+
+
+
+            'Dim q = list.Where(Function(o) o.KomplexAsInt > 0)
+
+            'If excludePlan Then
+            '    ' Вычитаем только часы с планами, выводящими из учета
+            '    q = q.Where(Function(o) Not IsExcludablePlan(o))
+            'End If
+
+            'Return q.Sum(Function(o) CSng(o.PCh))
+
         End Function
 
         Private Function GoalCountSum(startDate As Date, endDate As Date) As Integer
@@ -529,6 +582,47 @@ Namespace Kas
         End Function
 
 
+        ''' <summary>
+        ''' Проверяет план "На др дорогу"
+        ''' </summary>
+        Private Function HasTransferPlan(o As Otkaz) As Boolean
+            Return o.Plan IsNot Nothing AndAlso
+           o.Plan.Any(Function(p) String.Equals(p.Description, "На др дорогу", StringComparison.OrdinalIgnoreCase))
+        End Function
+
+        ''' <summary>
+        ''' Проверяет план "в технологию"
+        ''' </summary>
+        Private Function HasTechPlan(o As Otkaz) As Boolean
+            Return o.Plan IsNot Nothing AndAlso
+           o.Plan.Any(Function(p) p.Description IsNot Nothing AndAlso
+                                  p.Description.ToLower().Contains("технолог"))
+        End Function
+
+        ''' <summary>
+        ''' Проверяет план "корректировка"
+        ''' </summary>
+        Private Function HasCorrPlan(o As Otkaz) As Boolean
+            Return o.Plan IsNot Nothing AndAlso
+           o.Plan.Any(Function(p) p.Description IsNot Nothing AndAlso
+                                  p.Description.ToLower().Contains("корректировк"))
+        End Function
+
+        ''' <summary>
+        ''' Проверяет, является ли план одним из трех типов, выводящих часы из учета
+        ''' </summary>
+        Private Function IsExcludablePlan(o As Otkaz) As Boolean
+            Return HasTransferPlan(o) OrElse HasTechPlan(o) OrElse HasCorrPlan(o)
+        End Function
+
+
+
+
+
+
+
+
+
 #End Region
 
 
@@ -578,6 +672,41 @@ Namespace Kas
                 Me.UpdateLayout()
             End Try
         End Sub
+
+
+
+
+
+        '''' <summary>
+        '''' Проверяет, является ли план одним из трех типов, выводящих часы из учета:
+        '''' 1. На др дорогу
+        '''' 2. В технологию
+        '''' 3. Корректировка времени
+        '''' </summary>
+        'Private Function IsExcludablePlan(o As Otkaz) As Boolean
+        '    If o.Plan Is Nothing OrElse o.Plan.Count = 0 Then Return False
+
+        '    Return o.Plan.Any(Function(p)
+        '                          If p.Description Is Nothing Then Return False
+        '                          Dim desc = p.Description.ToLower()
+        '                          Return desc.Contains("др дорогу") OrElse
+        '                         desc.Contains("технолог") OrElse
+        '                         desc.Contains("корректировк")
+        '                      End Function)
+        'End Function
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

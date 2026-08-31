@@ -1811,7 +1811,8 @@ Namespace Kas
                     Case "", "!"
                         Return True
                     Case Else
-                        Return False
+
+                        Return False 'IsSaved
                 End Select
             End Get
         End Property

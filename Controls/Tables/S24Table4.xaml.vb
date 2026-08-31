@@ -62,7 +62,7 @@ Namespace Kas
 				Case "sld"  ' расследован/сохранен за СЛД — в колонку СЛД своего комплекса
 					Return o.ZaKem IsNot Nothing AndAlso o.ZaKem.ToLower.Contains("слд")
 				Case "zav"  ' заводы: точный список
-					Return o.ZaKem IsNot Nothing AndAlso (o.ZaKem.ToLower.Contains("авод") OrElse o.ZaKem.ToLower.Contains("проч"))
+					Return o.ZaKem IsNot Nothing AndAlso o.Uchet AndAlso (o.ZaKem.ToLower.Contains("авод") OrElse o.ZaKem.ToLower.Contains("проч"))
 				Case Else   ' ТЧЭ: в расследовании (ZaKem ""/"!") или отнесён на ТЧЭ (ZaKem "тч")
 					Return Not IsTrpu(o) AndAlso (o.VRassled OrElse (o.ZaKem IsNot Nothing AndAlso o.ZaKem.ToLower().Contains("тч")))
 			End Select

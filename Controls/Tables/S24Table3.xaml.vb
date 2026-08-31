@@ -205,6 +205,8 @@ Namespace Kas
 
 
 		Private Sub FillRow(row As Integer, k As Integer?)
+
+
 			' в расследовании: 1,2 кат / 3 кат / 1-3 кат
 			SetCellList(row, 1, ListInv(k, Cat12))
 			SetCellList(row, 2, ListInv(k, Cat3))
@@ -213,6 +215,7 @@ Namespace Kas
 			' более 3-х / более 10 суток
 			SetCellList(row, 4, ListDays(k, 3))
 			SetCellList(row, 5, ListDays(k, 10))
+
 			' учтено за депо: тек год / прошлый год
 			SetCellPair(row, 6, ListAttr(k, True, Cat12), CntAttr(k, False, Cat12))
 			SetCellPair(row, 7, ListAttr(k, True, Cat3), CntAttr(k, False, Cat3))
@@ -220,14 +223,13 @@ Namespace Kas
 
 			' ======================================
 
-			' Подписка на выделение столбцов для ВСЕХ ячеек данных
+			' Подписка на выделение столбцов ТОЛЬКО для колонок 1-5
 			If row >= 2 AndAlso row <= 6 Then
-				For col As Integer = 1 To 8
+				For col As Integer = 1 To 5  ' ← БЫЛО 8, СТАЛО 5
 					Dim border = FindChildByGridCoords(MainGrid, row, col)
 					If border IsNot Nothing Then
 						Dim tb = TryCast(border.Child, TextBlock)
 						If tb IsNot Nothing Then
-							' Обязательно для корректной работы MouseEnter
 							tb.Background = Brushes.Transparent
 
 							AddHandler tb.MouseEnter, AddressOf Cell_MouseEnterForSelection
@@ -237,8 +239,95 @@ Namespace Kas
 						End If
 					End If
 				Next
+
+				' === ДОБАВИТЬ: Подписки на весь Grid (только при первой строке данных) ===
+				If row = 2 Then
+					RemoveHandler MainGrid.MouseMove, AddressOf MainGrid_MouseMove
+					AddHandler MainGrid.MouseMove, AddressOf MainGrid_MouseMove
+
+					RemoveHandler MainGrid.MouseLeave, AddressOf MainGrid_MouseLeave
+					AddHandler MainGrid.MouseLeave, AddressOf MainGrid_MouseLeave
+				End If
+				' ========================================================================
+			End If
+
+
+
+
+
+
+
+
+
+
+
+
+			'' в расследовании: 1,2 кат / 3 кат / 1-3 кат
+			'SetCellList(row, 1, ListInv(k, Cat12))
+			'SetCellList(row, 2, ListInv(k, Cat3))
+			'SetCellList(row, 3, ListInv(k, Nothing))
+
+			'' более 3-х / более 10 суток
+			'SetCellList(row, 4, ListDays(k, 3))
+			'SetCellList(row, 5, ListDays(k, 10))
+			'' учтено за депо: тек год / прошлый год
+			'SetCellPair(row, 6, ListAttr(k, True, Cat12), CntAttr(k, False, Cat12))
+			'SetCellPair(row, 7, ListAttr(k, True, Cat3), CntAttr(k, False, Cat3))
+			'SetCellPair(row, 8, ListAttr(k, True, Nothing), CntAttr(k, False, Nothing))
+
+			'' ======================================
+
+			'' Подписка на выделение столбцов для ВСЕХ ячеек данных
+			'If row >= 2 AndAlso row <= 6 Then
+			'	For col As Integer = 1 To 8
+			'		Dim border = FindChildByGridCoords(MainGrid, row, col)
+			'		If border IsNot Nothing Then
+			'			Dim tb = TryCast(border.Child, TextBlock)
+			'			If tb IsNot Nothing Then
+			'				' Обязательно для корректной работы MouseEnter
+			'				tb.Background = Brushes.Transparent
+
+			'				AddHandler tb.MouseEnter, AddressOf Cell_MouseEnterForSelection
+			'				AddHandler tb.MouseLeave, AddressOf Cell_MouseLeaveForSelection
+			'				AddHandler tb.PreviewMouseLeftButtonDown, AddressOf Cell_PreviewMouseDownForSelection
+			'				AddHandler tb.MouseRightButtonDown, AddressOf CopyColumnToClipboard_Click
+			'			End If
+			'		End If
+			'	Next
+			'End If
+		End Sub
+
+
+		' Обработчик движения мыши по Grid'у
+		Private Sub MainGrid_MouseMove(sender As Object, e As MouseEventArgs)
+			If _selectedCells.Count = 0 OrElse Not _currentColumnBounds.HasValue Then Return
+
+			Dim mousePos = Mouse.GetPosition(MainGrid)
+
+			If Not _currentColumnBounds.Value.Contains(mousePos) Then
+				For Each cell In _selectedCells
+					cell.Background = DefaultBrush
+				Next
+				_selectedCells.Clear()
+				_currentColumnBounds = Nothing
 			End If
 		End Sub
+
+		' Обработчик ухода за пределы Grid'а
+		Private Sub MainGrid_MouseLeave(sender As Object, e As MouseEventArgs)
+			If _selectedCells.Count = 0 Then Return
+
+			For Each cell In _selectedCells
+				cell.Background = DefaultBrush
+			Next
+			_selectedCells.Clear()
+			_currentColumnBounds = Nothing
+		End Sub
+
+
+
+
+
 
 		' Список ячеек текущего выделенного столбца
 		Private _selectedCells As New List(Of TextBlock)()
@@ -318,23 +407,30 @@ Namespace Kas
 			e.Handled = True
 		End Sub
 
-
+		' Границы текущего выделенного столбца (для проверки в MouseMove)
+		Private _currentColumnBounds As Rect?
 
 
 		''' <summary>
 		''' Подсвечивает весь столбец (строки 2-6) указанной колонки
 		''' </summary>
 		Private Sub HighlightColumn(col As Integer)
+
+
 			' Снимаем предыдущее выделение
 			For Each cell In _selectedCells
 				cell.Background = DefaultBrush
 			Next
 			_selectedCells.Clear()
+			_currentColumnBounds = Nothing
 
-			' Если колонка вне диапазона данных - выходим
-			If col < 1 OrElse col > 8 Then Return
+			' Ограничиваем диапазон колонками 1-5
+			If col < 1 OrElse col > 5 Then Return
 
 			' Собираем и красим ячейки нового столбца
+			Dim firstBorder As Border = Nothing
+			Dim lastBorder As Border = Nothing
+
 			For r As Integer = 2 To 6
 				Dim border = FindChildByGridCoords(MainGrid, r, col)
 				If border IsNot Nothing Then
@@ -342,9 +438,52 @@ Namespace Kas
 					If tb IsNot Nothing Then
 						tb.Background = SelectionBrush
 						_selectedCells.Add(tb)
+
+						' Запоминаем первый и последний Border для расчета границ
+						If firstBorder Is Nothing Then firstBorder = border
+						lastBorder = border
 					End If
 				End If
 			Next
+
+			' === КАЛИБРУЕМ ГРАНИЦЫ ВЫДЕЛЕННОГО СТОЛБЦА ===
+			If firstBorder IsNot Nothing AndAlso lastBorder IsNot Nothing Then
+				Dim topLeft = firstBorder.TranslatePoint(New Point(0, 0), MainGrid)
+				Dim bottomRight = lastBorder.TranslatePoint(
+			New Point(lastBorder.ActualWidth, lastBorder.ActualHeight), MainGrid)
+				_currentColumnBounds = New Rect(topLeft, bottomRight)
+			End If
+			' ==============================================
+
+
+
+
+
+
+
+
+
+
+			'' Снимаем предыдущее выделение
+			'For Each cell In _selectedCells
+			'	cell.Background = DefaultBrush
+			'Next
+			'_selectedCells.Clear()
+
+			'' Если колонка вне диапазона данных - выходим
+			'If col < 1 OrElse col > 5 Then Return
+
+			'' Собираем и красим ячейки нового столбца
+			'For r As Integer = 2 To 6
+			'	Dim border = FindChildByGridCoords(MainGrid, r, col)
+			'	If border IsNot Nothing Then
+			'		Dim tb = TryCast(border.Child, TextBlock)
+			'		If tb IsNot Nothing Then
+			'			tb.Background = SelectionBrush
+			'			_selectedCells.Add(tb)
+			'		End If
+			'	End If
+			'Next
 		End Sub
 
 		''' <summary>
@@ -461,7 +600,6 @@ Namespace Kas
 			InitializeComponent()
 			' Добавить код инициализации после вызова InitializeComponent().
 		End Sub
-
 
 
 	End Class
