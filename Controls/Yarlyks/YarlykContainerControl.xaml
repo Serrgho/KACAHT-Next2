@@ -53,19 +53,20 @@
                     <local:Yarlyk x:Name="AllOTSYAR" HeaderText="ОТС ВСЕГО" MouseDown="YarlykPressHandler"/>
                     <local:Yarlyk x:Name="OnKRASRail" HeaderText="Допущ. на КРАС" MouseDown="YarlykPressHandler" />
                     <local:Yarlyk x:Name="OnOtherRails" HeaderText="Допущ. на др. дор." MouseDown="YarlykPressHandler"/>
-                   
+                    <local:Yarlyk x:Name="SohrYAR" HeaderText="Сохранено" MouseDown="YarlykPressHandler"/>
                     <local:Yarlyk x:Name="OTSOutKomplNotPeredanYAR" HeaderText="НЕ учт. в компл. и_не_перед." MouseDown="YarlykPressHandler"/>
                 </WrapPanel>
                 <Label Style="{StaticResource LabSty}" Content="Комплекс" />
                 <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" MinWidth="120" >
                     <local:Yarlyk x:Name="OTSInKomplYAR" HeaderText="Учт. в комплексе" MouseDown="YarlykPressHandler"/>
-					<local:Yarlyk x:Name="SohrYAR" HeaderText="Сохранено" MouseDown="YarlykPressHandler"/>
+					
 					<local:Yarlyk x:Name="RassForTCH" HeaderText="В расслед. на ТЧЭ" MouseDown="YarlykPressHandler"/>
 					
                     <local:Yarlyk x:Name="OTS_ON_TCH" HeaderText="Учт. за ТЧ" MouseDown="YarlykPressHandler"/>
 					<local:Yarlyk x:Name="OTS_ON_TRPU" HeaderText="Учт. за ТРПУ" MouseDown="YarlykPressHandler"/>
-					<local:Yarlyk x:Name="OTS_ON_SLD" HeaderText="Учт. за СЛД" MouseDown="YarlykPressHandler"/>
 					<local:Yarlyk x:Name="OTS_ON_Zavod_and_Proch" HeaderText="Учт. за Заводы_и_Проч." MouseDown="YarlykPressHandler"/>
+                    <local:Yarlyk x:Name="OTS_ON_SLD" HeaderText="Учт. за СЛД" MouseDown="YarlykPressHandler"/>
+					
                     
                 </WrapPanel>
 

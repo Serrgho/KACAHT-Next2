@@ -54,172 +54,7 @@ Namespace Kas
             ' YarCon.UpdateYarlykInfo()
         End Sub
 
-        'Private Sub EmptyFieldsPopup_MouseDown(sender As Object, e As MouseButtonEventArgs)
-        'Dim Bordr As Border = TryCast(sender, Border)
-        '' 1. Получаем данные — безопасно
-        'Dim source = OTSContainer.ItemsSource
-        'If source Is Nothing Then Return
 
-        'Dim items As IEnumerable(Of Otkaz)
-        'Try
-        '    items = CType(source, IEnumerable(Of Otkaz))
-        'Catch
-        '    items = source.Cast(Of Otkaz)()
-        'End Try
-
-        'Dim filtered As List(Of Otkaz) = items
-
-        'If Bordr.Name = EmptyFieldsBorder.Name Then
-        '    ' 2. Фильтруем: пусто в SerLokExact ИЛИ OTSLev1
-        '    filtered = items.Where(Function(o)
-        '                               Return String.IsNullOrWhiteSpace(o.SerLokExact) OrElse
-        '                                          (o.MyKlasLev3 = "")
-        '                           End Function).ToList()
-        'ElseIf Bordr.Name = VidTyagiBorder.Name Then
-        '    filtered = items.Where(Function(o)
-        '                               Return o.VidT = ""
-        '                           End Function).ToList()
-        '    'VidTyagiBorder
-        'ElseIf Bordr.Name = IsVioletsBorder.Name Then
-        '    filtered = items.Where(Function(o)
-        '                               Return o.IsViolet
-        '                           End Function).ToList()
-        'ElseIf Bordr.Name = IsRedsMashBrdr.Name Then
-        '    filtered = items.Where(Function(o)
-        '                               Return o.MashPripTXT_IsRed And (Not o.KtoZakryl.ToLower.Contains("трп"))
-        '                           End Function).ToList()
-        'ElseIf Bordr.Name = IsEmptyPCHBrdr.Name Then
-        '    filtered = items.Where(Function(o)
-        '                               Return o.PCh = 0 AndAlso o.Kat < 3
-        '                           End Function).ToList()
-        'End If
-
-
-
-        '' 3. Применяем
-        'MW.AddOTSToContainer(filtered)
-        '' OTSContainer.ItemsSource = filtered
-
-        '' 4. Обновляем интерфейс
-
-        'UpdateTotal()
-
-        ''YarCon.UpdateYarlykInfo() VidTyagiBorder
-
-        '' 5. Прячем предупреждение — теперь оно актуально (только пустые)
-        'If Bordr.Name = EmptyFieldsBorder.Name Then
-        '    EmptyFieldsBorder.Visibility = Visibility.Collapsed
-        'ElseIf Bordr.Name = VidTyagiBorder.Name Then
-        '    VidTyagiBorder.Visibility = Visibility.Collapsed
-        'ElseIf Bordr.Name = IsVioletsBorder.Name Then
-        '    IsVioletsBorder.Visibility = Visibility.Collapsed
-        'ElseIf Bordr.Name = IsRedsMashBrdr.Name Then
-        '    IsRedsMashBrdr.Visibility = Visibility.Collapsed
-        'ElseIf Bordr.Name = IsRedsMashBrdr.Name Then
-        '    IsRedsMashBrdr.Visibility = Visibility.Collapsed
-        'ElseIf Bordr.Name = IsEmptyPCHBrdr.Name Then
-        '    IsEmptyPCHBrdr.Visibility = Visibility.Collapsed
-        'End If
-
-        'e.Handled = True
-        'End Sub
-
-
-        '      Public Sub CheckForEmptyFields()
-        '          Dim items As IEnumerable(Of Otkaz) = If(OTSContainer.ItemsSource Is Nothing, Enumerable.Empty(Of Otkaz)(),
-        'OTSContainer.ItemsSource.Cast(Of Otkaz)())
-
-        '          Dim otkazType = GetType(Otkaz)
-        '          Dim parts As New List(Of String)
-        '          Dim vidTCount As Integer = 0
-        '          Dim violetCount As Integer = 0
-        '          Dim Redcount As Integer = 0
-        '          Dim EmptyPch As Integer = 0
-        '          ' ← фиксированный список для проверки незаполненных свойств отказа (НЕ ЗАБЫТЬ ДОБАВИТЬ В НЕГО!!!)
-        '          For Each propName As String In RequiredProps
-        '              Dim prop = otkazType.GetProperty(propName)
-        '              If prop Is Nothing Then Continue For
-
-        '              ' Особая обработка для IsViolet VidTyagiBorder
-        '              If propName = "VidT" Then
-        '                  ' Для IsViolet считаем False как "не заполнено"
-        '                  vidTCount = items.Count(Function(u) u.VidT = "")
-
-        '                  ' Если есть незаполненные IsViolet, показываем фиолетовый бордер
-        '                  If vidTCount > 0 Then
-        '                      VidTyagiLabel.Text = $"Не указан вид тяги: {vidTCount}"
-        '                      VidTyagiBorder.Visibility = Visibility.Visible
-        '                  Else
-        '                      VidTyagiBorder.Visibility = Visibility.Collapsed
-        '                  End If
-
-        '              ElseIf propName = "IsViolet" Then
-        '                  ' Для IsViolet считаем False как "не заполнено"
-        '                  violetCount = items.Count(Function(u) CBool(prop.GetValue(u)))
-
-        '                  ' Если есть незаполненные IsViolet, показываем фиолетовый бордер
-        '                  If violetCount > 0 Then
-        '                      VioletsLabel.Text = $"Не заполнено описаний: {violetCount}"
-        '                      IsVioletsBorder.Visibility = Visibility.Visible
-        '                  Else
-        '                      IsVioletsBorder.Visibility = Visibility.Collapsed
-        '                  End If
-
-
-
-        '              ElseIf propName = "MashPripTXT_IsRed" Then
-        '                  Redcount = items.Count(Function(u)
-        '                                             Dim isRed As Boolean = CBool(prop.GetValue(u))
-        '                                             Dim kto As String = If(u.KtoZakryl, "").ToLower()
-
-        '                                             Return isRed And (Not kto.Contains("трп"))
-        '                                         End Function)
-        '                  If Redcount > 0 Then
-        '                      IsRedsMashTBlk.Text = $"Неверно указан машинист: {Redcount}"
-        '                      IsRedsMashBrdr.Visibility = Visibility.Visible
-        '                  Else
-        '                      IsRedsMashBrdr.Visibility = Visibility.Collapsed
-        '                  End If
-        '              ElseIf propName = "PCh" Then
-        '                  EmptyPch = items.Count(Function(u)
-        '                                             Return u.PCh = 0 AndAlso u.Kat < 3
-        '                                         End Function)
-        '                  If EmptyPch > 0 Then
-        '                      IsEmptyPCHTBlk.Text = $"Не указаны потери П/Ч: {EmptyPch}"
-        '                      IsEmptyPCHBrdr.Visibility = Visibility.Visible
-        '                  Else
-        '                      IsEmptyPCHBrdr.Visibility = Visibility.Collapsed
-        '                  End If
-        '              Else
-        '                  ' Стандартная обработка для остальных свойств
-        '                  Dim emptyCount = items.Count(Function(u)
-        '                                                   Dim value = prop.GetValue(u)
-        '                                                   Return value Is Nothing OrElse value = "---" OrElse
-        '              (TypeOf value Is String AndAlso String.IsNullOrWhiteSpace(CStr(value)))
-        '                                               End Function)
-
-        '                  If emptyCount > 0 Then
-        '                      parts.Add($"{GetDisplayName(propName)} ({emptyCount})")
-        '                  End If
-        '              End If
-        '          Next
-
-        '          ' Управление оранжевым бордером для остальных полей
-        '          Dim isVisible = parts.Count > 0
-        '          If isVisible Then
-        '              EmptyFieldsLabel.Text = $"Не заполнено: {String.Join("; ", parts)}"
-        '              EmptyFieldsBorder.Visibility = Visibility.Visible
-        '          Else
-        '              EmptyFieldsBorder.Visibility = Visibility.Collapsed
-        '              EmptyFieldsLabel.Text = ""
-        '          End If
-
-
-
-
-
-
-        '      End Sub
 
         Private Function GetNoteNameForProperty(propName As String) As String
             ' ТОЛЬКО для конкретных свойств
@@ -1089,6 +924,7 @@ Namespace Kas
             Peredan0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             KomplexAsInt0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             PCh0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
+            Dlit0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
 
             ' Добавь другие индикаторы
             ' ------------------------------- KorDate
@@ -1150,6 +986,8 @@ Namespace Kas
                     PlanListText0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
                 Case "PCh"
                     PCh0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
+                Case "Dlit"
+                    Dlit0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
                     ' Добавь другие случаи KorDate
             End Select
             e.Handled = True

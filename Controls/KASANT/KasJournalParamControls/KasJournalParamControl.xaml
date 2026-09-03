@@ -75,7 +75,7 @@
 					<Button  x:Name="btnLoadOfflineJournal" Content="📁журнал ОТС из файла" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadOfflineJournal_Click" Width="auto" Visibility="Collapsed"/>
 					<!--<Button  x:Name="btnLoadInvestigationTest"  Content="📄4 отчет - ТАБЛИЦА RND" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadInvestigationTest_Click" Width="auto" Visibility="Collapsed"/>-->
 					<Button  x:Name="btnLoadInvestigationFile"  Content="📁4 отчет - ТАБЛИЦА ФАЙЛ" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadInvestigationFile_Click" Width="auto" Visibility="Collapsed"/>
-					<Button  x:Name="btnLoadDepotWeb"  Content="🌐Отчет по депо (Из сети)" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadDepotWeb_Click" Width="auto" Visibility="Collapsed"/>
+					<Button  x:Name="btnLoadDepotWeb"  Content="🌐Отчет по депо (Из сети)" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadDepotWeb_Click" Width="auto" Visibility="Visible"/>
 					<Button  x:Name="btnLoadSLDWeb"  Content="🌐Отчет по СЛД (Из сети)" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadSLDWeb_Click" Width="auto" Visibility="Collapsed"/>
 					<Button  x:Name="btnLoadDepotFile"  Content="📂Отчет по депо/СЛД (Из файла)" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadDepotFile_Click" Width="auto" Visibility="Collapsed"/>
 

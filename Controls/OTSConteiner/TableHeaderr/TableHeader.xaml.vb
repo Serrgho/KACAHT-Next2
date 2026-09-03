@@ -93,7 +93,7 @@ Namespace Kas
         Public Sub ClearAllFilters()
             _filterState.Clear()
             'и снимаем индикаторы
-            Dim knownProperties As String() = {"Kat", "Nach", "PCh", "Istochnik", "KtoZakryl", "ZaKem", "Zakem_TXT", "KomplexAsInt", "Postup", "DaysOnRassled", "Peredan", "UpdateNotes", "Marked", "VernulsaOTS"}
+            Dim knownProperties As String() = {"Kat", "Nach", "PCh", "Dlit", "Istochnik", "KtoZakryl", "ZaKem", "Zakem_TXT", "KomplexAsInt", "Postup", "DaysOnRassled", "Peredan", "UpdateNotes", "Marked", "VernulsaOTS"}
 
             For Each prop In knownProperties
                 UpdateIndicatorForProperty(prop)

@@ -24,5 +24,14 @@ Namespace Kas
 
             LblDate.Text = $"на {day} {monthName} {year}г."
         End Sub
+
+
+        Public Sub SetReportPeriod(periodStart As Date, periodEnd As Date, reportDate As Date)
+            Dim day As Integer = reportDate.Day
+            Dim monthName As String = MonthGenitive(reportDate.Month - 1)
+            Dim year As Integer = reportDate.Year
+
+            LblDate.Text = $"за период с {periodStart:dd.MM} по {periodEnd:dd.MM.yy} на {day} {monthName} {year}г."
+        End Sub
     End Class
 End Namespace

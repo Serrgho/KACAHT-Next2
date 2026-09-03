@@ -21,16 +21,6 @@ Namespace Kas
 
 #Region "Внешние классы"
 
-        '' =====================================================================
-        '' Класс для хранения результата парсинга по одному депо
-        '' =====================================================================
-        'Public Class Report341Result
-        '    Public Property DepotName As String
-        '    Public Property TotalCount As Integer
-        '    Public Property AcceptedCount As Integer
-        '    Public Property OverdueCount As Integer
-        '    Public Property InvestigatedCount As Integer
-        'End Class
 
         ' =====================================================================
         ' Класс для описания периода запроса
@@ -279,6 +269,43 @@ Namespace Kas
                 LogWrite("🔄 Сессия неактивна, выполняем вход...")
                 Return Await LoginAsync()
             End Function
+
+
+            '''' <summary>
+            '''' Формирует URL специально для отчета по ТЧ (Дирекция Тяги)
+            '''' sls=172450 - код Дирекции Т
+            '''' flg_alien=0 - только РЖД
+            '''' rep_status=0,1,2,6,7,10 - все статусы учета
+            '''' </summary>
+            'Public Function BuildTchReportUrl(dateFrom As Date, dateTo As Date) As String
+            '    Dim tmpUnik = Math.Floor((DateTime.UtcNow - New DateTime(1970, 1, 1)).TotalMilliseconds)
+
+            '    Return $"{_baseUrl}/reports/new/Report3_4_1?page=reports/new/Report3_4_1&tmp_unik={tmpUnik}" &
+            '       $"&dt_nd={dateFrom:dd.MM.yyyy}&dt_nd_h=00&dt_nd_min=00" &
+            '       $"&dt_kd={dateTo:dd.MM.yyyy}&dt_kd_h=23&dt_kd_min=59" &
+            '       "&rep_asu=0,1,2,5,7,11,12,14,15,20,21,26,26" &
+            '       "&rep_asu_dop=1:1" &
+            '       "&kind_rep_type=1" &
+            '       "&flg_alien=0" &          ' Только РЖД
+            '       "&flg_id_cause_other=0" &
+            '       "&sls=172450" &           ' Код Дирекции Т
+            '       "&flg_alien_service=0" &
+            '       "&dor_kod_guilty=88" &    ' Красноярская ж.д.
+            '       "&rep_status=0,1,2,6,7,10"
+            'End Function
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             ' =================================================================
             ' Формирует URL для отчёта 3.4.1

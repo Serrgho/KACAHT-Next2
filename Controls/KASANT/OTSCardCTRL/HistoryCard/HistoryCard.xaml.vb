@@ -74,10 +74,10 @@ Namespace Kas
             tbMain.Visibility = Visibility.Visible
 
             ' 4. Привязка правого клика к попупу
-            AddHandler tbMain.PreviewMouseRightButtonDown, Sub(s, e)
-                                                               _copyPopup.Show(tbMain, ExtractCopyData(tbMain))
-                                                               e.Handled = True
-                                                           End Sub
+            AddHandler tbMain.PreviewMouseRightButtonUp, Sub(s, e)
+                                                             _copyPopup.Show(tbMain, ExtractCopyData(tbMain))
+                                                             e.Handled = True
+                                                         End Sub
         End Sub
 
         Private Sub BuildMainLine(hrec As HistoryRecord)

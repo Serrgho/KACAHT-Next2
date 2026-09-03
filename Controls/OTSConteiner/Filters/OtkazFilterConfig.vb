@@ -43,6 +43,7 @@
                 Case "KorDate" : Return Function(o) o.KorDate
                 Case "PlanListText" : Return Function(o) o.PlanListText
                 Case "PCh" : Return Function(o) o.PCh
+                Case "Dlit" : Return Function(o) o.Dlit
                 Case "PripMash" : Return Function(o) o.PripMash
                 Case "KomplexAsInt" : Return Function(o) o.KomplexAsInt
                 Case "ZaKem" : Return Function(o) If(String.IsNullOrEmpty(o.ZaKem), (UNASSIGNED_MARKER), o.ZaKem)
@@ -66,7 +67,7 @@
                 Case Else : Return Nothing
             End Select
         End Function
-        'KorDate
+        'Dlit
         '''' <summary>
         '''' Строит предикат фильтрации (безопасно для Nothing и Object)
         '''' </summary>
@@ -184,6 +185,8 @@
                 ' Определяем тип по propName (старый способ)
                 If {"PCh"}.Contains(propName) Then
                     Return BuildNumericOrDatePredicate(propName, filterValuesOld, "number")
+                ElseIf {"Dlit"}.Contains(propName) Then
+                    Return BuildNumericOrDatePredicate(propName, filterValuesOld, "number")
                 ElseIf {"Nach", "Postup", "VernulsaOTS", "Zakryt", "Peredan", "Sozdan", "KorDate"}.Contains(propName) Then
                     Return BuildNumericOrDatePredicate(propName, filterValuesOld, "date")
                 Else
@@ -254,11 +257,11 @@
                                             Case "<="
                                                 predicateFuncs.Add(Function(o) o.PCh <= targetValue)
                                             Case Else
-                                                'Debug.WriteLine($"OtkazFilterConfig.BuildSinglePropertyPredicate: Unknown operator '{op}' for PCh, skipping condition")
+
                                                 ' Пропускаем условие с неизвестным оператором
                                         End Select
                                     Else
-                                        'Debug.WriteLine($"OtkazFilterConfig.BuildSinglePropertyPredicate: Value for PCh is not numeric, skipping: {FVal.Value}")
+
                                     End If
                                 End If
                             Next
@@ -267,11 +270,50 @@
                                 Return Function(o) True
                             End If
 
-                            'Debug.WriteLine($"OtkazFilterConfig.BuildSinglePropertyPredicate: Returning PCh predicate with AND for {predicateFuncs.Count} conditions")
                             Return Function(o) predicateFuncs.All(Function(pf) pf(o))
 
+
+
+                        Case "Dlit"
+                            ' Создаём список предикатов для каждого FilterValue
+                            Dim predicateFuncs As New List(Of Func(Of Otkaz, Boolean))
+                            For Each FVal In filterValues
+                                If FVal.Value IsNot Nothing Then
+                                    ' Проверим тип Value
+                                    If TypeOf FVal.Value Is Single OrElse TypeOf FVal.Value Is Double OrElse TypeOf FVal.Value Is Integer Then
+                                        Dim targetValue As Single = Convert.ToSingle(FVal.Value)
+                                        Dim op As String = FVal.Operatr ' Используем твоё свойство
+                                        Select Case op
+                                            Case "="
+                                                predicateFuncs.Add(Function(o) o.Dlit = targetValue)
+                                            Case "<>"
+                                                predicateFuncs.Add(Function(o) o.Dlit <> targetValue)
+                                            Case ">"
+                                                predicateFuncs.Add(Function(o) o.Dlit > targetValue)
+                                            Case ">="
+                                                predicateFuncs.Add(Function(o) o.Dlit >= targetValue)
+                                            Case "<"
+                                                predicateFuncs.Add(Function(o) o.Dlit < targetValue)
+                                            Case "<="
+                                                predicateFuncs.Add(Function(o) o.Dlit <= targetValue)
+                                            Case Else
+
+                                        End Select
+                                    Else
+
+                                    End If
+                                End If
+                            Next
+
+                            If predicateFuncs.Count = 0 Then
+                                Return Function(o) True
+                            End If
+
+                            Return Function(o) predicateFuncs.All(Function(pf) pf(o))
+
+
                         Case Else
-                            'Debug.WriteLine($"OtkazFilterConfig.BuildNumericOrDatePredicate: Unknown number property '{propName}', returning True")
+
                             Return Function(o) True
                     End Select
 
@@ -328,7 +370,7 @@
 
                 If allowedStrings.Count > 0 Then
                     Select Case propName
-                        Case "Kat", "PripMash", "MyKlasLev1", "MyKlasLev2", "MyKlasLev3", "Istochnik", "MestoOTS_Dor", "MestoOTS", "KtoZakryl", "ZaKem", "Zakem_TXT", "KomplexAsInt", "PripLok", "SerLokExact", "SerLok", "VidT", "NumLok", "DaysOnRassled", "IsStation", "KrasREG", "UpdateNotes", "SerLokNumLokTXT", "Marked", "PCh", "PlanListText"
+                        Case "Kat", "PripMash", "MyKlasLev1", "MyKlasLev2", "MyKlasLev3", "Istochnik", "MestoOTS_Dor", "MestoOTS", "KtoZakryl", "ZaKem", "Zakem_TXT", "KomplexAsInt", "PripLok", "SerLokExact", "SerLok", "VidT", "NumLok", "DaysOnRassled", "IsStation", "KrasREG", "UpdateNotes", "SerLokNumLokTXT", "Marked", "PCh", "Dlit", "PlanListText"
                             Dim selector = GetDisplaySelector(propName)
                             If selector IsNot Nothing Then
                                 If propName?.ToLowerInvariant() = "zakem" OrElse propName?.ToLowerInvariant() = "zakem_txt" Then

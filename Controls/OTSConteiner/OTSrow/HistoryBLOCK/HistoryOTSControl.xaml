@@ -15,7 +15,7 @@
 			<ColumnDefinition Width="Auto"/>
 		</Grid.ColumnDefinitions>
 
-		<ListBox Grid.Row="0" Grid.Column="0" x:Name="HistList" ItemsSource="{Binding History}" Style="{StaticResource HistoryListBoxStyle}">
+		<ListBox Grid.Row="0" Grid.Column="0" x:Name="HistList" ItemsSource="{Binding History}" Style="{StaticResource HistoryListBoxStyle}" Grid.ColumnSpan="2">
 			<!-- ⚠️ ВАЖНО ПРО СОБЫТИЕ (EventSetter) -->
 			<!-- Так как стиль вынесен, Handler="..." работать не будет, если метод в коде окна. -->
 			<!-- Добавить EventSetter локально в стиль ListBoxItem здесь -->

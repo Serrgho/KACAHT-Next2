@@ -17,8 +17,8 @@ Namespace Kas
         Private _currentYearOtkazy As List(Of Otkaz)
         Private _previousYearOtkazy As List(Of Otkaz)
         Private _previousYearOtkazyRaw As List(Of Otkaz)  ' ← Исходный список прошлого года (без фильтрации)
-        Private _periodStart As Date?
-        Private _periodEnd As Date?                        ' ← Запоминаем дату конца периода
+        Public _periodStart As Date?
+        Public _periodEnd As Date?                        ' ← Запоминаем дату конца периода
         Private RowCellsMap As New Dictionary(Of Integer, TextBlock())
 
         ' ==================== КОНСТРУКТОРЫ ====================

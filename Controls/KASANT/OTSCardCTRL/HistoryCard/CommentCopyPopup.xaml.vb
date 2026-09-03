@@ -5,7 +5,7 @@ Namespace Kas
 
         Private _targetTb As TextBlock
         Private _data As CardCopyData
-        Private Shared ReadOnly Presets As New List(Of String) From {"---", "На закрытие", "Для расследования", "Корректировка", "Предоставление документов", "Объединение дубликатов", "Особое мнение"}
+        Private Shared ReadOnly Presets As New List(Of String) From {"---", "На закрытие", "Для расследования", "Корректировка", "Предоставление документов", "Корректировка документов", "Объединение дубликатов", "Особое мнение", "Не согласовано с СЛД"}
 
         Public Sub New()
             InitializeComponent()

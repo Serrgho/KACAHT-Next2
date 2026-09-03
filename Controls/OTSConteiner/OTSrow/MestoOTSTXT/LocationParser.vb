@@ -92,56 +92,7 @@ Namespace Kas
 
             Return Tuple.Create(place, road)
 
-            'If String.IsNullOrEmpty(source) Then
-            '    Return Tuple.Create("", "Красноярская")
-            'End If
 
-            'Dim text = source.Trim()
-            'Dim place As String = ""
-            'Dim road As String = "Красноярская"
-            'Dim regMarker As String = ""  ' ← НОВОЕ: храним "РЕГ-2,  " целиком
-
-            'Dim regPos = text.IndexOf("РЕГ", StringComparison.OrdinalIgnoreCase)
-            'If regPos >= 0 Then
-            '    ' Дорога (всё до "РЕГ")
-            '    If regPos > 0 Then
-            '        road = text.Substring(0, regPos).Trim().TrimEnd(","c)
-            '    End If
-
-            '    ' Ищем запятую после "РЕГ"
-            '    Dim commaPos = text.IndexOf(","c, regPos)
-            '    If commaPos >= 0 Then
-            '        ' ★ Запоминаем маркер ОТ "РЕГ" ДО первого непробельного символа
-            '        Dim markerEnd = commaPos + 1
-            '        While markerEnd < text.Length AndAlso Char.IsWhiteSpace(text(markerEnd))
-            '            markerEnd += 1
-            '        End While
-            '        regMarker = text.Substring(regPos, markerEnd - regPos)
-
-            '        ' Место
-            '        Dim startPos = markerEnd
-            '        Dim endPos = text.IndexOf("поезда", startPos, StringComparison.OrdinalIgnoreCase)
-            '        If endPos < 0 Then endPos = text.Length
-
-            '        place = text.Substring(startPos, endPos - startPos).Trim()
-
-            '        ' Чистка пробелов вокруг тире в "путь"
-            '        Dim pathIndex = place.IndexOf("путь", StringComparison.OrdinalIgnoreCase)
-            '        If pathIndex >= 0 Then
-            '            Dim afterPath = place.Substring(pathIndex + 4)
-            '            afterPath = Regex.Replace(afterPath, "\s*-\s*", "-")
-            '            place = place.Substring(0, pathIndex + 4) & afterPath
-            '        End If
-            '    Else
-            '        ' Запятой нет — берём всё от "РЕГ" до конца как маркер
-            '        regMarker = text.Substring(regPos)
-            '    End If
-            'Else
-            '    Dim commaPos = text.IndexOf(",")
-            '    place = If(commaPos > 0, text.Substring(0, commaPos).Trim(), text)
-            'End If
-
-            'Return Tuple.Create(place, road)
         End Function
 
         ''' <summary>
@@ -284,6 +235,7 @@ Namespace Kas
                             If Integer.TryParse(numStr, number) Then
                                 If LocationParser.IsPassengerOrSuburban(number) Then
                                     run.Foreground = Brushes.Red
+                                    run.FontWeight = FontWeights.Bold
                                 End If
                             End If
 

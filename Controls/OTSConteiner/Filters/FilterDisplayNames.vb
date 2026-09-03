@@ -9,6 +9,7 @@
         {"Zakryt", "Закрыт"},
         {"Peredan", "Передан"},
         {"PCh", "Часы"},
+        {"Dlit", "Продолжительность ОТС"},
         {"Istochnik", "Источник"},
         {"MestoOTS_Dor", "Дорога отказа"},
         {"Marked", "Помеченные отказы"},
@@ -33,7 +34,7 @@
         {"SerLokNumLokTXT", "Серия и номер локомотива"},
         {"KrasREG", "Регион отказа"}
             }
-    'KorDate
+    'Dlit
     ' Метод для получения отображаемого имени по propertyName
     Public Function GetDisplayName(propName As String) As String
         If _displayNameMap.ContainsKey(propName) Then

@@ -6,11 +6,11 @@
         <Setter Property="Background" Value="{StaticResource AppBackBrush}"/>
         <Setter Property="BorderBrush" Value="Gray"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="2"/>
-        <Setter Property="Margin" Value="3"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Margin" Value="2"/>
         <Setter Property="Foreground" Value="Black"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="FontSize" Value="15"/>
         <Setter Property="Cursor" Value="Hand"/>
         
         <Setter Property="Template">

@@ -14,7 +14,8 @@
         
         <Grid.Resources>
 			 <local:IsNotEmptyConverter x:Key="IsNotEmptyConverter"/>
-             <!--Стиль для Rectangle -->
+			
+			<!--Стиль для Rectangle -->
             <Style TargetType="Rectangle" x:Key="TableRowBorderStyle">
                 <Setter Property="Stroke" Value="Transparent" />
                 <Setter Property="StrokeThickness" Value="3" />
@@ -88,13 +89,19 @@
                     <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                 
-                <Label Grid.Row="0"  Width="auto" Content="{Binding Id}"   HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Bottom" PreviewMouseLeftButtonDown="Label_PreviewMouseRightButtonDown"  PreviewMouseRightButtonUp="Label_PreviewMouseRightButtonUp">
+                <Label Grid.Row="0"  Width="auto" Content="{Binding Id}"   HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Bottom" PreviewMouseLeftButtonDown="Label_PreviewMouseRightButtonDown"  PreviewMouseRightButtonUp="Label_PreviewMouseRightButtonUp" FontSize="18" FontFamily="Consolas">
                     <Label.Style>
                         <Style TargetType="Label">
-                            <Style.Triggers>
+							<Setter Property="RenderTransformOrigin" Value="0.5,1"/>
+							<Style.Triggers>
                                  <Trigger Property="IsMouseOver" Value="true">
                                 <Setter Property = "FontWeight" Value="Bold"/>
-                            </Trigger>
+									<Setter Property="RenderTransform">
+										<Setter.Value>
+											<ScaleTransform ScaleX="1" ScaleY="1.3"/>
+										</Setter.Value>
+									</Setter>
+								</Trigger>
                             </Style.Triggers>
                            
                         </Style>
@@ -125,19 +132,22 @@
                             </Label.Style>
                         </Label>
                     </Grid>
-                <Label Grid.Row="2" Width="auto" Content="{Binding FormattedPCh}" HorizontalContentAlignment="Center"  VerticalContentAlignment="Center" VerticalAlignment="Top" Margin="0 0 0 3">
+				<Label Grid.Row="2" Width="auto" Content="{Binding FormattedPCh}" HorizontalContentAlignment="Center"  VerticalContentAlignment="Center" VerticalAlignment="Top" Margin="0 0 0 3" >
                         <Label.Style>
                             <Style TargetType="Label">
                                 <!-- Базовый стиль -->
-                                <Setter Property="FontWeight" Value="Normal" />
-                                <!-- Триггер: если Uchet = True -->
+							<Setter Property="FontWeight" Value="Normal" />
+							<Setter Property="FontFamily" Value="Consolas" />
+							<Setter Property="FontSize" Value="15" />
+							<!-- Триггер: если Uchet = True -->
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Uchet,NotifyOnTargetUpdated=True}" Value="True">
                                         <Setter Property="FontWeight" Value="Bold" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Uchet,NotifyOnTargetUpdated=True}" Value="False">
-                                        <Setter Property="FontWeight" Value="Normal" />
-                                    </DataTrigger>
+									<Setter Property="FontSize" Value="19" />
+								</DataTrigger>
+                                    <!--<DataTrigger Binding="{Binding Uchet,NotifyOnTargetUpdated=True}" Value="False">
+									<Setter Property="FontWeight" Value="SemiBold" />
+                                    </DataTrigger>-->
                                 </Style.Triggers>
                             </Style>
                         </Label.Style>
@@ -204,7 +214,7 @@
                         </Label.Style>
                     </Label>
 
-				    <ContentControl Grid.Row="1"
+				    <ContentControl 
                                             x:Name="MestoTBlok"
                                             Content="{Binding MestoOTS_TXT, Converter={StaticResource PlaceFormatterConverter}}"
                                             HorizontalContentAlignment="Stretch"
@@ -221,6 +231,27 @@
 						    </Style>
 					    </ContentControl.Style>
 				    </ContentControl>
+
+				<Label Margin="5,2"
+                       FontSize="13" 
+                       VerticalAlignment="Bottom" 
+                       HorizontalContentAlignment="Center"
+                       PreviewMouseRightButtonUp="IsStationPAN_PreviewMouseRightButtonUp">
+
+					<TextBlock TextAlignment="Center">
+        <Run Text="Продолж. ОТС - " Foreground="Black" FontWeight="SemiBold" FontStyle="Italic"/>
+        
+                     
+        <Run Text="{Binding Dlit, StringFormat={}{0:F2}}" 
+             Foreground="{Binding DlitColor}"
+             FontWeight="{Binding DlitWeight}" FontStyle="Italic"/>
+             
+        <Run Text=" ч" Foreground="Black" FontStyle="Italic"/>
+					</TextBlock>
+				</Label>
+
+
+
 			</StackPanel>
                 
 
@@ -246,7 +277,7 @@
 							</Border>
 							
                             <TextBlock x:Name="TxtBLK" Margin="2 5" Text="{Binding Opis}" TextAlignment="Justify" FontFamily="Times New Roman" FontSize="17" LineHeight="16.5" Style="{StaticResource ViolTBox}" TextWrapping="Wrap"/>
-							<local:HistoryOTSControl x:Name="HistList"/>
+							<local:HistoryOTSControl x:Name="HistList" />
 							
                         </StackPanel>
 

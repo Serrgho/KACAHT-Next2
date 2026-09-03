@@ -142,6 +142,30 @@
 						</Border>
 
 
+						<Border Width="60" x:Name="DlitBorder"
+						Style="{StaticResource FiltrTBlock}"
+						PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
+						PreviewMouseRightButtonUp="OnLevel0FilterMouseRightDown"
+						        local:FilterProperties.FieldType="number"
+								local:FilterProperties.FilterLevel="Level0"
+								Tag="Dlit">
+							<Grid>
+								<!-- Оберни в Grid, чтобы можно было наложить элементы -->
+								<TextBlock Text="Продолж ОТС" Style="{StaticResource TBSTYLE}"/>
+								<local:Level0FilterIndicator x:Name="Dlit0LevelIndicator"
+                                     PropertyName="Dlit"
+                                     HorizontalAlignment="Right"
+                                     VerticalAlignment="Top"
+                                     Margin="0,-2,-2,0"/>
+							</Grid>
+						</Border>
+
+
+
+
+
+
+
 
 						<Border Width="55" x:Name="MestoOTS_Dor0LevelBorder"
 								Style="{StaticResource FiltrTBlock}"

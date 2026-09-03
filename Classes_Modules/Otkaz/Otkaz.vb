@@ -229,11 +229,11 @@ Namespace Kas
             End Set
         End Property
 
-        <JsonIgnore>
-        Public Property Diff_Before As InlineCollection
+        '<JsonIgnore>
+        'Public Property Diff_Before As InlineCollection
 
-        <JsonIgnore>
-        Public Property Diff_After As InlineCollection
+        '<JsonIgnore>
+        'Public Property Diff_After As InlineCollection
         <JsonIgnore>
         Public Property PreviousMestoOTS_TXT As String = Nothing
 
@@ -1077,11 +1077,27 @@ Namespace Kas
         End Property
 
 
+        '''' <summary>
+        '''' (55) продолжительность ОТС
+        '''' </summary>
+        '''' <returns></returns>
+        '<Description("(55) продолжительность ОТС")>
+        'Public Property Dlit As Single
+        '    Get
+        '        Return _Dlit
+        '    End Get
+        '    Set(value As Single)
+        '        If _Dlit <> value Then
+        '            _Dlit = value
+        '            OnPropertyChanged(NameOf(Dlit))
+
+        '        End If
+        '    End Set
+        'End Property
+
         ''' <summary>
         ''' (55) продолжительность ОТС
         ''' </summary>
-        ''' <returns></returns>
-        <Description("(55) продолжительность ОТС")>
         Public Property Dlit As Single
             Get
                 Return _Dlit
@@ -1090,9 +1106,47 @@ Namespace Kas
                 If _Dlit <> value Then
                     _Dlit = value
                     OnPropertyChanged(NameOf(Dlit))
+                    OnPropertyChanged(NameOf(DlitColor))
+                    OnPropertyChanged(NameOf(DlitWeight))
+                    '' Обязательно уведомляем, что отображение тоже изменилось
+                    'OnPropertyChanged(NameOf(DlitDisplay))
                 End If
             End Set
         End Property
+
+        '''' <summary>
+        '''' Готовая строка для Label с цветом
+        '''' </summary>
+        'Public ReadOnly Property DlitDisplay As String
+        '    Get
+        '        Return $"Продолжительность - {_Dlit:F2}ч"
+        '    End Get
+        'End Property
+
+        ''' <summary>
+        ''' Цвет только для цифры длительности
+        ''' </summary>
+        Public ReadOnly Property DlitColor As Brush
+            Get
+                If _Dlit >= 1.0F Then
+                    Return Brushes.Red
+                Else
+                    Return Brushes.Black
+                End If
+            End Get
+        End Property
+        Public ReadOnly Property DlitWeight As FontWeight
+            Get
+                If _Dlit >= 1.0F Then Return FontWeights.Bold
+                Return FontWeights.Normal
+            End Get
+        End Property
+
+
+
+
+
+
 
 
         ''' <summary>

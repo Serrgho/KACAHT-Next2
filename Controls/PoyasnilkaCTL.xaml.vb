@@ -89,9 +89,6 @@ Namespace Kas
 
             Dim useOneTable As Boolean = AskOneTable()
 
-            ' ===== 0. ЗАГОЛОВОК ОТЧЕТА =====
-            Dim header As New ReportHeader()
-            header.SetReportDate(Today.Date)  ' Используем дату начала периода для заголовка
 
             ' ===== СОЗДАНИЕ СПИСКОВ ТАБЛИЦ =====
             Dim tables1 = BuildTableList(Of S24Table1)(
@@ -117,71 +114,103 @@ Namespace Kas
             Dim tables8 = BuildTableList(Of S24Table8)(
         Function(st, en) New S24Table8(fullCurY, st, en), useOneTable)
 
+            Dim tables9 = BuildTableList(Of S24Table9)(
+    Function(st, en) New S24Table9(fullCurY, st, en), useOneTable)
+
+            ' Таблица 10: Отказность СЛД/ТЧ (КАСАНТ) - загружается из CentralFetcher
+            Dim tables10 = BuildTableList(Of S24Table10)(
+            Function(st, en) New S24Table10(st, en), useOneTable)
+
             ' ===== СБОРКА ИНТЕРФЕЙСА =====
             Dim all As New List(Of FrameworkElement)
 
-            ' 1. Сначала добавляем ЗАГОЛОВОК
-            all.Add(header)
 
 
             Dim maxN = Math.Max(tables1.Count, Math.Max(tables5.Count, Math.Max(tables3.Count, tables4.Count)))
+            maxN = Math.Max(maxN, Math.Max(tables6.Count, Math.Max(tables7.Count, tables8.Count)))
+            maxN = Math.Max(maxN, Math.Max(tables9.Count, tables10.Count))
 
             For i = 0 To maxN - 1
+                ' ===== HEADER: PERIOD FROM TABLE ITSELF =====
+                Dim header As New ReportHeader()
 
+                Dim pStart As Date = nachDateTime.Date
+                Dim pEnd As Date = konDateTime.Date
+
+                If i < tables1.Count Then
+                    If tables1(i)._periodStart.HasValue Then pStart = tables1(i)._periodStart.Value
+                    If tables1(i)._periodEnd.HasValue Then pEnd = tables1(i)._periodEnd.Value
+                End If
+
+                header.SetReportPeriod(pStart, pEnd, Today.Date)
+                all.Add(header)
+                ' =============================================
 
                 ' Таблица 1 по центру страницы
                 If i < tables1.Count Then
                     Dim t1Container As New StackPanel With {
-        .HorizontalAlignment = HorizontalAlignment.Center,
-        .VerticalAlignment = VerticalAlignment.Top
-    }
+                        .HorizontalAlignment = HorizontalAlignment.Center,
+                        .VerticalAlignment = VerticalAlignment.Top
+                    }
                     t1Container.Children.Add(tables1(i))
                     all.Add(t1Container)
                 End If
-
-
-                '' 1. Таблица 1 (отдельно)
-                'If i < tables1.Count Then all.Add(tables1(i))
 
                 ' 2. Таблица 5 (над парными)
                 If i < tables5.Count Then all.Add(tables5(i))
 
                 ' 3. Парные T3 + T4
                 Dim pair As New StackPanel With {
-            .Orientation = Orientation.Horizontal,
-            .VerticalAlignment = VerticalAlignment.Top,
-            .Margin = New Thickness(50, 5, 50, 0)
-        }
+                    .Orientation = Orientation.Horizontal,
+                    .VerticalAlignment = VerticalAlignment.Top,
+                    .Margin = New Thickness(50, 5, 50, 0)
+                }
                 If i < tables3.Count Then pair.Children.Add(tables3(i))
                 If i < tables4.Count Then
                     tables4(i).Margin = New Thickness(50, 0, 0, 0)
                     pair.Children.Add(tables4(i))
                 End If
                 If pair.Children.Count > 0 Then all.Add(pair)
+
+                ' 4. Тройка: T6 + T7 + T8 для каждого месяца
+                Dim pairPlans As New StackPanel With {
+                    .Orientation = Orientation.Horizontal,
+                    .HorizontalAlignment = HorizontalAlignment.Center,
+                    .VerticalAlignment = VerticalAlignment.Top,
+                    .Margin = New Thickness(50, 5, 50, 0)
+                }
+
+                If i < tables6.Count Then pairPlans.Children.Add(tables6(i))
+
+                If i < tables7.Count Then
+                    tables7(i).Margin = New Thickness(50, 5, 50, 0)
+                    pairPlans.Children.Add(tables7(i))
+                End If
+
+                If i < tables8.Count Then
+                    tables8(i).Margin = New Thickness(50, 5, 50, 0)
+                    pairPlans.Children.Add(tables8(i))
+                End If
+
+                If i < tables9.Count Then
+                    tables9(i).Margin = New Thickness(50, 5, 50, 0)
+                    pairPlans.Children.Add(tables9(i))
+                End If
+
+                If pairPlans.Children.Count > 0 Then all.Add(pairPlans)
+                ' 5. Таблица 10 — ОТДЕЛЬНОЙ СТРОКОЙ В КОНЦЕ ЦИКЛА
+                ' (Широкая таблица КАСАНТ не должна быть в горизонтальной группе)
+                If i < tables10.Count Then
+                    Dim t10Container As New StackPanel With {
+                        .HorizontalAlignment = HorizontalAlignment.Center,
+                        .VerticalAlignment = VerticalAlignment.Top,
+                        .Margin = New Thickness(0, 10, 0, 0)
+                    }
+                    t10Container.Children.Add(tables10(i))
+                    all.Add(t10Container)
+                End If
             Next
 
-            ' 4. Тройка: T6 (План) + T7 (ОТС 1 кат) + T8 (Корректировки) — ПО ЦЕНТРУ
-            Dim pairPlans As New StackPanel With {
-        .Orientation = Orientation.Horizontal,
-        .HorizontalAlignment = HorizontalAlignment.Center,
-        .VerticalAlignment = VerticalAlignment.Top,
-        .Margin = New Thickness(50, 5, 50, 0)
-    }
-
-            If tables6.Count > 0 Then pairPlans.Children.Add(tables6(0))
-
-            If tables7.Count > 0 Then
-                tables7(0).Margin = New Thickness(50, 5, 50, 0)
-                pairPlans.Children.Add(tables7(0))
-            End If
-
-            ' === ТАБЛИЦА 8: ТРЕТИЙ ЭЛЕМЕНТ СПРАВА ОТ T7 ===
-            If tables8.Count > 0 Then
-                tables8(0).Margin = New Thickness(50, 5, 50, 0)
-                pairPlans.Children.Add(tables8(0))
-            End If
-
-            If pairPlans.Children.Count > 0 Then all.Add(pairPlans)
 
             ShowInWindow(all, $"Справка {Fetcher.NachDat.ToString("yy")}")
 
@@ -301,7 +330,7 @@ Namespace Kas
         .WindowStartupLocation = WindowStartupLocation.CenterScreen,
         .SizeToContent = SizeToContent.WidthAndHeight,
         .MaxWidth = SystemParameters.PrimaryScreenWidth,
-        .MaxHeight = SystemParameters.PrimaryScreenHeight
+        .MaxHeight = SystemParameters.PrimaryScreenHeight - 100
     }
 
             win.Content = scroller
