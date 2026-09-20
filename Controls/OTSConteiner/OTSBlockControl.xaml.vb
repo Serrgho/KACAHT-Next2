@@ -681,7 +681,7 @@ Namespace Kas
             ' 5. Устанавливаем
             OTSContainer.ItemsSource = source
             THed.ItemsSource = source
-
+            source = Nothing
             ' 6. Обновляем Total
             UpdateTotal()
 
@@ -731,7 +731,7 @@ Namespace Kas
                 ChkOK()
                 UpdateActionNotesVisibility()
             End If
-
+            TotCnt = Nothing
 
         End Sub
 
@@ -758,6 +758,7 @@ Namespace Kas
                 ' Показываем или прячем кнопку (DelAllActionBUBU - это имя твоей большой кнопки)
                 DelAllActionBUBU.Visibility = If(hasNotes, Visibility.Visible, Visibility.Collapsed)
             End If
+            source = Nothing
         End Sub
 
 
@@ -1298,6 +1299,7 @@ Namespace Kas
             If scrollViewer IsNot Nothing Then
                 scrollViewer.ScrollToTop()
             End If
+
         End Sub
 
         Private Sub ToDownButton_Click(sender As Object, e As RoutedEventArgs)
@@ -1306,7 +1308,11 @@ Namespace Kas
             If scrollViewer IsNot Nothing Then
                 scrollViewer.ScrollToEnd()
             End If
+
         End Sub
+
+
+
 
         Private Sub BtnToExcelReport_Click(sender As Object, e As RoutedEventArgs)
             ExportOTSListToExcel(OTSContainer.ItemsSource)
@@ -1316,6 +1322,7 @@ Namespace Kas
             Dim ToExcell = OTSContainer.Items.OfType(Of Otkaz).Any
             BtnToExcelReport.Visibility = If(ToExcell, Visibility.Visible, Visibility.Collapsed)
         End Sub
+
 
 
     End Class

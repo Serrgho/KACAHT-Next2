@@ -347,7 +347,7 @@ Module ReportToWord
             KorPart_CNT = OTS_SOURCE.Where(KorrectedOTS_inSource)
             RedirectPart_CNT = OTS_SOURCE.Where(RedirOTS)
         End If
-
+        OTS_SOURCE = Nothing
 
 
 

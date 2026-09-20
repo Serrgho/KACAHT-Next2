@@ -78,43 +78,5 @@
 		</Border>
 
 	</WrapPanel>
-
-	<!--<WrapPanel Orientation="Horizontal">
-		 --><!--xmlns:local="clr-namespace:KACAHT_Next2.Kas"--><!--
-		<Border x:Name="EmptyFieldsBorder" Background="DarkOrange" MouseUp="Border_MouseUp" Visibility="Collapsed" BorderBrush="LightYellow" BorderThickness="1" CornerRadius="4" Padding="8,4">
-			<StackPanel Orientation="Horizontal" Cursor="Hand">
-				<TextBlock Text="⚠️" FontSize="14" VerticalAlignment="Center" Foreground="LightYellow"/>
-				<TextBlock x:Name="EmptyFieldsLabel" Text="Незаполненные поля" FontWeight="Bold" Foreground="LightYellow" Margin="4,0,0,0" VerticalAlignment="Center"/>
-			</StackPanel>
-		</Border>
-
-		<Border x:Name="VidTyagiBorder" Background="#FF4E00" MouseUp="Border_MouseUp" Visibility="Collapsed" BorderBrush="LightYellow" BorderThickness="1" CornerRadius="4" Padding="8,4">
-			<StackPanel Orientation="Horizontal" Cursor="Hand">
-				<TextBlock Text="⚠️" FontSize="14" VerticalAlignment="Center" Foreground="LightYellow"/>
-				<TextBlock x:Name="VidTyagiLabel" Text="Не указан вид тяги" FontWeight="Bold" Foreground="LightYellow" Margin="4,0,0,0" VerticalAlignment="Center"/>
-			</StackPanel>
-		</Border>
-
-		<Border x:Name="IsVioletsBorder" Background="DarkViolet" MouseUp="Border_MouseUp" Visibility="Collapsed" BorderBrush="LightYellow" BorderThickness="1" CornerRadius="4" Padding="8,4">
-			<StackPanel Orientation="Horizontal" Cursor="Hand">
-				<TextBlock Text="⚠️" FontSize="14" VerticalAlignment="Center" Foreground="LightYellow"/>
-				<TextBlock x:Name="VioletsLabel" Text="Незаполненные описания" FontWeight="Bold" Foreground="LightYellow" Margin="4,0,0,0" VerticalAlignment="Center"/>
-			</StackPanel>
-		</Border>
-
-		<Border x:Name="IsRedsMashBrdr" Background="DarkBlue" MouseUp="Border_MouseUp" Visibility="Collapsed" BorderBrush="LightYellow" BorderThickness="1" CornerRadius="4" Padding="8,4">
-			<StackPanel Orientation="Horizontal" Cursor="Hand">
-				<TextBlock Text="⚠️" FontSize="14" VerticalAlignment="Center" Foreground="LightYellow"/>
-				<TextBlock x:Name="IsRedsMashTBlk" Text="Неверно указан машинист" FontWeight="Bold" Foreground="LightYellow" Margin="4,0,0,0" VerticalAlignment="Center"/>
-			</StackPanel>
-		</Border>
-
-		<Border x:Name="IsEmptyPCHBrdr" Background="DarkRed" MouseUp="Border_MouseUp" Visibility="Collapsed" BorderBrush="LightYellow" BorderThickness="1" CornerRadius="4" Padding="8,4">
-			<StackPanel Orientation="Horizontal" Cursor="Hand">
-				<TextBlock Text="⚠️" FontSize="14" VerticalAlignment="Center" Foreground="LightYellow"/>
-				<TextBlock x:Name="IsEmptyPCHTBlk" Text="Не указаны потери П/Ч" FontWeight="Bold" Foreground="LightYellow" Margin="4,0,0,0" VerticalAlignment="Center"/>
-			</StackPanel>
-		</Border>
-
-	</WrapPanel>-->
+	
 </UserControl>

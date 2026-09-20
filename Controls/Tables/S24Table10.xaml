@@ -33,7 +33,7 @@
 			<Setter Property="FontSize" Value="11"/>
 		</Style>
 
-		<!-- Текст ячейки -->
+		<!-- Текст ячейки данных -->
 		<Style x:Key="CellStyle" TargetType="TextBlock">
 			<Setter Property="TextAlignment" Value="Center"/>
 			<Setter Property="VerticalAlignment" Value="Center"/>
@@ -43,6 +43,7 @@
 	</UserControl.Resources>
 
 	<StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
+		<!-- Общий заголовок отчета -->
 		<TextBlock x:Name="LblCaption"
                    Width="Auto" MinWidth="300"
                    Text="Балловая оценка отказов 1 категории (сетевой учёт)"
@@ -50,38 +51,147 @@
                    FontSize="16" FontWeight="Bold"
                    TextAlignment="Center" Margin="0,0,0,10"/>
 
-		<!-- 
-           Структура колонок:
-           0: Депо (120px)
-           1-5: 2026 год (Т-ОТС, Т-Баллы, СЛД-ОТС, СЛД-Баллы, Всего)
-           6-10: 2025 весь период (аналогично)
-           11-15: 2025 нарастающий (аналогично)
-        -->
+		<!-- Основная сетка таблицы -->
 		<Grid x:Name="MainGrid">
+
+			<!-- !!! ВАЖНО: ОПРЕДЕЛЕНИЕ СТРОК !!! -->
+			<!-- Row 0-2: Заголовки (фиксированная высота Auto) -->
+			<!-- Row 3+: Данные (добавляются программно через RowDefinitions.Add) -->
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<!-- Периоды -->
+				<RowDefinition Height="Auto"/>
+				<!-- Т / СЛД / Всего -->
+				<RowDefinition Height="Auto"/>
+				<!-- Баллы / ОТС / Баллы -->
+			</Grid.RowDefinitions>
+
+			<!-- 
+               Структура колонок (всего 13):
+               0: Депо (120px)
+               1: Тек. год - Т (Баллы=ОТС)
+               2-3: Тек. год - СЛД (ОТС, Баллы)
+               4: Тек. год - Всего баллов
+               5-8: Прош. год весь (аналогично)
+               9-12: Прош. год нараст. (аналогично)
+            -->
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="120"/>
+				<!-- Депо -->
 
-				<!-- 2026 год -->
+				<!-- Тек. год -->
 				<ColumnDefinition Width="45"/>
+				<!-- Т -->
+				<ColumnDefinition Width="45"/>
+				<!-- СЛД ОТС -->
+				<ColumnDefinition Width="45"/>
+				<!-- СЛД Баллы -->
+				<ColumnDefinition Width="50"/>
+				<!-- Всего -->
+
+				<!-- Прош. год (весь период) -->
 				<ColumnDefinition Width="45"/>
 				<ColumnDefinition Width="45"/>
 				<ColumnDefinition Width="45"/>
 				<ColumnDefinition Width="50"/>
 
-				<!-- 2025 год (весь период) -->
-				<ColumnDefinition Width="45"/>
-				<ColumnDefinition Width="45"/>
-				<ColumnDefinition Width="45"/>
-				<ColumnDefinition Width="45"/>
-				<ColumnDefinition Width="50"/>
-
-				<!-- 2025 год (нарастающим итогом) -->
-				<ColumnDefinition Width="45"/>
+				<!-- Прош. год (с нач. года) -->
 				<ColumnDefinition Width="45"/>
 				<ColumnDefinition Width="45"/>
 				<ColumnDefinition Width="45"/>
 				<ColumnDefinition Width="50"/>
 			</Grid.ColumnDefinitions>
+
+			<!-- ===== ЗАГОЛОВКИ ===== -->
+
+			<!-- Row 0: Названия периодов -->
+			<Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Тек. год"/>
+			</Border>
+			<Border Grid.Row="0" Grid.Column="5" Grid.ColumnSpan="4" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Прош. год&#x0a;(весь период)"/>
+			</Border>
+			<Border Grid.Row="0" Grid.Column="9" Grid.ColumnSpan="4" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Прош. год&#x0a;(с нач. года)"/>
+			</Border>
+
+			<!-- Row 1: Группы Т / СЛД / Всего -->
+			<!-- Тек. год -->
+			<Border Grid.Row="1" Grid.Column="1" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Т"/>
+			</Border>
+			<Border Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="СЛД"/>
+			</Border>
+			<!-- !!! ОБЪЕДИНЕНИЕ СТРОК ДЛЯ "ВСЕГО БАЛЛОВ" !!! -->
+			<Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="4" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Всего&#x0a;баллов"/>
+			</Border>
+
+			<!-- Прош. год (весь период) -->
+			<Border Grid.Row="1" Grid.Column="5" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Т"/>
+			</Border>
+			<Border Grid.Row="1" Grid.Column="6" Grid.ColumnSpan="2" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="СЛД"/>
+			</Border>
+			<Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="8" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Всего&#x0a;баллов"/>
+			</Border>
+
+			<!-- Прош. год (с нач. года) -->
+			<Border Grid.Row="1" Grid.Column="9" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Т"/>
+			</Border>
+			<Border Grid.Row="1" Grid.Column="10" Grid.ColumnSpan="2" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="СЛД"/>
+			</Border>
+			<Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="12" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Всего&#x0a;баллов"/>
+			</Border>
+
+			<!-- Row 2: Подзаголовки (только для Т и СЛД, т.к. "Всего" уже занял место) -->
+			<!-- Тек. год -->
+			<Border Grid.Row="2" Grid.Column="1" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Баллы"/>
+			</Border>
+			<Border Grid.Row="2" Grid.Column="2" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="ОТС"/>
+			</Border>
+			<Border Grid.Row="2" Grid.Column="3" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Баллы"/>
+			</Border>
+			<!-- Колонка 4 пропущена, т.к. занята объединенным Border'ом выше -->
+
+			<!-- Прош. год (весь период) -->
+			<Border Grid.Row="2" Grid.Column="5" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Баллы"/>
+			</Border>
+			<Border Grid.Row="2" Grid.Column="6" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="ОТС"/>
+			</Border>
+			<Border Grid.Row="2" Grid.Column="7" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Баллы"/>
+			</Border>
+			<!-- Колонка 8 пропущена -->
+
+			<!-- Прош. год (с нач. года) -->
+			<Border Grid.Row="2" Grid.Column="9" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Баллы"/>
+			</Border>
+			<Border Grid.Row="2" Grid.Column="10" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="ОТС"/>
+			</Border>
+			<Border Grid.Row="2" Grid.Column="11" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Баллы"/>
+			</Border>
+			<!-- Колонка 12 пропущена -->
+
+			<!-- Колонка "Депо" объединяет все 3 строки заголовков -->
+			<Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Style="{StaticResource HeaderBorder}">
+				<TextBlock Style="{StaticResource HeaderTextStyle}" Text="Депо / СЛД"/>
+			</Border>
+
 		</Grid>
 	</StackPanel>
 </UserControl>

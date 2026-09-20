@@ -73,6 +73,9 @@ Namespace Kas
 			' Уникальный timestamp для обхода кэша сервера/прокси
 			Dim tmpUnik = Math.Floor((DateTime.UtcNow - New DateTime(1970, 1, 1)).TotalMilliseconds)
 
+
+
+
 			' ✅ Получаем код дороги из свойства (Integer) и форматируем в 2 цифры: 5 -> "05", 88 -> "88"
 			' Если свойство равно 0 или не задано, подставим "88" как запасной вариант (Красноярская)
 			Dim dorKod As String = If(DKod > 0, DKod.ToString("00"), "88")

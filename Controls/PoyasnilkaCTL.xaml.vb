@@ -234,7 +234,7 @@ Namespace Kas
             Dim tables = BuildTableList(Of S24Table2)(
                 Function(st, en) New S24Table2(fullCurY, oldY, st, en, ytdOtkazy),
                 useOneTable)
-
+            ytdOtkazy = Nothing
             ' ▼▼▼ вот тут: перекладываем в List(Of FrameworkElement) ▼▼▼
             Dim all As New List(Of FrameworkElement)
             all.AddRange(tables)
@@ -299,6 +299,8 @@ Namespace Kas
 
 
         Private Sub ShowInWindow(controls As List(Of FrameworkElement), title As String)
+            'RezervList = OTSList
+
             Dim panel As New StackPanel() With {
         .HorizontalAlignment = HorizontalAlignment.Stretch
     }
@@ -334,6 +336,31 @@ Namespace Kas
     }
 
             win.Content = scroller
+
+
+            '' === ЯДЕРНАЯ ОЧИСТКА ПЕРЕД ЗАКРЫТИЕМ ОКНА ===
+            '' Гарантируем, что все временные контролы отпишутся от событий
+            '' ДО того, как визуальное дерево будет уничтожено системой
+            'AddHandler win.Closed, Sub(s As Object, e As EventArgs)
+            '                           ' Очищаем каждый переданный контрол
+            '                           For Each ctrl In controls
+            '                               UnsubscribeAllEvents(ctrl)
+            '                           Next
+
+            '                           ' Очищаем сам скроллер (там висит PreviewMouseWheel)
+            '                           UnsubscribeAllEvents(scroller)
+
+            '                           ' Очищаем панель
+            '                           UnsubscribeAllEvents(panel)
+
+            '                           ' Принудительная сборка для временного окна
+            '                           GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking:=True)
+            '                           ResignOTSList(RezervList)
+            '                           RezervList = Nothing
+            '                       End Sub
+            '' ============================================
+
+
             win.Show()
         End Sub
 

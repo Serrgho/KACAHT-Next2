@@ -1,5 +1,6 @@
 ﻿
 
+Imports System.ComponentModel
 Imports System.Linq
 Imports System.Windows
 Imports System.Windows.Controls
@@ -232,6 +233,43 @@ Namespace Kas
             Next
 
         End Sub
+
+        ''' <summary>
+        ''' Заполняет строку 10: все ячейки > 0 являются ссылочными (drill-down)
+        ''' </summary>
+        Private Sub FillRowFullPeriod(rowIndex As Integer, data As TableRowData)
+            If Not RowCellsMap.ContainsKey(rowIndex) Then Return
+
+            Dim rowCells = RowCellsMap(rowIndex)
+
+            ' Порядок списков должен совпадать с порядком ячеек в RowCellsMap для merged-строк
+            Dim lists As List(Of Otkaz)() = {
+        data.Complex12List, data.Complex3List, data.Complex13List,
+        data.T12List, data.T3List, data.T13List,
+        data.TR12List, data.TR3List, data.TR13List,
+        data.SLD12List, data.SLD3List, data.SLD13List,
+        data.Factory12List, data.Factory3List, data.Factory13List
+    }
+
+            For i As Integer = 0 To Math.Min(rowCells.Length - 1, lists.Length - 1)
+                Dim list = lists(i)
+
+                ' Устанавливаем текст
+                rowCells(i).Text = If(list IsNot Nothing AndAlso list.Count > 0, list.Count.ToString(), "")
+
+                ' ВАЖНО: Если список есть и он не пустой — делаем ячейку кликабельной
+                If list IsNot Nothing AndAlso list.Count > 0 Then
+                    rowCells(i).Tag = list
+                    SetClickableStyle(rowCells(i), list)
+                Else
+                    rowCells(i).Tag = Nothing
+                    rowCells(i).Cursor = Cursors.Arrow
+                    rowCells(i).FontWeight = FontWeights.Normal
+                    rowCells(i).Foreground = Brushes.Black
+                End If
+            Next
+        End Sub
+
 
         ' ==================== СТИЛИ ====================
 
@@ -683,10 +721,13 @@ Namespace Kas
 
         ' ==================== ЗАГРУЗКА ====================
 
+
+
         Private Sub S24Table1_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
             If _currentYearOtkazy Is Nothing OrElse _previousYearOtkazy Is Nothing Then
                 Return
             End If
+
             UpdateHeaders()
             InitializeRowCells()
 
@@ -699,22 +740,20 @@ Namespace Kas
             ' ▲▲▲ ============ ▲▲▲
 
             ' Текущий год: строки 3 (полная) и 5 (merged)
-            Dim rowCurrent = BuildTableRowData(
-            _currentYearOtkazy,
-             tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav,
-            isCat1, isCat2, isCat3)
+            Dim rowCurrent As TableRowData = BuildTableRowData(
+                _currentYearOtkazy,
+                tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav,
+                isCat1, isCat2, isCat3)
             FillRow(3, rowCurrent)
             FillRowMerged(5, rowCurrent)
 
             ' Прошлый год: строки 4 (полная) и 6 (merged)
-            Dim rowPrevious = BuildTableRowData(
-            _previousYearOtkazy,
-            tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav,
-            isCat1, isCat2, isCat3)
+            Dim rowPrevious As TableRowData = BuildTableRowData(
+                _previousYearOtkazy,
+                tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav,
+                isCat1, isCat2, isCat3)
             FillRow(4, rowPrevious)
             FillRowMerged(6, rowPrevious)
-
-
 
             ' ▼▼▼ Строка 7: Целевые показатели ▼▼▼
             If _periodEnd IsNot Nothing Then
@@ -727,43 +766,201 @@ Namespace Kas
                     endDate = tmp
                 End If
 
-                Dim allGoals = GoalsStore.Load()
-                Dim goalForPeriod = GetGoalForPeriod(allGoals, startDate, endDate)
+                Dim allGoals As List(Of MonthlyGoal) = GoalsStore.Load()
+                Dim goalForPeriod As MonthlyGoal = GetGoalForPeriod(allGoals, startDate, endDate)
 
                 FillRowGoal(7, goalForPeriod)
             Else
                 FillRowGoal(7, New MonthlyGoal())
             End If
+
             ' Строка 8: Изменения случ. (абсолютная разница)
-            Dim changesData = CalculateChanges(rowCurrent, rowPrevious)
+            Dim changesData As TableRowNumericData = CalculateChanges(rowCurrent, rowPrevious)
             FillRowNumeric(8, changesData)
 
             ' Строка 9: % изменений (процентная разница)
-            Dim percentData = CalculatePercentChanges(rowCurrent, rowPrevious)
+            Dim percentData As TableRowNumericData = CalculatePercentChanges(rowCurrent, rowPrevious)
             FillRowNumeric(9, percentData)
 
-            ' ▼▼▼ Строка 10 - полный месяц прошлого года ▼▼▼
+
+
+            '' ▼▼▼ Строка 10 - ПОЛНЫЙ МЕСЯЦ ПРОШЛОГО ГОДА (КАК БЫЛО РАНЬШЕ) НЕ ССЫЛОЧНЫЕ ДАННЫЕ ▼▼▼
+            'If _periodEnd IsNot Nothing AndAlso _previousYearOtkazyRaw IsNot Nothing Then
+            '    Dim oldP = GetPrevPeriod(If(_periodStart, _periodEnd).Value.Date,
+            '         _periodEnd.Value.Date,
+            '         _previousYearOtkazyRaw)
+
+            '    Dim actualPrevYear As Integer = oldP.End.Year
+            '    Dim targetMon As Integer = oldP.End.Month
+
+            '    Dim monthStart As New Date(actualPrevYear, targetMon, 1)
+            '    Dim monthEnd As Date = monthStart.AddMonths(1).AddDays(-1)
+
+            '    ' Фильтруем сырые данные за ВЕСЬ этот месяц
+            '    Dim fullMonthOtkazy = _previousYearOtkazyRaw.Where(Function(o)
+            '                                                           Return o.Nach.Year = actualPrevYear AndAlso
+            '                                                          o.Nach.Date >= monthStart.Date AndAlso
+            '                                                          o.Nach.Date <= monthEnd.Date
+            '                                                       End Function).ToList()
+
+            '    Dim rowFullMonth As TableRowData = BuildTableRowData(
+            'fullMonthOtkazy, tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav,
+            'isCat1, isCat2, isCat3)
+
+            '    FillRowMerged(10, rowFullMonth, allNormal:=True)
+            'End If
+
+            ' ▼▼▼ Строка 10 - ПОЛНЫЙ МЕСЯЦ/ПЕРИОД ПРОШЛОГО ГОДА ▼▼▼
             If _periodEnd IsNot Nothing AndAlso _previousYearOtkazyRaw IsNot Nothing Then
                 Dim oldP = GetPrevPeriod(If(_periodStart, _periodEnd).Value.Date,
-                             _periodEnd.Value.Date,
-                             _previousYearOtkazyRaw)
+                     _periodEnd.Value.Date,
+                     _previousYearOtkazyRaw)
 
-                Dim actualPrevYear As Integer = oldP.End.Year
-                Dim targetMon As Integer = oldP.End.Month        ' ← февраль из ручного периода!
+                Dim oldStart As Date = oldP.Item1
+                Dim oldEnd As Date = oldP.Item2
 
-                Dim monthStart As New Date(actualPrevYear, targetMon, 1)
-                Dim monthEnd As Date = monthStart.AddMonths(1).AddDays(-1)
+                ' Проверяем, охватывает ли период несколько месяцев
+                Dim monthsDiff As Integer = (oldEnd.Year - oldStart.Year) * 12 + (oldEnd.Month - oldStart.Month)
 
-                Dim fullMonthOtkazy = _previousYearOtkazyRaw.Where(Function(o) o.Nach.Year = actualPrevYear AndAlso
-                                                                  o.Nach.Date >= monthStart.Date AndAlso
-                                                                  o.Nach.Date <= monthEnd.Date).ToList()
+                Dim fullPeriodOtkazy As List(Of Otkaz)
 
-                Dim rowFullMonth = BuildTableRowData(fullMonthOtkazy, tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav, isCat1, isCat2, isCat3)
-                FillRowMerged(10, rowFullMonth, allNormal:=True)
+                If monthsDiff > 0 Then
+                    Dim firstMonthStart As New Date(oldStart.Year, oldStart.Month, 1)
+
+                    ' Разбиваем на две строки
+                    Dim lastMonthBase As New Date(oldEnd.Year, oldEnd.Month, 1)
+                    Dim lastMonthEnd As Date = lastMonthBase.AddMonths(1).AddDays(-1)
+
+                    fullPeriodOtkazy = _previousYearOtkazyRaw.Where(Function(o)
+                                                                        Return o.Nach.Date >= firstMonthStart.Date AndAlso
+                                                                       o.Nach.Date <= lastMonthEnd.Date
+                                                                    End Function).ToList()
+                Else
+                    ' Один месяц — берем полный календарный месяц
+                    Dim actualPrevYear As Integer = oldEnd.Year
+                    Dim targetMon As Integer = oldEnd.Month
+                    Dim monthStart As New Date(actualPrevYear, targetMon, 1)
+                    Dim monthEnd As Date = monthStart.AddMonths(1).AddDays(-1)
+
+                    fullPeriodOtkazy = _previousYearOtkazyRaw.Where(Function(o)
+                                                                        Return o.Nach.Year = actualPrevYear AndAlso
+                                                                       o.Nach.Date >= monthStart.Date AndAlso
+                                                                       o.Nach.Date <= monthEnd.Date
+                                                                    End Function).ToList()
+                End If
+
+                Dim rowFullMonth As TableRowData = BuildTableRowData(
+            fullPeriodOtkazy, tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav,
+            isCat1, isCat2, isCat3)
+
+                FillRowFullPeriod(10, rowFullMonth)
             End If
+
+
             ' ▼▼▼ ИНИЦИАЛИЗАЦИЯ ПОДСВЕТКИ ГРУПП (В САМОМ КОНЦЕ!) ▼▼▼
             InitGroupHighlighting()
         End Sub
+
+        ' ==================== ОБНОВЛЕНИЕ ЗАГОЛОВКОВ ====================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        'Private Sub S24Table1_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
+        '    If _currentYearOtkazy Is Nothing OrElse _previousYearOtkazy Is Nothing Then
+        '        Return
+        '    End If
+        '    UpdateHeaders()
+        '    InitializeRowCells()
+
+        '    Dim isCat1 As Func(Of Otkaz, Boolean) = Function(o) o.Kat = 1
+        '    Dim isCat2 As Func(Of Otkaz, Boolean) = Function(o) o.Kat = 2
+        '    Dim isCat3 As Func(Of Otkaz, Boolean) = Function(o) o.Kat = 3
+
+        '    ' ▼▼▼ ОБЪЕДИНЁННЫЙ ПРЕДИКАТ ПО Т ▼▼▼
+        '    Dim tchCombined As Func(Of Otkaz, Boolean) = Function(o) SignedOnTCH(o) OrElse VRassForTCH(o)
+        '    ' ▲▲▲ ============ ▲▲▲
+
+        '    ' Текущий год: строки 3 (полная) и 5 (merged)
+        '    Dim rowCurrent = BuildTableRowData(
+        '    _currentYearOtkazy,
+        '     tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav,
+        '    isCat1, isCat2, isCat3)
+        '    FillRow(3, rowCurrent)
+        '    FillRowMerged(5, rowCurrent)
+
+        '    ' Прошлый год: строки 4 (полная) и 6 (merged)
+        '    Dim rowPrevious = BuildTableRowData(
+        '    _previousYearOtkazy,
+        '    tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav,
+        '    isCat1, isCat2, isCat3)
+        '    FillRow(4, rowPrevious)
+        '    FillRowMerged(6, rowPrevious)
+
+
+
+        '    ' ▼▼▼ Строка 7: Целевые показатели ▼▼▼
+        '    If _periodEnd IsNot Nothing Then
+        '        Dim startDate As Date = If(_periodStart, _periodEnd).Value
+        '        Dim endDate As Date = _periodEnd.Value
+
+        '        If startDate > endDate Then
+        '            Dim tmp As Date = startDate
+        '            startDate = endDate
+        '            endDate = tmp
+        '        End If
+
+        '        Dim allGoals = GoalsStore.Load()
+        '        Dim goalForPeriod = GetGoalForPeriod(allGoals, startDate, endDate)
+
+        '        FillRowGoal(7, goalForPeriod)
+        '    Else
+        '        FillRowGoal(7, New MonthlyGoal())
+        '    End If
+        '    ' Строка 8: Изменения случ. (абсолютная разница)
+        '    Dim changesData = CalculateChanges(rowCurrent, rowPrevious)
+        '    FillRowNumeric(8, changesData)
+
+        '    ' Строка 9: % изменений (процентная разница)
+        '    Dim percentData = CalculatePercentChanges(rowCurrent, rowPrevious)
+        '    FillRowNumeric(9, percentData)
+
+        '    ' ▼▼▼ Строка 10 - полный месяц прошлого года ▼▼▼
+        '    If _periodEnd IsNot Nothing AndAlso _previousYearOtkazyRaw IsNot Nothing Then
+        '        Dim oldP = GetPrevPeriod(If(_periodStart, _periodEnd).Value.Date,
+        '                     _periodEnd.Value.Date,
+        '                     _previousYearOtkazyRaw)
+
+        '        Dim actualPrevYear As Integer = oldP.End.Year
+        '        Dim targetMon As Integer = oldP.End.Month        ' ← февраль из ручного периода!
+
+        '        Dim monthStart As New Date(actualPrevYear, targetMon, 1)
+        '        Dim monthEnd As Date = monthStart.AddMonths(1).AddDays(-1)
+
+        '        Dim fullMonthOtkazy = _previousYearOtkazyRaw.Where(Function(o) o.Nach.Year = actualPrevYear AndAlso
+        '                                                          o.Nach.Date >= monthStart.Date AndAlso
+        '                                                          o.Nach.Date <= monthEnd.Date).ToList()
+
+        '        Dim rowFullMonth = BuildTableRowData(fullMonthOtkazy, tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav, isCat1, isCat2, isCat3)
+        '        FillRowMerged(10, rowFullMonth, allNormal:=True)
+        '    End If
+        '    ' ▼▼▼ ИНИЦИАЛИЗАЦИЯ ПОДСВЕТКИ ГРУПП (В САМОМ КОНЦЕ!) ▼▼▼
+        '    InitGroupHighlighting()
+        'End Sub
 
 
         ''' <summary>
@@ -1008,28 +1205,111 @@ Namespace Kas
             End If
         End Function
 
-        Private Sub UpdateHeaders()
 
+        Private Sub UpdateHeaders()
             If _periodEnd Is Nothing Then Return
 
             Dim currentYear As Integer = _periodEnd.Value.Year
 
-            ' ▼▼▼ прошлый период — ручной или авто, один источник правды ▼▼▼
-            Dim oldP = GetPrevPeriod(If(_periodStart, _periodEnd).Value.Date,
-                                     _periodEnd.Value.Date,
-                                     _previousYearOtkazyRaw)
+            ' ▼▼▼ прошлый период — один источник правды через ваш модуль ▼▼▼
+            Dim currentStart As Date = If(_periodStart, _periodEnd).Value.Date
+            Dim currentEnd As Date = _periodEnd.Value.Date
 
-            LblRow2Period.Text = $"{_periodStart.Value:dd.MM} - {_periodEnd.Value:dd.MM.yy}"
+            ' Получаем кортеж прошлого периода
+            Dim prevPeriodTuple = GetPrevPeriod(currentStart, currentEnd, _previousYearOtkazyRaw)
+
+            Dim oldStart As Date = prevPeriodTuple.Item1
+            Dim oldEnd As Date = prevPeriodTuple.Item2
+            Dim oldYear As Integer = oldEnd.Year
+
+            ' Формирование подписи периода текущего года
+            Dim periodText As String
+            If _periodStart.HasValue AndAlso _periodStart.Value <> _periodEnd.Value Then
+                periodText = $"{_periodStart.Value:dd.MM} - {_periodEnd.Value:dd.MM.yy}"
+            Else
+                periodText = $"{_periodEnd.Value:dd.MM.yy}"
+            End If
+
+            LblRow2Period.Text = periodText
             LblRow2.Text = currentYear.ToString()
-            LblRow3.Text = oldP.End.Year.ToString()
+            LblRow3.Text = oldYear.ToString()
 
             LblRow4.Text = currentYear.ToString()
-            LblRow5.Text = oldP.End.Year.ToString()
+            LblRow5.Text = oldYear.ToString()
             LblGoal.Text = "Цель"
 
-            LblFullPeriodPrev.Text = $"{oldP.Start:dd.MM} - {oldP.End:dd.MM.yy}"
+            '' Формирование подписи для Строки 10 (период прошлого года)
+            '' Если период охватывает несколько месяцев/дней, показываем диапазон
+            'Dim prevPeriodText As String
+            'If oldStart.Month <> oldEnd.Month OrElse oldStart.Year <> oldEnd.Year Then
+            '    prevPeriodText = $"{oldStart:dd.MM} - {oldEnd:dd.MM.yy}"
+            'Else
+            '    prevPeriodText = $"{oldStart:dd.MM.yy}"
+            'End If
+
+            'LblFullPeriodPrev.Text = prevPeriodText
+
+            ' ▼▼▼ Заголовок для Строки 10 ▼▼▼
+            Dim prevPeriodText As String
+
+            ' Проверяем, охватывает ли период несколько месяцев
+            Dim monthsDiff As Integer = (oldEnd.Year - oldStart.Year) * 12 + (oldEnd.Month - oldStart.Month)
+
+            If monthsDiff > 0 Then
+                Dim firstMonthStart As New Date(oldStart.Year, oldStart.Month, 1)
+
+                ' Разбиваем на две строки
+                Dim lastMonthBase As New Date(oldEnd.Year, oldEnd.Month, 1)
+                Dim lastMonthEnd As Date = lastMonthBase.AddMonths(1).AddDays(-1)
+
+                prevPeriodText = $"{firstMonthStart:dd.MM} - {lastMonthEnd:dd.MM.yy}"
+            Else
+                ' Один месяц — показываем полный календарный месяц
+                Dim monthStart As New Date(oldEnd.Year, oldEnd.Month, 1)
+                Dim monthEnd As Date = monthStart.AddMonths(1).AddDays(-1)
+                prevPeriodText = $"{monthStart:dd.MM} - {monthEnd:dd.MM.yy}"
+            End If
+
+            ' Всегда показываем диапазон полного месяца
+            LblFullPeriodPrev.Text = prevPeriodText
+
 
         End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+        'Private Sub UpdateHeaders()
+
+        '    If _periodEnd Is Nothing Then Return
+
+        '    Dim currentYear As Integer = _periodEnd.Value.Year
+
+        '    ' ▼▼▼ прошлый период — ручной или авто, один источник правды ▼▼▼
+        '    Dim oldP = GetPrevPeriod(If(_periodStart, _periodEnd).Value.Date,
+        '                             _periodEnd.Value.Date,
+        '                             _previousYearOtkazyRaw)
+
+        '    LblRow2Period.Text = $"{_periodStart.Value:dd.MM} - {_periodEnd.Value:dd.MM.yy}"
+        '    LblRow2.Text = currentYear.ToString()
+        '    LblRow3.Text = oldP.End.Year.ToString()
+
+        '    LblRow4.Text = currentYear.ToString()
+        '    LblRow5.Text = oldP.End.Year.ToString()
+        '    LblGoal.Text = "Цель"
+
+        '    LblFullPeriodPrev.Text = $"{oldP.Start:dd.MM} - {oldP.End:dd.MM.yy}"
+
+        'End Sub
 
         ''' <summary>
         ''' Заполняет строку целевыми показателями
@@ -1055,6 +1335,35 @@ Namespace Kas
             Next
         End Sub
 
+        Private Sub S24Table1_Unloaded(sender As Object, e As RoutedEventArgs) Handles Me.Unloaded
+            _currentYearOtkazy = Nothing
+            _previousYearOtkazy = Nothing
+            _previousYearOtkazyRaw = Nothing
+            ' ОЧИЩАЕМ КОЛЛЕКЦИИ
+            RowCellsMap?.Clear()
+            _highlightGroup?.Clear()
+            _cellToGroupIndex?.Clear()
+        End Sub
+
+        'Private Sub S24Table1_Unloaded(sender As Object, e As RoutedEventArgs) Handles Me.Unloaded
+        '    ' ВЫЗЫВАЕМ ТВОЙ УНИВЕРСАЛЬНЫЙ ОТПИСЧИК
+        '    UnsubscribeAllEvents(Me)
+
+        '    ' ОЧИЩАЕМ КОЛЛЕКЦИИ
+        '    RowCellsMap?.Clear()
+        '    _highlightGroup?.Clear()
+        '    _cellToGroupIndex?.Clear()
+
+        '    ' ОСВОБОЖДАЕМ ПАМЯТЬ
+        '    _currentYearOtkazy = Nothing
+        '    _previousYearOtkazy = Nothing
+        '    _previousYearOtkazyRaw = Nothing
+
+        '    ' ОТПИСЫВАЕМСЯ ОТ Unloaded (ЧТОБЫ НЕ БЫЛО ЦИКЛИЧЕСКИХ ССЫЛОК)
+        '    RemoveHandler Me.Unloaded, AddressOf S24Table1_Unloaded
+
+        '    GC.Collect()
+        'End Sub
     End Class
 
 

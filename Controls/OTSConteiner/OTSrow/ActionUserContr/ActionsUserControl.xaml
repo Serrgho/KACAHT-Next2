@@ -410,8 +410,50 @@
 
 
 
-		<!--========== ПУСТЫЕ ПОЛЯ (через DataTrigger) ==========--> 
-         <!--Нет серии локомотива--> 
+		<!--========== ПУСТЫЕ ПОЛЯ (через DataTrigger) ==========-->
+
+		<!--Нет серии локомотива ИЛИ нет приписки-->
+		<Border x:Name="NoSerLokItem"
+                MouseUp="EmptyFieldItem_MouseDown"
+                Tag="Нет серии или приписки локомотива">
+
+			<Border.Style>
+				<Style TargetType="Border" BasedOn="{StaticResource NoteItemStyle}">
+					<Setter Property="Visibility" Value="Collapsed"/>
+					<Style.Triggers>
+						<!-- Проверка Серии -->
+						<DataTrigger Binding="{Binding SerLokExact}" Value="{x:Null}">
+							<Setter Property="Visibility" Value="Visible"/>
+						</DataTrigger>
+						<DataTrigger Binding="{Binding SerLokExact}" Value="">
+							<Setter Property="Visibility" Value="Visible"/>
+						</DataTrigger>
+
+						<!-- Проверка Приписки (ДОБАВЛЕНО) -->
+						<DataTrigger Binding="{Binding PripLok}" Value="{x:Null}">
+							<Setter Property="Visibility" Value="Visible"/>
+						</DataTrigger>
+						<DataTrigger Binding="{Binding PripLok}" Value="">
+							<Setter Property="Visibility" Value="Visible"/>
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</Border.Style>
+
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="20"/>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
+				<TextBlock Grid.Column="0" Text="🚃" Style="{StaticResource NoteTextStyle}"/>
+				<TextBlock Grid.Column="1" Text="Локомотив!" Style="{StaticResource NoteTextStyle}"/>
+			</Grid>
+		</Border>
+
+
+
+
+		<!--Нет серии локомотива--><!-- 
         <Border x:Name="NoSerLokItem"
                 MouseUp="EmptyFieldItem_MouseDown"
                 Tag="Нет серии локомотива">
@@ -440,7 +482,7 @@
                 <TextBlock Grid.Column="1" Text="Локомотив!" Style="{StaticResource NoteTextStyle}"/>
                 
             </Grid>
-        </Border>
+        </Border>-->
         
        
 

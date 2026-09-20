@@ -35,7 +35,9 @@ Namespace Kas
 
             Select Case bordr.Name
                 Case "EmptyFieldsBorder"
-                    filtered = source.Where(Function(o) String.IsNullOrWhiteSpace(o.SerLokExact) OrElse o.MyKlasLev3 = "").ToList()
+                    filtered = source.Where(Function(o) String.IsNullOrWhiteSpace(o.SerLokExact) OrElse
+                                        o.MyKlasLev3 = "" OrElse
+                                        String.IsNullOrWhiteSpace(o.PripLok)).ToList()
                 Case "VidTyagiBorder"
                     filtered = source.Where(Function(o) o.VidT = "").ToList()
                 Case "IsVioletsBorder"
@@ -92,6 +94,14 @@ Namespace Kas
                         Else
                             VidTyagiBorder.Visibility = Visibility.Collapsed
                         End If
+
+                         ' --- ДОБАВЛЕННЫЙ БЛОК ДЛЯ ПРИПИСКИ ---
+                    Case "PripLok"
+                        Dim pripCount = items.Count(Function(u) String.IsNullOrWhiteSpace(u.PripLok))
+                        If pripCount > 0 Then
+                            parts.Add($"Приписка локомотива ({pripCount})")
+                        End If
+                        ' -------------------------------------
 
                     Case "IsViolet"
                         Dim violetCount = items.Count(Function(u) CBool(prop.GetValue(u)))

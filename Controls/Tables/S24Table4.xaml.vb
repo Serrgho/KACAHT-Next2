@@ -407,7 +407,20 @@ Namespace Kas
 
 		End Sub
 
+		Private Sub S24Table4_Unloaded(sender As Object, e As RoutedEventArgs) Handles Me.Unloaded
 
+			_cur = Nothing
+
+			' ВЫЗЫВАЕМ ТВОЙ УНИВЕРСАЛЬНЫЙ ОТПИСЧИК
+			UnsubscribeAllEvents(Me)
+
+
+
+			' ОТПИСЫВАЕМСЯ ОТ Unloaded (ЧТОБЫ НЕ БЫЛО ЦИКЛИЧЕСКИХ ССЫЛОК)
+			RemoveHandler Me.Unloaded, AddressOf S24Table4_Unloaded
+
+			GC.Collect()
+		End Sub
 	End Class
 
 End Namespace

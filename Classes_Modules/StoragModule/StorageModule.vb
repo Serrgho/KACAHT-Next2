@@ -13,47 +13,47 @@ Module StorageModule
 
 
 
-    Public Function LoadFilteredFromJson(filePath As String, dateFrom As Date, dateTo As Date) As List(Of Otkaz)
-        Dim result As New List(Of Otkaz)()
-        If Not File.Exists(filePath) Then Return result
+    'Public Function LoadFilteredFromJson(filePath As String, dateFrom As Date, dateTo As Date) As List(Of Otkaz)
+    '    Dim result As New List(Of Otkaz)()
+    '    If Not File.Exists(filePath) Then Return result
 
-        ' Настройки сериализатора (должны совпадать с теми, что используете при сохранении)
-        Dim serializerSettings As New JsonSerializerSettings With {
-        .NullValueHandling = NullValueHandling.Ignore,
-        .MissingMemberHandling = MissingMemberHandling.Ignore,
-        .DateFormatHandling = DateFormatHandling.IsoDateFormat
-    }
-        Dim serializer = JsonSerializer.Create(serializerSettings)
+    '    ' Настройки сериализатора (должны совпадать с теми, что используете при сохранении)
+    '    Dim serializerSettings As New JsonSerializerSettings With {
+    '    .NullValueHandling = NullValueHandling.Ignore,
+    '    .MissingMemberHandling = MissingMemberHandling.Ignore,
+    '    .DateFormatHandling = DateFormatHandling.IsoDateFormat
+    '}
+    '    Dim serializer = JsonSerializer.Create(serializerSettings)
 
-        ' 64 КБ буфер + SequentialScan ускоряют чтение больших файлов в 2-3 раза
-        Using fs As New FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 65536, FileOptions.SequentialScan)
-            Using sr As New StreamReader(fs)
-                Using reader As New JsonTextReader(sr)
-                    ' Ожидается структура JSON: [ { ... }, { ... }, ... ]
-                    If reader.Read() AndAlso reader.TokenType = JsonToken.StartArray Then
-                        While reader.Read()
-                            ' Пропускаем всё, кроме начала объектов
-                            If reader.TokenType = JsonToken.StartObject Then
-                                Try
-                                    Dim item = serializer.Deserialize(Of Otkaz)(reader)
-                                    If item IsNot Nothing Then
-                                        ' 🔍 Фильтрация по дате начала (.Date отбрасывает время)
-                                        If item.Nach.Date >= dateFrom.Date AndAlso item.Nach.Date <= dateTo.Date Then
-                                            result.Add(item)
-                                        End If
-                                    End If
-                                Catch ex As Exception
-                                    ' Битая запись не должна ломать загрузку всего файла
-                                    ' System.Diagnostics.Debug.WriteLine($"⚠️ Пропуск записи: {ex.Message}")
-                                End Try
-                            End If
-                        End While
-                    End If
-                End Using
-            End Using
-        End Using
-        Return result
-    End Function
+    '    ' 64 КБ буфер + SequentialScan ускоряют чтение больших файлов в 2-3 раза
+    '    Using fs As New FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 65536, FileOptions.SequentialScan)
+    '        Using sr As New StreamReader(fs)
+    '            Using reader As New JsonTextReader(sr)
+    '                ' Ожидается структура JSON: [ { ... }, { ... }, ... ]
+    '                If reader.Read() AndAlso reader.TokenType = JsonToken.StartArray Then
+    '                    While reader.Read()
+    '                        ' Пропускаем всё, кроме начала объектов
+    '                        If reader.TokenType = JsonToken.StartObject Then
+    '                            Try
+    '                                Dim item = serializer.Deserialize(Of Otkaz)(reader)
+    '                                If item IsNot Nothing Then
+    '                                    ' 🔍 Фильтрация по дате начала (.Date отбрасывает время)
+    '                                    If item.Nach.Date >= dateFrom.Date AndAlso item.Nach.Date <= dateTo.Date Then
+    '                                        result.Add(item)
+    '                                    End If
+    '                                End If
+    '                            Catch ex As Exception
+    '                                ' Битая запись не должна ломать загрузку всего файла
+    '                                ' System.Diagnostics.Debug.WriteLine($"⚠️ Пропуск записи: {ex.Message}")
+    '                            End Try
+    '                        End If
+    '                    End While
+    '                End If
+    '            End Using
+    '        End Using
+    '    End Using
+    '    Return result
+    'End Function
 
 
 

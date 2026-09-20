@@ -77,24 +77,24 @@
 
 
 
-        Public Sub UpdateTableContainer(data As IEnumerable(Of Otkaz))
+        'Public Sub UpdateTableContainer(data As IEnumerable(Of Otkaz))
 
-            Stopwatch.Reset()
-            Stopwatch.Start()
+        '    'Stopwatch.Reset()
+        '    'Stopwatch.Start()
 
-            ' Присваиваем новые данные
-            MW.TRowsContainer.ItemsSource = data.OrderBy(Function(u) u.Nach).ToList()
+        '    ' Присваиваем новые данные
+        '    MW.TRowsContainer.ItemsSource = data.OrderBy(Function(u) u.Nach).ToList()
 
-            Stopwatch.Stop()
-            Dim elapsedTime As TimeSpan = Stopwatch.Elapsed
+        '    'Stopwatch.Stop()
+        '    'Dim elapsedTime As TimeSpan = Stopwatch.Elapsed
 
-            If Not IsNothing(PointedOtkaz) Then
-                MW.TRowsContainer.ScrollToPointedOTS()
-            End If
+        '    If Not IsNothing(PointedOtkaz) Then
+        '        MW.TRowsContainer.ScrollToPointedOTS()
+        '    End If
 
-            MW.InfoBLOK.AddItem($"Загружено и отсортировано в контейнер{vbCrLf}за {elapsedTime.TotalMilliseconds:F0} мс", True)
-            MW.InfoBLOK.ScrollToEnd()
-        End Sub
+        '    'MW.InfoBLOK.AddItem($"Загружено и отсортировано в контейнер{vbCrLf}за {elapsedTime.TotalMilliseconds:F0} мс", True)
+        '    'MW.InfoBLOK.ScrollToEnd()
+        'End Sub
 
         Sub YarlykPressHandler(sender As Object, e As MouseButtonEventArgs)
             ProcessingMDown(CType(sender, Yarlyk))

@@ -129,7 +129,7 @@
 	</UserControl.Resources>
 	
 	<Expander x:Name="expAuth" 
-              Header="👤Авторизация в КАСАНТ" 
+              Header="👤 Авторизация в КАСАНТ" 
               Background="{StaticResource ScrolBarBrush}"
 			  FontSize="15"
               FontWeight="Bold"

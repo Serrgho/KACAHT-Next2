@@ -101,7 +101,7 @@ Namespace Kas
                         Return
                     End Try
                 End If
-                ClearAllNoTesOTS(OTSList)
+                ClearAllUpdateNotes(OTSList)
 
 
                 Load4ReportOld(filePathToProcess, OTSList)

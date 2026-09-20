@@ -145,7 +145,7 @@ Namespace Kas
             AddHandler MW.PripMashPopup.Confirmed, AddressOf PripMashPopup_Confirmed
             AddHandler MW.PripMashPopup.Cancelled, AddressOf PripMashPopup_Cancelled
 
-            Fetcher.KonMinut = 0
+            'Fetcher.KonMinut = 0
 
         End Sub
 
@@ -193,20 +193,6 @@ Namespace Kas
             End With
 
 
-            '=======================================================
-            ' 0. Сначала настройки:
-            BarHeight = 6        ' толщина полоски
-            BarColor = Color.FromRgb(0, 255, 0)
-            FrameIntervalMs = 40 ' скорость (~12 FPS)
-            TotalFrames = 48
-
-
-            ' 1. Инициализируем аниматор при старте
-            AnimIconInitialize(Me)
-            ' 2. Запускаем анимацию (например, при начале обновления)
-            Start()
-            '=======================================================
-
             ResetPeriodSUB()
             InfoBLOK.AddItem("=== Начальная загрузка ===")
             PointedYarlyk = YarCon.AllOTSYAR
@@ -227,10 +213,11 @@ Namespace Kas
             ConnIndicator.Initialize()
             CentralConnectionIndicator.Initialize()
 
+
         End Sub
 
         Private Sub MainWindow_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
-            Module1.AnimIconDispose()
+            'Module1.AnimIconDispose()
         End Sub
 
         Sub RestoreSizes()

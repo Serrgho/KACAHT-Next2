@@ -239,10 +239,10 @@
                        PreviewMouseRightButtonUp="IsStationPAN_PreviewMouseRightButtonUp">
 
 					<TextBlock TextAlignment="Center">
-        <Run Text="Продолж. ОТС - " Foreground="Black" FontWeight="SemiBold" FontStyle="Italic"/>
+        <Run Text="Продолж. ОТС - " Foreground="Black" FontStyle="Italic"/>
         
                      
-        <Run Text="{Binding Dlit, StringFormat={}{0:F2}}" 
+        <Run Text="{Binding Dlit, StringFormat={}{0:F2}, ConverterCulture=ru-RU}" 
              Foreground="{Binding DlitColor}"
              FontWeight="{Binding DlitWeight}" FontStyle="Italic"/>
              
@@ -382,7 +382,7 @@
                 </Grid>
             </local:UniversalGrid>
         <Grid >
-            <local:WarningUserControl Grid.Row="2" x:Name="InOpisWarnCTRL" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="140 2 2 2" MaxWidth="420"/>
+            <local:WarningUserControl Grid.Row="2" x:Name="InOpisWarnCTRL" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="160 2 2 2" MaxWidth="420"/>
         </Grid>
 		<local:PlanSelectPopup x:Name="PlanPopup" 
                            Grid.RowSpan="99" 

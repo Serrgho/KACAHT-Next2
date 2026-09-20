@@ -16,8 +16,7 @@ Namespace Kas
 
     Public Module KasReport341Module
 
-        ' Глобальный экземпляр загрузчика для центральной сессии
-        Public CentralFetcher As New Report341Fetcher()
+        '
 
 #Region "Внешние классы"
 
@@ -84,6 +83,36 @@ Namespace Kas
                     Return _httpClient
                 End Get
             End Property
+
+
+
+            ' =================================================================
+            ' ПРИНУДИТЕЛЬНАЯ ОЧИСТКА ПАМЯТИ
+            ' =================================================================
+            Public Sub ForceCleanup()
+                Try
+                    LogWrite("🧹 Запуск принудительной очистки памяти...")
+
+                    ' 1. Запрашиваем сборку мусора
+                    GC.Collect()
+                    ' 2. Ждем завершения всех финализаторов (освобождение неуправляемых ресурсов)
+                    GC.WaitForPendingFinalizers()
+                    ' 3. Повторная сборка (часто освобождает объекты, ставшие доступными после шага 2)
+                    GC.Collect()
+
+                    Dim memMB As Long = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024
+                    LogWrite($"✅ Память очищена. Текущее потребление: {memMB} МБ")
+                Catch ex As Exception
+                    LogWrite($"⚠ Ошибка при очистке памяти: {ex.Message}")
+                End Try
+            End Sub
+
+
+
+
+
+
+
 
             Public Sub New()
                 Dim handler As New HttpClientHandler()
@@ -271,42 +300,6 @@ Namespace Kas
             End Function
 
 
-            '''' <summary>
-            '''' Формирует URL специально для отчета по ТЧ (Дирекция Тяги)
-            '''' sls=172450 - код Дирекции Т
-            '''' flg_alien=0 - только РЖД
-            '''' rep_status=0,1,2,6,7,10 - все статусы учета
-            '''' </summary>
-            'Public Function BuildTchReportUrl(dateFrom As Date, dateTo As Date) As String
-            '    Dim tmpUnik = Math.Floor((DateTime.UtcNow - New DateTime(1970, 1, 1)).TotalMilliseconds)
-
-            '    Return $"{_baseUrl}/reports/new/Report3_4_1?page=reports/new/Report3_4_1&tmp_unik={tmpUnik}" &
-            '       $"&dt_nd={dateFrom:dd.MM.yyyy}&dt_nd_h=00&dt_nd_min=00" &
-            '       $"&dt_kd={dateTo:dd.MM.yyyy}&dt_kd_h=23&dt_kd_min=59" &
-            '       "&rep_asu=0,1,2,5,7,11,12,14,15,20,21,26,26" &
-            '       "&rep_asu_dop=1:1" &
-            '       "&kind_rep_type=1" &
-            '       "&flg_alien=0" &          ' Только РЖД
-            '       "&flg_id_cause_other=0" &
-            '       "&sls=172450" &           ' Код Дирекции Т
-            '       "&flg_alien_service=0" &
-            '       "&dor_kod_guilty=88" &    ' Красноярская ж.д.
-            '       "&rep_status=0,1,2,6,7,10"
-            'End Function
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             ' =================================================================
             ' Формирует URL для отчёта 3.4.1
             ' =================================================================
@@ -387,61 +380,137 @@ Namespace Kas
             ' БЫСТРЫЙ ПАРСИНГ — только название депо и колонка "Всего"
             ' =================================================================
             Public Async Function FetchDepotTotalsAsync(url As String) As Task(Of Dictionary(Of String, Integer))
+
                 Dim result As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
                 Dim debugFolder = GetDebugFolder()
+                Dim doc As HtmlAgilityPack.HtmlDocument = Nothing ' Объявляем заранее для очистки
 
                 Try
                     LogWrite($"📥 Загрузка отчёта...")
-                    Dim response = Await _httpClient.GetAsync(url)
-                    response.EnsureSuccessStatusCode()
 
-                    Dim bytes = Await response.Content.ReadAsByteArrayAsync()
-                    Dim html = Encoding.GetEncoding("windows-1251").GetString(bytes)
+                    ' Используем Using для HttpResponseMessage, чтобы гарантировать освобождение контента
+                    Using response = Await _httpClient.GetAsync(url)
+                        response.EnsureSuccessStatusCode()
 
-                    File.WriteAllText(Path.Combine(debugFolder, "r341_report.html"), html, Encoding.GetEncoding("windows-1251"))
-                    LogWrite($"📄 Получено {bytes.Length} байт")
+                        ' Читаем байты
+                        Dim bytes = Await response.Content.ReadAsByteArrayAsync()
+                        Dim html = Encoding.GetEncoding("windows-1251").GetString(bytes)
 
-                    If html.Contains("anauth_panel") OrElse html.Contains("id_prog") Then
-                        LogWrite("⚠ Сессия протухла при загрузке отчёта")
-                        Return result
-                    End If
+                        ' Сохраняем для отладки (если нужно), но помним, что это занимает память
+                        ' File.WriteAllText(Path.Combine(debugFolder, "r341_report.html"), html, Encoding.GetEncoding("windows-1251"))
 
-                    Dim doc As New HtmlAgilityPack.HtmlDocument()
-                    doc.LoadHtml(html)
+                        ' Освобождаем байтовый массив сразу после конвертации, если он больше не нужен
+                        bytes = Nothing
 
-                    Dim rows = doc.DocumentNode.SelectNodes("//tr")
-                    If rows Is Nothing Then
-                        LogWrite("⚠ В HTML не найдены строки <tr>")
-                        Return result
-                    End If
-
-                    Dim parsedCount As Integer = 0
-                    For Each row In rows
-                        Dim cells = row.SelectNodes("./td")
-                        If cells IsNot Nothing AndAlso cells.Count >= 2 Then
-                            Dim depotName = CleanText(cells(0).InnerText)
-
-                            If String.IsNullOrWhiteSpace(depotName) OrElse
-                               depotName.Contains("Наименование структурного") OrElse
-                               depotName.Contains("Отчёт о состоянии") OrElse
-                               depotName.ToUpper() = "ВСЕГО" Then
-                                Continue For
-                            End If
-
-                            Dim totalCount As Integer = 0
-                            Integer.TryParse(CleanText(cells(1).InnerText), totalCount)
-                            result(depotName) = totalCount
-                            parsedCount += 1
+                        If html.Contains("anauth_panel") OrElse html.Contains("id_prog") Then
+                            LogWrite("⚠ Сессия протухла при загрузке отчёта")
+                            Return result
                         End If
-                    Next
 
-                    LogWrite($"✓ Распарсено записей в отчёте: {parsedCount}")
+                        doc = New HtmlAgilityPack.HtmlDocument()
+                        doc.LoadHtml(html)
+
+                        ' Очищаем большую строку HTML сразу после парсинга
+                        html = Nothing
+                        GC.Collect() ' Легкая сборка после освобождения большой строки
+
+                        Dim rows = doc.DocumentNode.SelectNodes("//tr")
+                        If rows Is Nothing Then
+                            LogWrite("⚠ В HTML не найдены строки <tr>")
+                            Return result
+                        End If
+
+                        Dim parsedCount As Integer = 0
+                        For Each row In rows
+                            Dim cells = row.SelectNodes("./td")
+                            If cells IsNot Nothing AndAlso cells.Count >= 2 Then
+                                Dim depotName = CleanText(cells(0).InnerText)
+
+                                If String.IsNullOrWhiteSpace(depotName) OrElse
+                                   depotName.Contains("Наименование структурного") OrElse
+                                   depotName.Contains("Отчёт о состоянии") OrElse
+                                   depotName.ToUpper() = "ВСЕГО" Then
+                                    Continue For
+                                End If
+
+                                Dim totalCount As Integer = 0
+                                Integer.TryParse(CleanText(cells(1).InnerText), totalCount)
+                                result(depotName) = totalCount
+                                parsedCount += 1
+                            End If
+                        Next
+
+                        LogWrite($"✓ Распарсено записей в отчёте: {parsedCount}")
+                    End Using ' Здесь response.Dispose()
 
                 Catch ex As Exception
                     LogWrite($"💥 Ошибка загрузки отчёта: {ex.Message}{vbCrLf}{ex.StackTrace}")
+                Finally
+                    ' Гарантированно очищаем DOM-дерево
+                    If doc IsNot Nothing Then
+                        doc = Nothing
+                    End If
                 End Try
 
                 Return result
+
+
+
+                'Dim result As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
+                'Dim debugFolder = GetDebugFolder()
+
+                'Try
+                '    LogWrite($"📥 Загрузка отчёта...")
+                '    Dim response = Await _httpClient.GetAsync(url)
+                '    response.EnsureSuccessStatusCode()
+
+                '    Dim bytes = Await response.Content.ReadAsByteArrayAsync()
+                '    Dim html = Encoding.GetEncoding("windows-1251").GetString(bytes)
+
+                '    File.WriteAllText(Path.Combine(debugFolder, "r341_report.html"), html, Encoding.GetEncoding("windows-1251"))
+                '    LogWrite($"📄 Получено {bytes.Length} байт")
+
+                '    If html.Contains("anauth_panel") OrElse html.Contains("id_prog") Then
+                '        LogWrite("⚠ Сессия протухла при загрузке отчёта")
+                '        Return result
+                '    End If
+
+                '    Dim doc As New HtmlAgilityPack.HtmlDocument()
+                '    doc.LoadHtml(html)
+
+                '    Dim rows = doc.DocumentNode.SelectNodes("//tr")
+                '    If rows Is Nothing Then
+                '        LogWrite("⚠ В HTML не найдены строки <tr>")
+                '        Return result
+                '    End If
+
+                '    Dim parsedCount As Integer = 0
+                '    For Each row In rows
+                '        Dim cells = row.SelectNodes("./td")
+                '        If cells IsNot Nothing AndAlso cells.Count >= 2 Then
+                '            Dim depotName = CleanText(cells(0).InnerText)
+
+                '            If String.IsNullOrWhiteSpace(depotName) OrElse
+                '               depotName.Contains("Наименование структурного") OrElse
+                '               depotName.Contains("Отчёт о состоянии") OrElse
+                '               depotName.ToUpper() = "ВСЕГО" Then
+                '                Continue For
+                '            End If
+
+                '            Dim totalCount As Integer = 0
+                '            Integer.TryParse(CleanText(cells(1).InnerText), totalCount)
+                '            result(depotName) = totalCount
+                '            parsedCount += 1
+                '        End If
+                '    Next
+
+                '    LogWrite($"✓ Распарсено записей в отчёте: {parsedCount}")
+
+                'Catch ex As Exception
+                '    LogWrite($"💥 Ошибка загрузки отчёта: {ex.Message}{vbCrLf}{ex.StackTrace}")
+                'End Try
+
+                'Return result
             End Function
 
             Private Function FindDepotValue(dict As Dictionary(Of String, Integer), keywords As String()) As Integer?
@@ -761,21 +830,20 @@ Namespace Kas
             ' ШАГ 3: СКАЧИВАНИЕ EXCEL
             ' =================================================================
             Public Async Function DownloadGenReportAsync(dateFrom As DateTime, dateTo As DateTime) As Task(Of String)
+
+                Dim excelBytes As Byte() = Nothing
                 Try
-                    ' Проверяем наличие активного подключения/сессии перед запросом
                     If Not Await EnsureConnectedAsync() Then
                         LogWrite("❌ Нет сессии")
                         Return Nothing
                     End If
 
-                    ' Шаг 3.1: Вызываем метод парсинга HTML для получения токена строки "ЛОКОМОТИВНЫЙ КОМПЛЕКС"
                     Dim rowToken = Await GetLocomotiveComplexTokenAsync(dateFrom, dateTo)
                     If String.IsNullOrWhiteSpace(rowToken) Then
                         LogWrite("❌ Не удалось получить токен строки")
                         Return Nothing
                     End If
 
-                    ' Шаг 3.2: Формируем JSON-payload для отправки на сервер
                     Dim payload As New With {
                         .reportName = "DetailReportInfo2755",
                         .criptFilterInfo = rowToken,
@@ -784,59 +852,131 @@ Namespace Kas
                     }
                     Dim jsonBody = JsonSerializer.Serialize(payload)
 
-                    ' Шаг 3.3: Создаем HTTP POST запрос к эндпоинту экспорта в Excel
-                    Dim request As New System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, $"{_baseUrl}/version/rest/api/Excel")
+                    Using request As New System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, $"{_baseUrl}/version/rest/api/Excel")
+                        request.Content = New StringContent(jsonBody, Encoding.UTF8, "application/json")
+                        request.Headers.Add("Accept", "application/vnd.ms-excel, application/octet-stream, */*")
+                        request.Headers.Add("Origin", _baseUrl)
+                        request.Headers.Referrer = New Uri($"{_baseUrl}/index2560R.html")
 
-                    ' 🔑 КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Контент-тип отправляемых данных должен быть "application/json"
-                    request.Content = New StringContent(jsonBody, Encoding.UTF8, "application/json")
+                        LogWrite($"📥 POST /api/Excel (период: {dateFrom:dd.MM.yyyy} - {dateTo:dd.MM.yyyy})")
 
-                    ' Настраиваем заголовки: сообщаем серверу, что ожидаем в ответ файл Excel
-                    request.Headers.Add("Accept", "application/vnd.ms-excel, application/octet-stream, */*")
-                    request.Headers.Add("Origin", _baseUrl)
-                    request.Headers.Referrer = New Uri($"{_baseUrl}/index2560R.html")
+                        Using response = Await _httpClient.SendAsync(request)
+                            If Not response.IsSuccessStatusCode Then
+                                Dim errText = Await response.Content.ReadAsStringAsync()
+                                LogWrite($"⚠ Ошибка HTTP /api/Excel: {response.StatusCode}. Ответ сервера: {errText}")
+                                Return Nothing
+                            End If
 
-                    LogWrite($"📥 POST /api/Excel (период: {dateFrom:dd.MM.yyyy} - {dateTo:dd.MM.yyyy})")
+                            ' Читаем байты
+                            excelBytes = Await response.Content.ReadAsByteArrayAsync()
+                            LogWrite($"📦 Получено байт с сервера: {excelBytes.Length}")
 
-                    ' Шаг 3.4: Отправляем запрос асинхронно
-                    Dim response = Await _httpClient.SendAsync(request)
+                            ' Проверка на слишком маленький размер
+                            If excelBytes.Length < 1000 Then
+                                LogWrite($"⚠ Файл слишком маленький: {excelBytes.Length} байт.")
+                                excelBytes = Nothing
+                                Return Nothing
+                            End If
 
-                    ' Проверяем успешность HTTP-статуса (200 OK)
-                    If Not response.IsSuccessStatusCode Then
-                        Dim errText = Await response.Content.ReadAsStringAsync()
-                        LogWrite($"⚠ Ошибка HTTP /api/Excel: {response.StatusCode}. Ответ сервера: {errText}")
-                        Return Nothing
-                    End If
+                            ' Сохраняем на диск
+                            Dim savePath = Path.Combine(GetDebugFolder(), $"GenReport_Loco_{dateFrom:yyyyMMdd}_{dateTo:yyyyMMdd}.xls")
+                            File.WriteAllBytes(savePath, excelBytes)
+                            LogWrite($"💾 Файл успешно сохранён: {savePath} ({excelBytes.Length} байт)")
 
-                    ' Шаг 3.5: Читаем бинарный ответ от сервера
-                    Dim excelBytes = Await response.Content.ReadAsByteArrayAsync()
-                    LogWrite($"📦 Получено байт с сервера: {excelBytes.Length}")
-
-                    ' Проверка на слишком маленький размер (обычно означает, что вместо файла пришел JSON с ошибкой)
-                    If excelBytes.Length < 1000 Then
-                        LogWrite($"⚠ Файл слишком маленький: {excelBytes.Length} байт. Возможно, сервер вернул текстовую ошибку.")
-                        Try
-                            Dim errorSnapshot = Encoding.UTF8.GetString(excelBytes.Take(250).ToArray())
-                            LogWrite($"Контекст ответа: {errorSnapshot}")
-                        Catch
-                        End Try
-                        Return Nothing
-                    End If
-
-
-
-                    ' Шаг 3.6: Формируем имя файла и сохраняем его на диск
-                    Dim savePath = Path.Combine(GetDebugFolder(), $"GenReport_Loco_{dateFrom:yyyyMMdd}_{dateTo:yyyyMMdd}.xls")
-                    File.WriteAllBytes(savePath, excelBytes)
-                    LogWrite($"💾 Файл успешно сохранён: {savePath} ({excelBytes.Length} байт)")
-
-
-                    ' Возвращаем полный путь к сохраненному файлу
-                    Return savePath
+                            Return savePath
+                        End Using ' Dispose response
+                    End Using ' Dispose request
 
                 Catch ex As Exception
                     LogWrite($"💥 Ошибка в DownloadGenReportAsync: {ex.Message}{vbCrLf}{ex.StackTrace}")
                     Return Nothing
+                Finally
+                    ' !!! КЛЮЧЕВОЙ МОМЕНТ: Обнуляем массив байтов сразу после сохранения
+                    If excelBytes IsNot Nothing Then
+                        excelBytes = Nothing
+                    End If
+                    ' Вызываем сборку мусора, так как мы только что освободили большой массив
+                    GC.Collect()
                 End Try
+
+
+
+                'Try
+                '    ' Проверяем наличие активного подключения/сессии перед запросом
+                '    If Not Await EnsureConnectedAsync() Then
+                '        LogWrite("❌ Нет сессии")
+                '        Return Nothing
+                '    End If
+
+                '    ' Шаг 3.1: Вызываем метод парсинга HTML для получения токена строки "ЛОКОМОТИВНЫЙ КОМПЛЕКС"
+                '    Dim rowToken = Await GetLocomotiveComplexTokenAsync(dateFrom, dateTo)
+                '    If String.IsNullOrWhiteSpace(rowToken) Then
+                '        LogWrite("❌ Не удалось получить токен строки")
+                '        Return Nothing
+                '    End If
+
+                '    ' Шаг 3.2: Формируем JSON-payload для отправки на сервер
+                '    Dim payload As New With {
+                '        .reportName = "DetailReportInfo2755",
+                '        .criptFilterInfo = rowToken,
+                '        .presentation = "excel",
+                '        .reportLevel = "CENTER"
+                '    }
+                '    Dim jsonBody = JsonSerializer.Serialize(payload)
+
+                '    ' Шаг 3.3: Создаем HTTP POST запрос к эндпоинту экспорта в Excel
+                '    Dim request As New System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, $"{_baseUrl}/version/rest/api/Excel")
+
+                '    ' 🔑 КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Контент-тип отправляемых данных должен быть "application/json"
+                '    request.Content = New StringContent(jsonBody, Encoding.UTF8, "application/json")
+
+                '    ' Настраиваем заголовки: сообщаем серверу, что ожидаем в ответ файл Excel
+                '    request.Headers.Add("Accept", "application/vnd.ms-excel, application/octet-stream, */*")
+                '    request.Headers.Add("Origin", _baseUrl)
+                '    request.Headers.Referrer = New Uri($"{_baseUrl}/index2560R.html")
+
+                '    LogWrite($"📥 POST /api/Excel (период: {dateFrom:dd.MM.yyyy} - {dateTo:dd.MM.yyyy})")
+
+                '    ' Шаг 3.4: Отправляем запрос асинхронно
+                '    Dim response = Await _httpClient.SendAsync(request)
+
+                '    ' Проверяем успешность HTTP-статуса (200 OK)
+                '    If Not response.IsSuccessStatusCode Then
+                '        Dim errText = Await response.Content.ReadAsStringAsync()
+                '        LogWrite($"⚠ Ошибка HTTP /api/Excel: {response.StatusCode}. Ответ сервера: {errText}")
+                '        Return Nothing
+                '    End If
+
+                '    ' Шаг 3.5: Читаем бинарный ответ от сервера
+                '    Dim excelBytes = Await response.Content.ReadAsByteArrayAsync()
+                '    LogWrite($"📦 Получено байт с сервера: {excelBytes.Length}")
+
+                '    ' Проверка на слишком маленький размер (обычно означает, что вместо файла пришел JSON с ошибкой)
+                '    If excelBytes.Length < 1000 Then
+                '        LogWrite($"⚠ Файл слишком маленький: {excelBytes.Length} байт. Возможно, сервер вернул текстовую ошибку.")
+                '        Try
+                '            Dim errorSnapshot = Encoding.UTF8.GetString(excelBytes.Take(250).ToArray())
+                '            LogWrite($"Контекст ответа: {errorSnapshot}")
+                '        Catch
+                '        End Try
+                '        Return Nothing
+                '    End If
+
+
+
+                '    ' Шаг 3.6: Формируем имя файла и сохраняем его на диск
+                '    Dim savePath = Path.Combine(GetDebugFolder(), $"GenReport_Loco_{dateFrom:yyyyMMdd}_{dateTo:yyyyMMdd}.xls")
+                '    File.WriteAllBytes(savePath, excelBytes)
+                '    LogWrite($"💾 Файл успешно сохранён: {savePath} ({excelBytes.Length} байт)")
+
+
+                '    ' Возвращаем полный путь к сохраненному файлу
+                '    Return savePath
+
+                'Catch ex As Exception
+                '    LogWrite($"💥 Ошибка в DownloadGenReportAsync: {ex.Message}{vbCrLf}{ex.StackTrace}")
+                '    Return Nothing
+                'End Try
             End Function
 
 

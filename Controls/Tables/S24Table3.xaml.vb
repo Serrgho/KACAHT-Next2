@@ -572,36 +572,27 @@ Namespace Kas
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		Sub New()
 			' Этот вызов является обязательным для конструктора.
 			InitializeComponent()
 			' Добавить код инициализации после вызова InitializeComponent().
 		End Sub
 
+		Private Sub S24Table3_Unloaded(sender As Object, e As RoutedEventArgs) Handles Me.Unloaded
+			_cur = Nothing
+			_prev = Nothing
 
+
+			' ВЫЗЫВАЕМ ТВОЙ УНИВЕРСАЛЬНЫЙ ОТПИСЧИК
+			UnsubscribeAllEvents(Me)
+
+
+
+			' ОТПИСЫВАЕМСЯ ОТ Unloaded (ЧТОБЫ НЕ БЫЛО ЦИКЛИЧЕСКИХ ССЫЛОК)
+			RemoveHandler Me.Unloaded, AddressOf S24Table3_Unloaded
+
+			GC.Collect()
+		End Sub
 	End Class
 End Namespace
 

@@ -86,5 +86,8 @@
     <Setting Name="WorkFileName" Type="System.String" Scope="User">
       <Value Profile="(Default)">"РабочийФайл"</Value>
     </Setting>
+    <Setting Name="LastUsedFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

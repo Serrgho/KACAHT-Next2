@@ -6,6 +6,7 @@ Imports System.Globalization
 Imports System.IO
 Imports System.Linq
 Imports System.Net.Http
+Imports System.Reflection
 Imports System.Runtime.CompilerServices
 Imports System.Text
 Imports System.Text.RegularExpressions
@@ -15,6 +16,7 @@ Imports System.Windows.Forms
 Imports System.Windows.Media
 Imports System.Windows.Media.Imaging
 Imports System.Windows.Threading
+Imports Microsoft.Office.Interop.Word
 
 
 Namespace Kas
@@ -24,153 +26,162 @@ Namespace Kas
         Public InformLB As InfoLBoxControl
 
         Public ReadOnly Ru As New System.Globalization.CultureInfo("ru-RU")
+
+
         ' К этой переменной теперь можно обратиться из любой точки программы
         Public ReadOnly Fetcher As New KasantFetcher()
+        'Глобальный экземпляр загрузчика для центральной сессии
+        Public CentralFetcher As New Report341Fetcher()
+
+
+        Public OTSList As New List(Of Otkaz)
+        'Public RezervList As New List(Of Otkaz)
+
 
         ' Инициализируем таймер
-        Public Stopwatch As New Stopwatch()
+        'Public Stopwatch As New Stopwatch()
 
         Public IstRails As New List(Of String)({"ГИД УРАЛ", "ВСЖД", "ЗАБЖД", "ДВЖД", "ЗСЖД", "РУЧНОЙ ВВОД", "ПРИВЖД", "СКАВЖД", "ЮВЖД", "ЮУРЖД", "КБШЖД", "ГОРЖД", "СВРДЖД", "ОКТЖД", "КЛНГЖД", "СЕВЖД", "САХЖД"})
 
 
 #Region "Анимация значка в трэе"
-        ''' <summary>
-        ''' Анимация "бегущей полоски" на иконке в панели задач.
-        ''' Базовая иконка берётся из самого окна (та, что указана в XAML).
-        ''' </summary>
+        '''' <summary>
+        '''' Анимация "бегущей полоски" на иконке в панели задач.
+        '''' Базовая иконка берётся из самого окна (та, что указана в XAML).
+        '''' </summary>
 
-        Private _frames As New List(Of ImageSource)
-        Private _timer As DispatcherTimer
-        Private _frameIndex As Integer = 0
-        Private _baseIcon As BitmapSource
-        Private _targetWindow As Window
-        Private _isAnimating As Boolean = False
-        Private _isInitialized As Boolean = False
+        'Private _frames As New List(Of ImageSource)
+        'Private _timer As DispatcherTimer
+        'Private _frameIndex As Integer = 0
+        'Private _baseIcon As BitmapSource
+        'Private _targetWindow As Window
+        'Private _isAnimating As Boolean = False
+        'Private _isInitialized As Boolean = False
 
-        ' --- Настройки ---
-        Public Property FrameIntervalMs As Integer = 80        ' ~12 FPS
-        Public Property BarColor As Color = Color.FromRgb(220, 50, 50)
-        Public Property BarWidth As Double = 10
-        Public Property BarHeight As Double = 5
-        Public Property IconSize As Integer = 32
-        Public Property TotalFrames As Integer = 32
+        '' --- Настройки ---
+        'Public Property FrameIntervalMs As Integer = 80        ' ~12 FPS
+        'Public Property BarColor As Color = Color.FromRgb(220, 50, 50)
+        'Public Property BarWidth As Double = 10
+        'Public Property BarHeight As Double = 5
+        'Public Property IconSize As Integer = 32
+        'Public Property TotalFrames As Integer = 32
 
-        ''' <summary>
-        ''' Инициализация. Иконка берётся из свойства Window.Icon (из XAML).
-        ''' </summary>
-        Public Sub AnimIconInitialize(targetWindow As Window)
-            If _isInitialized Then Return
-            If targetWindow Is Nothing Then Throw New ArgumentNullException(NameOf(targetWindow))
+        '''' <summary>
+        '''' Инициализация. Иконка берётся из свойства Window.Icon (из XAML).
+        '''' </summary>
+        'Public Sub AnimIconInitialize(targetWindow As Window)
+        '    If _isInitialized Then Return
+        '    If targetWindow Is Nothing Then Throw New ArgumentNullException(NameOf(targetWindow))
 
-            _targetWindow = targetWindow
+        '    _targetWindow = targetWindow
 
-            ' Берём иконку, которая УЖЕ установлена в XAML (Icon="favicon.ico")
-            _baseIcon = TryCast(_targetWindow.Icon, BitmapSource)
+        '    ' Берём иконку, которая УЖЕ установлена в XAML (Icon="favicon.ico")
+        '    _baseIcon = TryCast(_targetWindow.Icon, BitmapSource)
 
-            GenerateAllFrames()
-            _isInitialized = True
+        '    GenerateAllFrames()
+        '    _isInitialized = True
 
-            Debug.WriteLine("TaskbarAnimator: инициализирован, кадров: " & _frames.Count)
-        End Sub
+        '    Debug.WriteLine("TaskbarAnimator: инициализирован, кадров: " & _frames.Count)
+        'End Sub
 
-        Public Sub Start()
-            If Not _isInitialized OrElse _isAnimating Then Return
+        'Public Sub Start()
+        '    If Not _isInitialized OrElse _isAnimating Then Return
 
-            _frameIndex = 0
-            _timer = New DispatcherTimer()
-            _timer.Interval = TimeSpan.FromMilliseconds(FrameIntervalMs)
-            AddHandler _timer.Tick, AddressOf OnTick
-            _timer.Start()
-            _isAnimating = True
-        End Sub
+        '    _frameIndex = 0
+        '    _timer = New DispatcherTimer()
+        '    _timer.Interval = TimeSpan.FromMilliseconds(FrameIntervalMs)
+        '    AddHandler _timer.Tick, AddressOf OnTick
+        '    _timer.Start()
+        '    _isAnimating = True
+        'End Sub
 
-        Public Sub [Stop]()
-            If _timer IsNot Nothing Then
-                _timer.Stop()
-                RemoveHandler _timer.Tick, AddressOf OnTick
-                _timer = Nothing
-            End If
+        'Public Sub [Stop]()
+        '    If _timer IsNot Nothing Then
+        '        _timer.Stop()
+        '        RemoveHandler _timer.Tick, AddressOf OnTick
+        '        _timer = Nothing
+        '    End If
 
-            ' Возвращаем исходную иконку
-            If _targetWindow IsNot Nothing AndAlso _baseIcon IsNot Nothing Then
-                _targetWindow.Icon = _baseIcon
-            End If
+        '    ' Возвращаем исходную иконку
+        '    If _targetWindow IsNot Nothing AndAlso _baseIcon IsNot Nothing Then
+        '        _targetWindow.Icon = _baseIcon
+        '    End If
 
-            _isAnimating = False
-        End Sub
+        '    _isAnimating = False
+        'End Sub
 
-        Public Sub AnimIconDispose()
-            [Stop]()
-            _frames.Clear()
-            _baseIcon = Nothing
-            _targetWindow = Nothing
-            _isInitialized = False
-        End Sub
+        'Public Sub AnimIconDispose()
+        '    [Stop]()
+        '    _frames.Clear()
+        '    _baseIcon = Nothing
+        '    _targetWindow = Nothing
+        '    _isInitialized = False
+        'End Sub
 
-        Public ReadOnly Property IsAnimating As Boolean
-            Get
-                Return _isAnimating
-            End Get
-        End Property
+        'Public ReadOnly Property IsAnimating As Boolean
+        '    Get
+        '        Return _isAnimating
+        '    End Get
+        'End Property
 
         ' ==================== ВНУТРЕННОЕ ====================
 
-        Private Sub GenerateAllFrames()
-            _frames.Clear()
+        'Private Sub GenerateAllFrames()
+        '    _frames.Clear()
 
-            Dim half As Integer = TotalFrames \ 2
+        '    Dim half As Integer = TotalFrames \ 2
 
-            For i As Integer = 0 To TotalFrames - 1
-                Dim rtb As New RenderTargetBitmap(IconSize, IconSize, 96, 96, PixelFormats.Pbgra32)
-                Dim dv As New DrawingVisual()
+        '    For i As Integer = 0 To TotalFrames - 1
+        '        Dim rtb As New RenderTargetBitmap(IconSize, IconSize, 96, 96, PixelFormats.Pbgra32)
+        '        Dim dv As New DrawingVisual()
 
-                Using dc As DrawingContext = dv.RenderOpen()
+        '        Using dc As DrawingContext = dv.RenderOpen()
 
-                    ' 1. Базовая иконка (favicon.ico)
-                    If _baseIcon IsNot Nothing Then
-                        dc.DrawImage(_baseIcon, New Rect(0, 0, IconSize, IconSize))
-                    End If
+        '            ' 1. Базовая иконка (favicon.ico)
+        '            If _baseIcon IsNot Nothing Then
+        '                dc.DrawImage(_baseIcon, New Rect(0, 0, IconSize, IconSize))
+        '            End If
 
-                    ' 2. Полоска в две фазы:
-                    '    Фаза 1 (i < half):  заполняется слева направо (левый край стоит, правый едет)
-                    '    Фаза 2 (i >= half): убывает слева направо (правый край стоит, левый догоняет)
-                    Dim barLeft As Double
-                    Dim barRight As Double
-                    Dim p As Double
+        '            ' 2. Полоска в две фазы:
+        '            '    Фаза 1 (i < half):  заполняется слева направо (левый край стоит, правый едет)
+        '            '    Фаза 2 (i >= half): убывает слева направо (правый край стоит, левый догоняет)
+        '            Dim barLeft As Double
+        '            Dim barRight As Double
+        '            Dim p As Double
 
-                    If i < half Then
-                        p = (i + 1) / half
-                        barLeft = 0
-                        barRight = p * IconSize
-                    Else
-                        p = (i - half + 1) / half
-                        barLeft = p * IconSize
-                        barRight = IconSize
-                    End If
+        '            If i < half Then
+        '                p = (i + 1) / half
+        '                barLeft = 0
+        '                barRight = p * IconSize
+        '            Else
+        '                p = (i - half + 1) / half
+        '                barLeft = p * IconSize
+        '                barRight = IconSize
+        '            End If
 
-                    Dim barY As Double = IconSize - BarHeight - 1
-                    Dim brush As New SolidColorBrush(BarColor)
-                    brush.Freeze()
+        '            Dim barY As Double = IconSize - BarHeight - 1
+        '            Dim brush As New SolidColorBrush(BarColor)
+        '            brush.Freeze()
 
-                    ' Рисуем только если есть что рисовать (последний кадр — пустой,
-                    ' даёт короткую паузу между циклами, как у настоящего индикатора)
-                    If barRight - barLeft > 0.5 Then
-                        dc.DrawRectangle(brush, Nothing, New Rect(barLeft, barY, barRight - barLeft, BarHeight))
-                    End If
-                End Using
+        '            ' Рисуем только если есть что рисовать (последний кадр — пустой,
+        '            ' даёт короткую паузу между циклами, как у настоящего индикатора)
+        '            If barRight - barLeft > 0.5 Then
+        '                dc.DrawRectangle(brush, Nothing, New Rect(barLeft, barY, barRight - barLeft, BarHeight))
+        '            End If
+        '        End Using
 
-                rtb.Render(dv)
-                rtb.Freeze()
-                _frames.Add(rtb)
-            Next
+        '        rtb.Render(dv)
+        '        rtb.Freeze()
+        '        _frames.Add(rtb)
+        '    Next
 
-        End Sub
+        'End Sub
 
-        Private Sub OnTick(sender As Object, e As EventArgs)
-            If _targetWindow Is Nothing OrElse _frames.Count = 0 Then Return
-            _frameIndex = (_frameIndex + 1) Mod _frames.Count
-            _targetWindow.Icon = _frames(_frameIndex)
-        End Sub
+        'Private Sub OnTick(sender As Object, e As EventArgs)
+        '    If _targetWindow Is Nothing OrElse _frames.Count = 0 Then Return
+        '    _frameIndex = (_frameIndex + 1) Mod _frames.Count
+        '    _targetWindow.Icon = _frames(_frameIndex)
+        'End Sub
 
 
 
@@ -318,8 +329,7 @@ Namespace Kas
         'Public DepNum As New List(Of Integer)({1, 2, 3, 5, 7})
         'Public TRNum As New List(Of Integer)({4, 9, 10, 11, 12})
 
-        Public OTSList As New List(Of Otkaz)
-        Public RezervList As New List(Of Otkaz)
+
 
 
         '        '========================================================================================================
@@ -458,6 +468,103 @@ Namespace Kas
 
 
 
+
+
+        ''' <summary>
+        ''' Универсальный помощник для безопасного отписывания от событий UI-элементов
+        ''' </summary>
+
+
+        ''' <summary>
+        ''' ОТПИСЫВАЕТ ВСЕ ОБРАБОТЧИКИ ОТ ВСЕХ ROUTED EVENT'ОВ
+        ''' </summary>
+        Public Sub UnsubscribeAllEvents(container As DependencyObject)
+            If container Is Nothing Then Return
+
+            Dim ui = TryCast(container, UIElement)
+            If ui IsNot Nothing Then
+                ' ПОЛУЧАЕМ ВСЕ ROUTED EVENT'ы из типа UIElement
+                Dim routedEvents = GetType(UIElement).GetFields(BindingFlags.Public Or BindingFlags.Static) _
+                    .Where(Function(f) f.FieldType Is GetType(RoutedEvent)) _
+                    .Select(Function(f) DirectCast(f.GetValue(Nothing), RoutedEvent)).ToList()
+
+                ' ДЛЯ КАЖДОГО СОБЫТИЯ ПЫТАЕМСЯ УДАЛИТЬ ВСЕ ОБРАБОТЧИКИ
+                For Each ev In routedEvents
+                    Try
+                        Dim handlers = GetHandlers(ui, ev)
+                        For Each handler In handlers
+                            ui.RemoveHandler(ev, handler)
+                        Next
+                    Catch
+                        ' ИГНОРИРУЕМ ОШИБКИ ПРИ УДАЛЕНИИ
+                    End Try
+                Next
+            End If
+
+            ' РЕКУРСИЯ ПО ПОТОМКАМ ВИЗУАЛЬНОГО ДЕРЕВА
+            Dim count = VisualTreeHelper.GetChildrenCount(container)
+            For i As Integer = 0 To count - 1
+                UnsubscribeAllEvents(VisualTreeHelper.GetChild(container, i))
+            Next
+        End Sub
+
+        ''' <summary>
+        ''' ПОЛУЧАЕТ СПИСОК ОБРАБОТЧИКОВ ДЛЯ КОНКРЕТНОГО СОБЫТИЯ ЧЕРЕЗ ВНУТРЕННИЙ КЭШ WPF
+        ''' </summary>
+        Private Function GetHandlers(element As UIElement, routedEvent As RoutedEvent) As List(Of [Delegate])
+            Dim handlers As New List(Of [Delegate])()
+
+            Try
+                ' ДОСТУП К ВНУТРЕННЕМУ ПОЛЮ _eventHandlersStore
+                Dim eventHandlersStoreField = GetType(UIElement).GetField("_eventHandlersStore",
+                    BindingFlags.NonPublic Or BindingFlags.Instance)
+
+                If eventHandlersStoreField IsNot Nothing Then
+                    Dim store = eventHandlersStoreField.GetValue(element)
+                    If store IsNot Nothing Then
+                        ' ВЫЗЫВАЕМ МЕТОД GetHandlers(store, RoutedEvent)
+                        Dim getHandlersMethod = store.GetType().GetMethod("GetHandlers",
+                            BindingFlags.Public Or BindingFlags.Instance)
+
+                        If getHandlersMethod IsNot Nothing Then
+                            Dim result = getHandlersMethod.Invoke(store, New Object() {routedEvent})
+                            If result IsNot Nothing Then
+                                Dim array = TryCast(result, Array)
+                                If array IsNot Nothing Then
+                                    For Each item In array
+                                        If item IsNot Nothing Then
+                                            Dim handler = TryCast(item, [Delegate])
+                                            If handler IsNot Nothing Then
+                                                handlers.Add(handler)
+                                            End If
+                                        End If
+                                    Next
+                                End If
+                            End If
+                        End If
+                    End If
+                End If
+            Catch
+                ' ЕСЛИ ВНУТРЕННЯЯ СТРУКТУРА ИЗМЕНИТСЯ В НОВОЙ ВЕРСИИ .NET - ПРОСТО ВЕРНЕМ ПУСТОЙ СПИСОК
+            End Try
+
+            Return handlers
+        End Function
+
+        ''' <summary>
+        ''' Очищает список выделенных ячеек и сбрасывает их фон
+        ''' </summary>
+        Public Sub ClearSelection(selectedCells As List(Of TextBlock), defaultBrush As Brush)
+            If selectedCells Is Nothing Then Return
+            For Each cell In selectedCells
+                cell.Background = defaultBrush
+            Next
+            selectedCells.Clear()
+        End Sub
+
+
+
+
         Sub ResignOTSList(Lst As List(Of Otkaz))
 
             OTSList = Lst
@@ -468,40 +575,51 @@ Namespace Kas
 
 
         Public Sub AddOTSToContainer(Optional LST As List(Of Otkaz) = Nothing)
-            ' Счятаем время выполнения
-            Dim elapsedTime, elapsedTime1 As TimeSpan
 
+
+            'Dim elapsedTime, elapsedTime1 As TimeSpan
             Dim TempLST As New List(Of Otkaz)
-            If Not IsNothing(PointedYarlyk) Then
-                If Not IsNothing(PointedYarlyk.Zapros) Then
-                    Stopwatch.Reset()
-                    Stopwatch.Start()
 
+            If Not IsNothing(PointedYarlyk) AndAlso Not IsNothing(PointedYarlyk.Zapros) Then
+                'Stopwatch.Reset()
+                'Stopwatch.Start()
 
-                    If LST IsNot Nothing Then
-                        TempLST = LST.Where(PointedYarlyk.Zapros).ToList
-                    Else
-                        TempLST = OTSList.Where(PointedYarlyk.Zapros).ToList
-                    End If
-
-
-                    Stopwatch.Stop()
-                    elapsedTime = Stopwatch.Elapsed
+                If LST IsNot Nothing Then
+                    TempLST = LST.Where(PointedYarlyk.Zapros).ToList
+                Else
+                    TempLST = OTSList.Where(PointedYarlyk.Zapros).ToList
                 End If
+
+                'Stopwatch.Stop()
+                'elapsedTime = Stopwatch.Elapsed
             Else
                 MW.InfoBLOK.AddItem($"Запрос не указан")
                 MW.InfoBLOK.ScrollToEnd()
+                Return ' ⚠️ ВАЖНО: выходим, если запроса нет, чтобы не выполнять лишнюю работу
             End If
 
-            Stopwatch.Reset()
-            Stopwatch.Start()
+            ' === КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: ОЧИСТКА СТАРОГО СПИСКА ПЕРЕД ЗАГРУЗКОЙ НОВОГО ===
 
+            ' 1. Сбрасываем ItemsSource в Nothing, чтобы WPF начал уничтожать старые OTSRowControl
+            MW.TRowsContainer.ItemsSource = Nothing
+
+            ' 2. Принудительно собираем мусор ПОСЛЕ сброса, но ДО создания нового списка
+            '    Это освобождает память от старых контролов и фильтрованного TempLST предыдущего вызова
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking:=True)
+            GC.WaitForPendingFinalizers()
+
+            ' ================================================================
+
+            'Stopwatch.Reset()
+            'Stopwatch.Start()
+
+            ' 3. Теперь безопасно присваиваем новый источник
             MW.TRowsContainer.ItemsSource = TempLST.OrderBy(Function(u) u.Nach)
             MW.YarlykContainer.UpdateYarlykInfo()
+            TempLST = Nothing
 
-            Stopwatch.Stop()
-            elapsedTime1 = Stopwatch.Elapsed
-
+            'Stopwatch.Stop()
+            'elapsedTime1 = Stopwatch.Elapsed
 
             If Not IsNothing(PointedOtkaz) Then
                 MW.TRowsContainer.ScrollToPointedOTS()
@@ -509,9 +627,13 @@ Namespace Kas
                 MW.TRowsContainer.ScrollToEnd()
             End If
 
-            MW.InfoBLOK.AddItem($" {TempLST.Count} элементов отфильтровано{vbCrLf}за {elapsedTime.TotalMilliseconds:F0} мс")
-            MW.InfoBLOK.AddItem($" {TempLST.Count} элементов передано в контейнер и отсортировано{vbCrLf}за {elapsedTime1.TotalMilliseconds:F0} мс")
-            MW.InfoBLOK.ScrollToEnd()
+            'MW.InfoBLOK.AddItem($" {TempLST.Count} элементов отфильтровано{vbCrLf}за {elapsedTime.TotalMilliseconds:F0} мс")
+            'MW.InfoBLOK.AddItem($" {TempLST.Count} элементов передано в контейнер и отсортировано{vbCrLf}за {elapsedTime1.TotalMilliseconds:F0} мс")
+            'MW.InfoBLOK.ScrollToEnd()
+
+
+
+
         End Sub
 
         Public Async Function GetGenOtchRows(SaveFilteredItog As Boolean) As Task(Of List(Of GenReportRow))
@@ -624,8 +746,8 @@ Namespace Kas
 
             ' Сортируем и устанавливаем
             MW.TRowsContainer.ItemsSource = baseList.OrderBy(Function(o) o.Nach).ToList()
-
-
+            baseList = Nothing
+            THIS_OTS = Nothing
         End Sub
 
         Public Function SafePredicate(p As Func(Of Otkaz, Boolean)) As Func(Of Otkaz, Boolean)
@@ -634,7 +756,7 @@ Namespace Kas
 
 
 
-        Sub ClearAllNoTesOTS(OTSLST As List(Of Otkaz))
+        Sub ClearAllUpdateNotes(OTSLST As List(Of Otkaz))
             For Each OTS In OTSLST
                 OTS.ClearAllItemUpdateNotes()
             Next

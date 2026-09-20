@@ -33,7 +33,7 @@
 	</UserControl.Resources>
 
 	<Border Margin="0" Padding="5" BorderBrush="{StaticResource SplitterBrush}" CornerRadius="4" BorderThickness="4" Background="{StaticResource AppBackBrush}">
-		<Grid >
+		<Grid>
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="Auto"/>
@@ -47,48 +47,56 @@
 
 			<!-- Заголовок -->
 			<TextBlock Grid.Row="0" Text="Данные на локомотив" 
-					   FontSize="15" FontWeight="Bold" 
-					   HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                       FontSize="15" FontWeight="Bold" 
+                       HorizontalAlignment="Center" Margin="0,0,0,6"/>
 
 			<!-- ===== БОЛЬШОЙ РЕМОНТ ===== -->
 			<TextBlock Grid.Row="1" Text="Большой ремонт" FontWeight="Bold" 
-					   Foreground="DarkBlue" Margin="0,0,0,3"/>
+                       Foreground="DarkBlue" Margin="0,0,0,3"/>
 
 			<!-- Вид + Пробег + Место + стрелка -->
 			<StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,4">
 				<ComboBox x:Name="CmbRepairType" Style="{StaticResource MyCombo}" 
-						  Width="75" Margin="0,0,3,0" Padding="2"
-						  FontSize="13" FontWeight="Bold"
-						  VerticalContentAlignment="Center"/>
+                          Width="75" Margin="0,0,3,0" Padding="2"
+                          FontSize="13" FontWeight="Bold"
+                          VerticalContentAlignment="Center"
+                          SelectionChanged="CmbRepairType_SelectionChanged"/>
 				<TextBox x:Name="TxtMileage" Style="{StaticResource RemontTextBoxStyle}" 
-						 Width="65" TextAlignment="Center" ToolTip="Пробег км"/>
+                         Width="65" TextAlignment="Center" ToolTip="Пробег км"/>
 				<TextBox x:Name="TxtMajorPlace" Style="{StaticResource RemontTextBoxStyle}" 
-						 Width="170" TextAlignment="Left" Margin="3,2,0,2"
-						 ToolTip="Место ремонта"/>
+                         Width="170" TextAlignment="Left" Margin="3,2,0,2"
+                         ToolTip="Место ремонта"/>
 				<Button x:Name="BtnPickMajor" Content="▼" 
-						Style="{StaticResource ArrowBtnStyle}"
-						Click="BtnPickMajor_Click"/>
+                        Style="{StaticResource ArrowBtnStyle}"
+                        Click="BtnPickMajor_Click"/>
 			</StackPanel>
 
 			<!-- ===== ТО-2 ===== -->
 			<TextBlock Grid.Row="3" Text="ТО-2" FontWeight="Bold" 
-					   Foreground="DarkGreen" Margin="0,4,0,3"/>
+                       Foreground="DarkGreen" Margin="0,4,0,3"/>
 
 			<StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,0,0,4">
 				<TextBox x:Name="TxtTO2Place" Style="{StaticResource RemontTextBoxStyle}" 
-						 Width="240" TextAlignment="Left"
-						 ToolTip="Место проведения ТО-2"/>
+                         Width="240" TextAlignment="Left"
+                         ToolTip="Место проведения ТО-2"/>
 				<Button x:Name="BtnPickTO2" Content="▼" 
-						Style="{StaticResource ArrowBtnStyle}"
-						Click="BtnPickTO2_Click"/>
+                        Style="{StaticResource ArrowBtnStyle}"
+                        Click="BtnPickTO2_Click"/>
+				<CheckBox x:Name="ChkWithMajorRepair" 
+                          Content="с большим ремонтом"
+                          Margin="8,0,0,0" 
+                          VerticalAlignment="Center"
+                          FontWeight="Bold"
+                          Checked="ChkWithMajorRepair_Changed"
+                          Unchecked="ChkWithMajorRepair_Changed"/>
 			</StackPanel>
 
 			<!-- ===== ПОПАП ВЫБОРА МЕСТА (скрыт по умолчанию) ===== -->
 			<Border Grid.Row="5" x:Name="PickerBorder" 
-					Visibility="Collapsed"
-					BorderBrush="Gray" BorderThickness="1" 
-					Background="{StaticResource AppBackBrush}"
-					Margin="0,4,0,4" Padding="6">
+                    Visibility="Collapsed"
+                    BorderBrush="Gray" BorderThickness="1" 
+                    Background="{StaticResource AppBackBrush}"
+                    Margin="0,4,0,4" Padding="6">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto"/>
@@ -100,66 +108,59 @@
 					<!-- RadioButton: СЛД / Заводы -->
 					<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
 						<RadioButton x:Name="RbSLD" Content="СЛД по дорогам" 
-									 Margin="0,0,15,0" 
-									 Checked="RbCategory_Changed"/>
+                                     Margin="0,0,15,0" 
+                                     Checked="RbCategory_Changed"/>
 						<RadioButton x:Name="RbFactories" Content="Заводы" 
-									 Margin="0,0,15,0"
-									 Checked="RbCategory_Changed"/>
+                                     Margin="0,0,15,0"
+                                     Checked="RbCategory_Changed"/>
 					</StackPanel>
 
 					<!-- Панель СЛД: дороги + список СЛД -->
 					<StackPanel Grid.Row="1" x:Name="PnlSLD" Orientation="Vertical">
 						<TextBlock Text="Железная дорога:" FontWeight="Bold" FontSize="12" Margin="0,0,0,2"/>
 						<StackPanel Orientation="Horizontal">
-							 <ComboBox x:Name="CmbRoad" Style="{StaticResource MyCombo}" 
-								  Width="Auto" HorizontalAlignment="Left"
-								  Margin="0,0,0,4" Padding="2" FontSize="13"
-								  SelectionChanged="CmbRoad_SelectionChanged"/>
-							<ComboBox	x:Name="CmbSLD" Style="{StaticResource MyCombo}" 
-										Width="Auto" Padding="2" FontSize="13"  
-										VerticalContentAlignment="Center" 	 
-										SelectionChanged="CmbSLD_SelectionChanged"/>
+							<ComboBox x:Name="CmbRoad" Style="{StaticResource MyCombo}" 
+                                  Width="Auto" HorizontalAlignment="Left"
+                                  Margin="0,0,0,4" Padding="2" FontSize="13"
+                                  SelectionChanged="CmbRoad_SelectionChanged"/>
+							<ComboBox x:Name="CmbSLD" Style="{StaticResource MyCombo}" 
+                                        Width="Auto" Padding="2" FontSize="13"  
+                                        VerticalContentAlignment="Center"      
+                                        SelectionChanged="CmbSLD_SelectionChanged"/>
 						</StackPanel>
-						
-						 
 					</StackPanel>
 
 					<!-- Панель Заводов -->
 					<StackPanel Grid.Row="2" x:Name="PnlFactories" Orientation="Vertical">
 						<TextBlock Text="Локомотиворемонтные и локомотивостроительные заводы:" 
-								   FontWeight="Bold" FontSize="12" Margin="0,0,0,2" TextWrapping="Wrap"/>
-						
-						<ComboBox	x:Name="CmbFactories" Style="{StaticResource MyCombo}" 
-									Width="Auto" Padding="2" FontSize="13"
-									VerticalContentAlignment="Center"
-									SelectionChanged="CmbFactories_SelectionChanged"/>
+                                   FontWeight="Bold" FontSize="12" Margin="0,0,0,2" TextWrapping="Wrap"/>
+
+						<ComboBox x:Name="CmbFactories" Style="{StaticResource MyCombo}" 
+                                    Width="Auto" Padding="2" FontSize="13"
+                                    VerticalContentAlignment="Center"
+                                    SelectionChanged="CmbFactories_SelectionChanged"/>
 					</StackPanel>
 
 					<!-- Кнопки подтверждения -->
 					<StackPanel Grid.Row="3" Orientation="Horizontal" 
-								HorizontalAlignment="Right" Margin="0,6,0,0">
+                                HorizontalAlignment="Right" Margin="0,6,0,0">
 						<Button Content="Применить" x:Name="BtnApplyPick" 
-								Click="BtnApplyPick_Click"
-								Style="{StaticResource PopupStyleButtonGreen}" 
-								Width="90" Margin="0,0,6,0" IsEnabled="False"/>
+                                Click="BtnApplyPick_Click"
+                                Style="{StaticResource PopupStyleButtonGreen}" 
+                                Width="90" Margin="0,0,6,0" IsEnabled="False"/>
 						<Button Content="Закрыть" Click="BtnClosePicker_Click"
-								Style="{StaticResource PopupStyleButton}" Width="70"/>
+                                Style="{StaticResource PopupStyleButton}" Width="70"/>
 					</StackPanel>
 				</Grid>
 			</Border>
 
 			<!-- ===== КНОПКИ ОК / ОТМЕНА ===== -->
 			<StackPanel Grid.Row="7" Orientation="Horizontal" 
-						HorizontalAlignment="Right" Margin="0,8,0,0">
+                        HorizontalAlignment="Right" Margin="0,8,0,0">
 				<Button Content="✔️" x:Name="BtnOk" Click="BtnOk_Click"
-						Style="{StaticResource PopupStyleButton}" 
-						Width="Auto" Foreground="DarkGreen" Margin="0,0,8,0" IsDefault="True"/>
-				<!--<Button Content="Отмена" Click="BtnCancel_Click"
-						Style="{StaticResource PopupStyleButton}" 
-						Width="80" IsCancel="True"/>-->
+                        Style="{StaticResource PopupStyleButton}" 
+                        Width="Auto" Foreground="DarkGreen" Margin="0,0,8,0" IsDefault="True"/>
 			</StackPanel>
 		</Grid>
 	</Border>
-
-	
 </UserControl>

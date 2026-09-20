@@ -460,55 +460,17 @@ Namespace Kas
             End If
         End Sub
 
-        '        If PointedOtkaz Is Nothing Then Return
+        Private Sub OTSRowControl_Unloaded(sender As Object, e As RoutedEventArgs) Handles Me.Unloaded
+            ' 1. Ядерная очистка всех routed-событий
+            'UnsubscribeAllEvents(Me)
 
-        '        ' Если уже открыт — закрываем
-        '        If _remontPopup IsNot Nothing AndAlso _remontPopup.IsOpen Then
-        '            CloseRemontPopup()
-        '            Return
-        '        End If
+            '' 2. Ручная отписка от специфических событий попапа/редактора
+            ''    (UnsubscribeAllEvents их не видит, т.к. это не routed events)
+            'CloseRemontPopup()
 
-        '        ' Создаём редактор
-        '        _remontEditor = New RemontEditor()
-
-        '        ' Привязываем к DaNaLok текущего отказа
-        '        If PointedOtkaz.DaNaLok Is Nothing Then
-        '            PointedOtkaz.DaNaLok = New ObservableCollection(Of Remont)()
-        '        End If
-        '        _remontEditor.BindTo(PointedOtkaz.DaNaLok)
-
-        '        AddHandler _remontEditor.Cancelled, AddressOf RemontEditor_Cancelled
-
-        '        ' Popup с закрытием по клику мимо
-        '        _remontPopup = New Popup With {
-        '    .Child = _remontEditor,
-        '    .Placement = PlacementMode.MousePoint,
-        '    .StaysOpen = False,
-        '    .AllowsTransparency = True
-        '}
-
-        '        _remontPopup.IsOpen = True
-        '        e.Handled = True
-        'End Sub
-
-        'Private Sub RemontEditor_Cancelled(sender As Object, e As EventArgs)
-        '    CloseRemontPopup()
-        'End Sub
-
-        'Private Sub CloseRemontPopup()
-        '    If _remontPopup IsNot Nothing Then
-        '        If _remontEditor IsNot Nothing Then
-        '            RemoveHandler _remontEditor.Cancelled, AddressOf RemontEditor_Cancelled
-        '        End If
-        '        _remontPopup.IsOpen = False
-        '        _remontPopup = Nothing
-        '        _remontEditor = Nothing
-        '    End If
-        'End Sub
-
-
-
-
+            'DataContext = Nothing
+            'TxtBLK.Inlines.Clear()
+        End Sub
 
 
 

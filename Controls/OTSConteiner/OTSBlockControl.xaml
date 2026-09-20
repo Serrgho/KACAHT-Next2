@@ -142,7 +142,7 @@
 						</Border>
 
 
-						<Border Width="60" x:Name="DlitBorder"
+						<Border Width="70" x:Name="DlitBorder"
 						Style="{StaticResource FiltrTBlock}"
 						PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
 						PreviewMouseRightButtonUp="OnLevel0FilterMouseRightDown"
@@ -567,7 +567,7 @@
 				</ScrollViewer>
 			</Grid>
 
-
+			
 
 
 			<Grid Grid.Row="3" ShowGridLines="True">
@@ -583,21 +583,22 @@
 
 					<Grid>
 						<Grid.RowDefinitions>
-							<!-- Заголовок -->
+							
 							<RowDefinition Height="Auto"/>
-							<!-- кнопка ВВЕРХ -->
+							
 							<RowDefinition Height="Auto"/>
-							<!-- Содержимое ListBox -->
+							
 							<RowDefinition Height="*"/>
-							<!-- кнопка ВНИЗ -->
+							
 							<RowDefinition Height="Auto"/>
 						</Grid.RowDefinitions>
-						<!-- Заголовок: будет скроллиться по горизонтали, но не по вертикали -->
+						
 						<local:TableHeader x:Name="THed" Grid.Row="0"/>
 
 						<Button x:Name="ToUpButton" Grid.Row="1" Style="{StaticResource PopupStyleButton}" Click="ToUpButton_Click"  Padding="-1" Content="▲▲▲▲▲▲▲" Foreground="DarkBlue" Height="20"/>
 
-						<!-- ListBox: без горизонтальной прокрутки, но с вертикальной -->
+					
+						
 						<ListBox Grid.Row="2"
 							  x:Name="OTSContainer"
 							  Margin="2"
@@ -627,14 +628,13 @@
 							</ListBox.ItemContainerStyle>
 							<ListBox.ItemTemplate>
 								<DataTemplate>
-									<!--<local:OTSRowControl/>-->
-									<!--<local:OTSRowControl SearchTerm="{Binding Text, ElementName=SearchOpisBox}"/>-->
+								
 									<local:OTSRowControl SearchTerm="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=CurrentSearchTerm}" />
 								</DataTemplate>
 							</ListBox.ItemTemplate>
 							<ListBox.Template>
 								<ControlTemplate TargetType="ListBox">
-									<!--просто чтобы к скроллу доступ иметь-->
+								
 									<ScrollViewer x:Name="InnerScrollViewer"
 											  HorizontalScrollBarVisibility="Disabled"
 											  VerticalScrollBarVisibility="Auto">
@@ -649,7 +649,7 @@
 
 			</Grid>
 
-			<!-- Итоговая панель (не скроллится ни по горизонтали, ни по вертикали) -->
+			
 			<Grid Grid.Row="4" Background="{StaticResource ScrolBarBrush}">
 				<Grid>
 					<Grid.ColumnDefinitions>

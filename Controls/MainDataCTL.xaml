@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:KACAHT_Next2.Kas"
              mc:Ignorable="d">
-    <Expander x:Name="expDataWork" 
+    <!--<Expander x:Name="expDataWork" 
 			Header="🌐📁📝  Работа с данными" 
 			Background="{StaticResource ScrolBarBrush}"
 			Foreground="DarkBlue"
@@ -14,9 +14,48 @@
 			BorderThickness="3"
 			BorderBrush="{StaticResource SplitterBrush}"
 			IsExpanded="True"
-			HorizontalContentAlignment="Stretch">
+			HorizontalContentAlignment="Stretch">-->
 
-        <WrapPanel x:Name="TopRibbon"  Orientation="Horizontal" Background="{StaticResource ScrolBarBrush}" VerticalAlignment="Center">
+
+	<Expander x:Name="expDataWork" 
+              Background="{StaticResource ScrolBarBrush}"
+              Foreground="DarkBlue"
+              FontWeight="Bold"	
+              FontSize="15"
+              BorderThickness="3"
+              BorderBrush="{StaticResource SplitterBrush}"
+              IsExpanded="True"
+              HorizontalContentAlignment="Stretch">
+
+		<!-- НАЧАЛО ИЗМЕНЕНИЙ: Кастомный заголовок -->
+		<Expander.Header>
+			<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+				<!-- Основной текст заголовка -->
+				<TextBlock Text="🌐📁📝  Работа с данными" 
+                           Foreground="DarkBlue" 
+                           FontWeight="Bold" 
+                           FontSize="15"/>
+
+				<!-- Разделитель (изначально скрыт) -->
+				<TextBlock x:Name="TxtSeparator" 
+                   Text=" | "
+				   Foreground="Gray"
+                   Visibility="Collapsed"
+				   Margin="20 0 0 0"/>
+
+
+				<!-- Индикатор процесса (изначально пустой) -->
+				<TextBlock x:Name="LblProcessStatus" 
+                       Text="" 
+                       Foreground="Red" 
+                       FontWeight="Normal" 
+                       FontSize="14"
+                       Padding="3 1"
+                       VerticalAlignment="Center"/>
+			</StackPanel>
+		</Expander.Header>
+
+		<WrapPanel x:Name="TopRibbon"  Orientation="Horizontal" Background="{StaticResource ScrolBarBrush}" VerticalAlignment="Center">
 			
 			<Button x:Name="LoadData" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="LoadData_Click">📁 Импорт ОТС из Excel</Button>
 			<Button x:Name="LoadDataFromJSON" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="LoadDataFromJSON_Click">📁 Импорт ОТС из JSON</Button>
@@ -24,7 +63,7 @@
             <Button x:Name="AppendDataToJSON" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="AppendDataToJSON_Click">📝Добавить ОТС к файлу JSON</Button>
 
 			<Button x:Name="SaveDataToJSON" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="SaveDataToJSON_Click">📝Сохранить данные в JSON</Button>
-			<Button x:Name="ResetToOTSList" Style="{StaticResource PopupStyleButtonOrange}" Click="ResetToOTSList_Click">🔙 Вернуться в основной список</Button>
+			<Button x:Name="ResetToOTSList" Style="{StaticResource PopupStyleButtonOrange}" Click="ResetToOTSList_Click">🔙 Последний загруженный файл</Button>
 			<Button x:Name="FilterWithTimeOTSList" Style="{StaticResource PopupStyleButton}" Click="FilterWithTimeOTSList_Click">🌪️ Отфильтровать с учетом времени</Button>
 			<Button x:Name="BtnShowInExplorer" Style="{StaticResource PopupStyleButton}" Click="BtnShowInExplorer_Click">📁 Показать папку с данными</Button>
         </WrapPanel>

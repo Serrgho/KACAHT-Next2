@@ -126,6 +126,8 @@ Namespace Kas
 
             Catch ex As Exception
                 MessageBox.Show(ex.ToString(), "Ошибка в S24Table2")
+            Finally
+
             End Try
         End Sub
 
@@ -785,10 +787,22 @@ Namespace Kas
             End Try
         End Sub
 
+        Private Sub S24Table2_Unloaded(sender As Object, e As RoutedEventArgs) Handles Me.Unloaded
+            _cur = Nothing
+            _prev = Nothing
+            _curRaw = Nothing
+            _prevRaw = Nothing
+            _ytdRaw = Nothing
+            ' ВЫЗЫВАЕМ ТВОЙ УНИВЕРСАЛЬНЫЙ ОТПИСЧИК
+            UnsubscribeAllEvents(Me)
 
 
 
+            ' ОТПИСЫВАЕМСЯ ОТ Unloaded (ЧТОБЫ НЕ БЫЛО ЦИКЛИЧЕСКИХ ССЫЛОК)
+            RemoveHandler Me.Unloaded, AddressOf S24Table2_Unloaded
 
+            GC.Collect()
+        End Sub
     End Class
 
 End Namespace

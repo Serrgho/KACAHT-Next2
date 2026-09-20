@@ -285,6 +285,21 @@ Namespace Kas
             Return v.ToString("F2", Ru)
         End Function
 
+        Private Sub S24Table6_Unloaded(sender As Object, e As RoutedEventArgs) Handles Me.Unloaded
+
+            _cur = Nothing
+
+            ' ВЫЗЫВАЕМ ТВОЙ УНИВЕРСАЛЬНЫЙ ОТПИСЧИК
+            UnsubscribeAllEvents(Me)
+
+
+
+            ' ОТПИСЫВАЕМСЯ ОТ Unloaded (ЧТОБЫ НЕ БЫЛО ЦИКЛИЧЕСКИХ ССЫЛОК)
+            RemoveHandler Me.Unloaded, AddressOf S24Table6_Unloaded
+
+            GC.Collect()
+        End Sub
+
 #End Region
 
 
