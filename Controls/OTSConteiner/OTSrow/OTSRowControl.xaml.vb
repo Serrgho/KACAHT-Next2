@@ -184,11 +184,12 @@ Namespace Kas
 
 
         Private Sub MashFamTB_MouseDown(sender As Object, e As MouseButtonEventArgs)
+            'при сбросе значения
             If e.ClickCount = 2 Then
                 With PointedOtkaz
                     .Mash = ""
                     .PripMash = ""
-
+                    MW.TRowsContainer.WarningFilters.CheckForEmptyFields()
                 End With
             End If
         End Sub
@@ -204,11 +205,13 @@ Namespace Kas
         End Sub
 
         Private Sub LokPrip_MouseDown(sender As Object, e As MouseButtonEventArgs)
+            'при сбросе значения
             If e.ClickCount = 2 Then
                 With PointedOtkaz
                     .SerLokExact = ""
                     .PripLok = ""
 
+                    MW.TRowsContainer.WarningFilters.CheckForEmptyFields()
                 End With
             End If
         End Sub

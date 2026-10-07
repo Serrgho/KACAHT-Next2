@@ -140,8 +140,23 @@ Namespace Kas
             Return Me.SortOrderToggleUC.MYToggle.IsChecked = True
         End Function
 
+        ''' <summary>
+        ''' Закрывает текущий popup и снимает все ссылки с него,
+        ''' чтобы обработчики и дочерние контролы не удерживались в памяти.
+        ''' </summary>
+        Private Sub CloseCurrentPopup()
+            If _currentPopup Is Nothing Then Return
+            Try
+                _currentPopup.IsOpen = False
+                _currentPopup.Child = Nothing
+            Catch
+                ' Popup мог быть уже уничтожен — игнорируем
+            End Try
+            _currentPopup = Nothing
+        End Sub
 
         Private Sub ShowTextualFilterPopup(sender As Object, propName As String, fieldType As String)
+
             Dim source = MW.TRowsContainer.OTSContainer.ItemsSource
             Dim isSorted = Me.SortOrderToggleUC.MYToggle.IsChecked = True
 
@@ -150,8 +165,9 @@ Namespace Kas
             Dim popup = result.Item1
             Dim values = result.Item2
 
-            ' Кнопка копирования (твоя локальная логика)
             Dim popupCtrl As FilterPopup = CType(popup.Child, FilterPopup)
+
+            ' --- Кнопка копирования ---
             If values Is Nothing OrElse values.Count = 0 Then
                 popupCtrl.CopyButton.IsEnabled = False
             Else
@@ -159,37 +175,118 @@ Namespace Kas
                 popupCtrl.CopyButton.ToolTip = $"Скопировать {values.Count} значений"
             End If
 
-            ' Твой стандартный обработчик OK (без всяких Action)
-            AddHandler popupCtrl.OkButt.Click, Sub(s, args)
-                                                   Dim selected = OtkazFilterConfig.SafeGetSelectedItems(popupCtrl.FilterListBox)
-                                                   Dim isBoolean = (fieldType.ToLowerInvariant() = "boolean")
+            ' --- Обработчик OK с возможностью отписки ---
+            ' Захватываем локальные переменные, чтобы замыкание не тянуло весь класс
+            Dim capturedPopup As Popup = popup
+            Dim capturedCtrl As FilterPopup = popupCtrl
+            Dim capturedProp As String = propName
+            Dim capturedFieldType As String = fieldType
+            Dim capturedIsBoolean As Boolean = (fieldType.ToLowerInvariant() = "boolean")
 
-                                                   ' Парсинг (можно тоже вынести в конфиг, но пусть будет тут для наглядности)
-                                                   Dim originalValues = selected.Select(Function(item)
-                                                                                            Dim str = item?.ToString()
-                                                                                            If String.IsNullOrEmpty(str) Then Return str
-                                                                                            If str.Contains(" [") AndAlso str.EndsWith("]") Then
-                                                                                                If isBoolean Then
-                                                                                                    If str.StartsWith("Да ") Then Return "True"
-                                                                                                    If str.StartsWith("Нет ") Then Return "False"
-                                                                                                End If
-                                                                                                Return str.Substring(0, str.IndexOf(" ["))
-                                                                                            ElseIf str.Contains(" (") AndAlso str.EndsWith(")") Then
-                                                                                                Return str.Substring(0, str.IndexOf(" ("))
-                                                                                            End If
-                                                                                            Return str
-                                                                                        End Function).ToList()
+            Dim okHandler As RoutedEventHandler = Nothing
+            okHandler = Sub(s, args)
+                            Try
+                                Dim selected = OtkazFilterConfig.SafeGetSelectedItems(capturedCtrl.FilterListBox)
 
-                                                   _level0FilterState.SetFilter(propName, originalValues)
-                                                   RaiseEvent FiltersChanged(Me, EventArgs.Empty)
-                                                   UpdateIndicatorForProperty(propName)
-                                                   popup.IsOpen = False
-                                               End Sub
+                                ' Парсинг значений (тот же код, что у вас был)
+                                Dim originalValues = selected.Select(Function(item)
+                                                                         Dim str = item?.ToString()
+                                                                         If String.IsNullOrEmpty(str) Then Return str
+                                                                         If str.Contains(" [") AndAlso str.EndsWith("]") Then
+                                                                             If capturedIsBoolean Then
+                                                                                 If str.StartsWith("Да ") Then Return "True"
+                                                                                 If str.StartsWith("Нет ") Then Return "False"
+                                                                             End If
+                                                                             Return str.Substring(0, str.IndexOf(" ["))
+                                                                         ElseIf str.Contains(" (") AndAlso str.EndsWith(")") Then
+                                                                             Return str.Substring(0, str.IndexOf(" ("))
+                                                                         End If
+                                                                         Return str
+                                                                     End Function).ToList()
 
-            ' Управление открытием
-            If _currentPopup IsNot Nothing Then _currentPopup.IsOpen = False
+                                _level0FilterState.SetFilter(capturedProp, originalValues)
+                                RaiseEvent FiltersChanged(Me, EventArgs.Empty)
+                                UpdateIndicatorForProperty(capturedProp)
+                            Finally
+                                ' Снимаем обработчик и отпускаем ресурсы popup
+                                RemoveHandler capturedCtrl.OkButt.Click, okHandler
+                                capturedPopup.IsOpen = False
+                                capturedPopup.Child = Nothing
+                                If _currentPopup Is capturedPopup Then _currentPopup = Nothing
+                            End Try
+                        End Sub
+            AddHandler popupCtrl.OkButt.Click, okHandler
+
+            ' --- Управление открытием: закрываем предыдущий popup ---
+            CloseCurrentPopup()
             _currentPopup = popup
             popup.IsOpen = True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            'Dim source = MW.TRowsContainer.OTSContainer.ItemsSource
+            'Dim isSorted = Me.SortOrderToggleUC.MYToggle.IsChecked = True
+
+            '' Получаем готовый попап
+            'Dim result = FilterPopupHelper.PrepareTextualFilter(sender, propName, fieldType, source, _level0FilterState, isSorted)
+            'Dim popup = result.Item1
+            'Dim values = result.Item2
+
+            '' Перед открытием — закрыть предыдущий и отписаться
+            'CloseCurrentPopup()
+
+
+            '' Кнопка копирования (твоя локальная логика)
+            'Dim popupCtrl As FilterPopup = CType(popup.Child, FilterPopup)
+            'If values Is Nothing OrElse values.Count = 0 Then
+            '    popupCtrl.CopyButton.IsEnabled = False
+            'Else
+            '    popupCtrl.CopyButton.IsEnabled = True
+            '    popupCtrl.CopyButton.ToolTip = $"Скопировать {values.Count} значений"
+            'End If
+
+            '' Твой стандартный обработчик OK (без всяких Action)
+            'AddHandler popupCtrl.OkButt.Click, Sub(s, args)
+            '                                       Dim selected = OtkazFilterConfig.SafeGetSelectedItems(popupCtrl.FilterListBox)
+            '                                       Dim isBoolean = (fieldType.ToLowerInvariant() = "boolean")
+
+            '                                       ' Парсинг (можно тоже вынести в конфиг, но пусть будет тут для наглядности)
+            '                                       Dim originalValues = selected.Select(Function(item)
+            '                                                                                Dim str = item?.ToString()
+            '                                                                                If String.IsNullOrEmpty(str) Then Return str
+            '                                                                                If str.Contains(" [") AndAlso str.EndsWith("]") Then
+            '                                                                                    If isBoolean Then
+            '                                                                                        If str.StartsWith("Да ") Then Return "True"
+            '                                                                                        If str.StartsWith("Нет ") Then Return "False"
+            '                                                                                    End If
+            '                                                                                    Return str.Substring(0, str.IndexOf(" ["))
+            '                                                                                ElseIf str.Contains(" (") AndAlso str.EndsWith(")") Then
+            '                                                                                    Return str.Substring(0, str.IndexOf(" ("))
+            '                                                                                End If
+            '                                                                                Return str
+            '                                                                            End Function).ToList()
+
+            '                                       _level0FilterState.SetFilter(propName, originalValues)
+            '                                       RaiseEvent FiltersChanged(Me, EventArgs.Empty)
+            '                                       UpdateIndicatorForProperty(propName)
+            '                                       popup.IsOpen = False
+            '                                   End Sub
+
+            '' Управление открытием
+            'If _currentPopup IsNot Nothing Then _currentPopup.IsOpen = False
+            '_currentPopup = popup
+            'popup.IsOpen = True
         End Sub
 
 
@@ -377,60 +474,149 @@ Namespace Kas
 
 
         Private Sub ShowDateFilterPopupNew(sender As Object, propName As String)
+
+
             Dim currentSource As IEnumerable(Of Otkaz) = TryCast(OTSContainer.ItemsSource, IEnumerable(Of Otkaz))
             If currentSource Is Nothing Then Return
+
+            ' --- Восстанавливаем ранее выбранные даты ---
             Dim previouslySelectedDates As HashSet(Of Date) = Nothing
             Dim filterValues As List(Of Object) = _level0FilterState.GetFilter(propName)
-            If filterValues?.Count > 0 Then
+            If filterValues IsNot Nothing AndAlso filterValues.Count > 0 Then
                 previouslySelectedDates = New HashSet(Of Date)(
-    filterValues.OfType(Of FilterValue)().Where(Function(fv) fv.Value IsNot Nothing).Select(Function(fv) CType(fv.Value, Date))
-)
+                    filterValues.OfType(Of FilterValue)().
+                                Where(Function(fv) fv.Value IsNot Nothing).
+                                Select(Function(fv) CType(fv.Value, Date))
+                )
             End If
-            Dim popup As New Popup With {
-.Placement = PlacementMode.Bottom,
-.PlacementTarget = sender,
-.StaysOpen = False,
-.AllowsTransparency = True,
-.PopupAnimation = PopupAnimation.Slide
-}
 
-            ' Контрол дат
+            ' --- Создаём popup ---
+            Dim popup As New Popup With {
+                .Placement = PlacementMode.Bottom,
+                .PlacementTarget = sender,
+                .StaysOpen = False,
+                .AllowsTransparency = True,
+                .PopupAnimation = PopupAnimation.Slide
+            }
+
             Dim ctrl As New DateFilterPopup()
             ctrl.SourcePropertyName = propName
-            ctrl.PopulateDates(currentSource, propName, previouslySelectedDates) ' <-- 
+            ctrl.PopulateDates(currentSource, propName, previouslySelectedDates)
             popup.Child = ctrl
 
-            AddHandler ctrl.FilterApplied, Sub(s As Object, e As DateFilterAppliedEventArgs)
-                                               ' Собираем выбранные даты → предикат
-                                               Dim selectedDates = e.SelectedDates
-                                               Dim predicate As Func(Of Otkaz, Boolean) = Function(o As Otkaz) True
+            ' --- Локальные захваты, чтобы замыкание не тянуло весь класс ---
+            Dim capturedPopup As Popup = popup
+            Dim capturedCtrl As DateFilterPopup = ctrl
+            Dim capturedProp As String = propName
 
-                                               If selectedDates?.Count > 0 Then
-                                                   Select Case propName
-                                                       Case "Nach" : predicate = Function(o As Otkaz) o.Nach > Date.MinValue AndAlso selectedDates.Contains(o.Nach.Date)
-                                                       Case "Postup" : predicate = Function(o As Otkaz) o.Postup > Date.MinValue AndAlso selectedDates.Contains(o.Postup.Date)
-                                                       Case "VernulsaOTS" : predicate = Function(o As Otkaz) o.VernulsaOTS > Date.MinValue AndAlso selectedDates.Contains(o.VernulsaOTS.Date)
-                                                       Case "Zakryt" : predicate = Function(o As Otkaz) o.Zakryt > Date.MinValue AndAlso selectedDates.Contains(o.Zakryt.Date)
-                                                       Case "Peredan" : predicate = Function(o As Otkaz) o.Peredan > Date.MinValue AndAlso selectedDates.Contains(o.Peredan.Date)
-                                                       Case "Sozdan" : predicate = Function(o As Otkaz) o.Sozdan > Date.MinValue AndAlso selectedDates.Contains(o.Sozdan.Date)
-                                                       Case "KorDate" : predicate = Function(o As Otkaz) o.KorDate > Date.MinValue AndAlso selectedDates.Contains(o.KorDate.Date)
-                                                   End Select
-                                               End If
-                                               'KorDate
-                                               Dim filtVal As New List(Of FilterValue)
-                                               For Each dt In selectedDates
-                                                   filtVal.Add(New FilterValue(dt, "="))
-                                               Next
-                                               _level0FilterState.SetFilterWithOperator(propName, filtVal)
-                                               UpdateIndicatorForProperty(propName)
-                                               RaiseEvent FiltersChanged(Me, EventArgs.Empty) ' <-- ДОБАВИТЬ ЭТУ СТРОКУ
-                                               popup.IsOpen = False
-                                           End Sub
+            ' --- Обработчик с возможностью отписки ---
+            Dim dateHandler As EventHandler(Of DateFilterAppliedEventArgs) = Nothing
+            dateHandler = Sub(s As Object, e As DateFilterAppliedEventArgs)
+                              Try
+                                  Dim selectedDates = e.SelectedDates
+                                  Dim predicate As Func(Of Otkaz, Boolean) = Function(o As Otkaz) True
 
-            ' VernulsaOTS
-            If _currentPopup IsNot Nothing Then _currentPopup.IsOpen = False
+                                  If selectedDates IsNot Nothing AndAlso selectedDates.Count > 0 Then
+                                      Select Case capturedProp
+                                          Case "Nach"
+                                              predicate = Function(o As Otkaz) o.Nach > Date.MinValue AndAlso selectedDates.Contains(o.Nach.Date)
+                                          Case "Postup"
+                                              predicate = Function(o As Otkaz) o.Postup > Date.MinValue AndAlso selectedDates.Contains(o.Postup.Date)
+                                          Case "VernulsaOTS"
+                                              predicate = Function(o As Otkaz) o.VernulsaOTS > Date.MinValue AndAlso selectedDates.Contains(o.VernulsaOTS.Date)
+                                          Case "Zakryt"
+                                              predicate = Function(o As Otkaz) o.Zakryt > Date.MinValue AndAlso selectedDates.Contains(o.Zakryt.Date)
+                                          Case "Peredan"
+                                              predicate = Function(o As Otkaz) o.Peredan > Date.MinValue AndAlso selectedDates.Contains(o.Peredan.Date)
+                                          Case "Sozdan"
+                                              predicate = Function(o As Otkaz) o.Sozdan > Date.MinValue AndAlso selectedDates.Contains(o.Sozdan.Date)
+                                          Case "KorDate"
+                                              predicate = Function(o As Otkaz) o.KorDate > Date.MinValue AndAlso selectedDates.Contains(o.KorDate.Date)
+                                      End Select
+                                  End If
+
+                                  Dim filtVal As New List(Of FilterValue)
+                                  If selectedDates IsNot Nothing Then
+                                      For Each dt In selectedDates
+                                          filtVal.Add(New FilterValue(dt, "="))
+                                      Next
+                                  End If
+                                  _level0FilterState.SetFilterWithOperator(capturedProp, filtVal)
+                                  UpdateIndicatorForProperty(capturedProp)
+                                  RaiseEvent FiltersChanged(Me, EventArgs.Empty)
+                              Finally
+                                  ' Снять обработчик и отпустить ресурсы popup
+                                  RemoveHandler capturedCtrl.FilterApplied, dateHandler
+                                  capturedPopup.IsOpen = False
+                                  capturedPopup.Child = Nothing
+                                  If _currentPopup Is capturedPopup Then _currentPopup = Nothing
+                              End Try
+                          End Sub
+            AddHandler ctrl.FilterApplied, dateHandler
+
+            ' --- Управление открытием ---
+            previouslySelectedDates = Nothing
+            CloseCurrentPopup()
             _currentPopup = popup
             popup.IsOpen = True
+
+
+
+            '            Dim currentSource As IEnumerable(Of Otkaz) = TryCast(OTSContainer.ItemsSource, IEnumerable(Of Otkaz))
+            '            If currentSource Is Nothing Then Return
+            '            Dim previouslySelectedDates As HashSet(Of Date) = Nothing
+            '            Dim filterValues As List(Of Object) = _level0FilterState.GetFilter(propName)
+            '            If filterValues?.Count > 0 Then
+            '                previouslySelectedDates = New HashSet(Of Date)(
+            '    filterValues.OfType(Of FilterValue)().Where(Function(fv) fv.Value IsNot Nothing).Select(Function(fv) CType(fv.Value, Date))
+            ')
+            '            End If
+            '            Dim popup As New Popup With {
+            '.Placement = PlacementMode.Bottom,
+            '.PlacementTarget = sender,
+            '.StaysOpen = False,
+            '.AllowsTransparency = True,
+            '.PopupAnimation = PopupAnimation.Slide
+            '}
+
+            '            ' Контрол дат
+            '            Dim ctrl As New DateFilterPopup()
+            '            ctrl.SourcePropertyName = propName
+            '            ctrl.PopulateDates(currentSource, propName, previouslySelectedDates) ' <-- 
+            '            popup.Child = ctrl
+
+            '            AddHandler ctrl.FilterApplied, Sub(s As Object, e As DateFilterAppliedEventArgs)
+            '                                               ' Собираем выбранные даты → предикат
+            '                                               Dim selectedDates = e.SelectedDates
+            '                                               Dim predicate As Func(Of Otkaz, Boolean) = Function(o As Otkaz) True
+
+            '                                               If selectedDates?.Count > 0 Then
+            '                                                   Select Case propName
+            '                                                       Case "Nach" : predicate = Function(o As Otkaz) o.Nach > Date.MinValue AndAlso selectedDates.Contains(o.Nach.Date)
+            '                                                       Case "Postup" : predicate = Function(o As Otkaz) o.Postup > Date.MinValue AndAlso selectedDates.Contains(o.Postup.Date)
+            '                                                       Case "VernulsaOTS" : predicate = Function(o As Otkaz) o.VernulsaOTS > Date.MinValue AndAlso selectedDates.Contains(o.VernulsaOTS.Date)
+            '                                                       Case "Zakryt" : predicate = Function(o As Otkaz) o.Zakryt > Date.MinValue AndAlso selectedDates.Contains(o.Zakryt.Date)
+            '                                                       Case "Peredan" : predicate = Function(o As Otkaz) o.Peredan > Date.MinValue AndAlso selectedDates.Contains(o.Peredan.Date)
+            '                                                       Case "Sozdan" : predicate = Function(o As Otkaz) o.Sozdan > Date.MinValue AndAlso selectedDates.Contains(o.Sozdan.Date)
+            '                                                       Case "KorDate" : predicate = Function(o As Otkaz) o.KorDate > Date.MinValue AndAlso selectedDates.Contains(o.KorDate.Date)
+            '                                                   End Select
+            '                                               End If
+            '                                               'KorDate
+            '                                               Dim filtVal As New List(Of FilterValue)
+            '                                               For Each dt In selectedDates
+            '                                                   filtVal.Add(New FilterValue(dt, "="))
+            '                                               Next
+            '                                               _level0FilterState.SetFilterWithOperator(propName, filtVal)
+            '                                               UpdateIndicatorForProperty(propName)
+            '                                               RaiseEvent FiltersChanged(Me, EventArgs.Empty) ' <-- ДОБАВИТЬ ЭТУ СТРОКУ
+            '                                               popup.IsOpen = False
+            '                                           End Sub
+
+            '            ' VernulsaOTS
+            '            previouslySelectedDates = Nothing
+            '            If _currentPopup IsNot Nothing Then _currentPopup.IsOpen = False
+            '            _currentPopup = popup
+            '            popup.IsOpen = True
         End Sub
 
         '================================================================================================
@@ -468,37 +654,88 @@ Namespace Kas
         '================================================================================================
 
         Private Sub ShowNumericFilterPopupNew(sender As Object, propName As String)
-            Dim popup As New Popup With {
-.Placement = PlacementMode.Bottom,
-.PlacementTarget = sender,
-.StaysOpen = False,
-.AllowsTransparency = True,
-.PopupAnimation = PopupAnimation.Slide
-}
-            Dim ctrl As New NumericFilterPopup() ' <-- Если NumericFilterPopup не зависит от source
 
+            Dim popup As New Popup With {
+       .Placement = PlacementMode.Bottom,
+       .PlacementTarget = sender,
+       .StaysOpen = False,
+       .AllowsTransparency = True,
+       .PopupAnimation = PopupAnimation.Slide
+   }
+
+            Dim ctrl As New NumericFilterPopup()
             popup.Child = ctrl
 
-            AddHandler ctrl.FilterApplied, Sub(s As Object, e As FilterAppliedEventArgs)
-                                               Dim currentFilterValues As List(Of FilterValue) = Nothing
-                                               Dim currentObjects = _level0FilterState.GetFilter(propName)
-                                               currentFilterValues = currentObjects.OfType(Of FilterValue)().ToList()
+            ' --- Локальные захваты ---
+            Dim capturedPopup As Popup = popup
+            Dim capturedCtrl As NumericFilterPopup = ctrl
+            Dim capturedProp As String = propName
 
-                                               currentFilterValues = currentFilterValues.Where(Function(fv) fv.Operatr <> e.Operatr).ToList()
+            ' --- Обработчик с возможностью отписки ---
+            Dim numHandler As EventHandler(Of FilterAppliedEventArgs) = Nothing
+            numHandler = Sub(s As Object, e As FilterAppliedEventArgs)
+                             Try
+                                 Dim currentFilterValues As List(Of FilterValue) = Nothing
+                                 Dim currentObjects = _level0FilterState.GetFilter(capturedProp)
+                                 currentFilterValues = currentObjects.OfType(Of FilterValue)().ToList()
 
-                                               If e.Value.HasValue Then
-                                                   currentFilterValues.Add(New FilterValue(e.Value.Value, e.Operatr))
-                                               End If
+                                 ' Убираем старый фильтр с этим же оператором
+                                 currentFilterValues = currentFilterValues.Where(Function(fv) fv.Operatr <> e.Operatr).ToList()
 
-                                               _level0FilterState.SetFilterWithOperator(propName, currentFilterValues)
-                                               UpdateIndicatorForProperty(propName) ' <-- ВАЖНО
-                                               RaiseEvent FiltersChanged(Me, EventArgs.Empty) ' <-- ВАЖНО
-                                               popup.IsOpen = False
-                                           End Sub
+                                 ' Добавляем новый, если значение задано
+                                 If e.Value.HasValue Then
+                                     currentFilterValues.Add(New FilterValue(e.Value.Value, e.Operatr))
+                                 End If
 
-            If _currentPopup IsNot Nothing Then _currentPopup.IsOpen = False
+                                 _level0FilterState.SetFilterWithOperator(capturedProp, currentFilterValues)
+                                 UpdateIndicatorForProperty(capturedProp)
+                                 RaiseEvent FiltersChanged(Me, EventArgs.Empty)
+                             Finally
+                                 ' Снять обработчик и отпустить ресурсы popup
+                                 RemoveHandler capturedCtrl.FilterApplied, numHandler
+                                 capturedPopup.IsOpen = False
+                                 capturedPopup.Child = Nothing
+                                 If _currentPopup Is capturedPopup Then _currentPopup = Nothing
+                             End Try
+                         End Sub
+            AddHandler ctrl.FilterApplied, numHandler
+
+            ' --- Управление открытием ---
+            CloseCurrentPopup()
             _currentPopup = popup
             popup.IsOpen = True
+
+            '            Dim popup As New Popup With {
+            '.Placement = PlacementMode.Bottom,
+            '.PlacementTarget = sender,
+            '.StaysOpen = False,
+            '.AllowsTransparency = True,
+            '.PopupAnimation = PopupAnimation.Slide
+            '}
+            '            Dim ctrl As New NumericFilterPopup() ' <-- Если NumericFilterPopup не зависит от source
+
+            '            popup.Child = ctrl
+
+            '            AddHandler ctrl.FilterApplied, Sub(s As Object, e As FilterAppliedEventArgs)
+            '                                               Dim currentFilterValues As List(Of FilterValue) = Nothing
+            '                                               Dim currentObjects = _level0FilterState.GetFilter(propName)
+            '                                               currentFilterValues = currentObjects.OfType(Of FilterValue)().ToList()
+
+            '                                               currentFilterValues = currentFilterValues.Where(Function(fv) fv.Operatr <> e.Operatr).ToList()
+
+            '                                               If e.Value.HasValue Then
+            '                                                   currentFilterValues.Add(New FilterValue(e.Value.Value, e.Operatr))
+            '                                               End If
+
+            '                                               _level0FilterState.SetFilterWithOperator(propName, currentFilterValues)
+            '                                               UpdateIndicatorForProperty(propName) ' <-- ВАЖНО
+            '                                               RaiseEvent FiltersChanged(Me, EventArgs.Empty) ' <-- ВАЖНО
+            '                                               popup.IsOpen = False
+            '                                           End Sub
+
+            '            If _currentPopup IsNot Nothing Then _currentPopup.IsOpen = False
+            '            _currentPopup = popup
+            '            popup.IsOpen = True
         End Sub
 
         Private Sub UpdateIndicatorForProperty(propertyName As String)
@@ -530,6 +767,30 @@ Namespace Kas
 
 
         Private Sub RebuildLevel0Filtered()
+            '' 1. База — из _baseContext (исходный список), с учётом ярлыка
+            'Dim baseList As IEnumerable(Of Otkaz) = _baseContext
+            'If baseList Is Nothing Then
+            '    _level0Filtered = Nothing
+            '    Return
+            'End If
+
+            'If PointedYarlyk?.Zapros IsNot Nothing Then
+            '    baseList = baseList.Where(PointedYarlyk.Zapros)
+            'End If
+
+            '' 2. Level0-фильтры
+            'If _level0FilterState.HasActiveFilters() Then
+            '    Dim pred = _level0FilterState.BuildPredicate()
+            '    baseList = baseList.Where(pred)
+            'End If
+
+            '' 3. ОДНА материализация
+            '_level0Filtered = baseList.ToList()
+
+            '' 4. THed работает от Level0, но НЕ от _baseContext
+            'THed.ItemsSource = _level0Filtered
+
+
             ' 1. Получаем базовый список с учётом ярлыка
             Dim baseList As List(Of Otkaz)
             If PointedYarlyk?.Zapros IsNot Nothing Then
@@ -556,6 +817,15 @@ Namespace Kas
                 Return _baseContext
             End Get
             Set
+                ' 🔥 Освобождаем старые ссылки ПЕРЕД присвоением новых
+                _currentView = Nothing
+                _level0Filtered = Nothing
+                _baseContext = Nothing
+
+                ' Отвязываем от UI-контейнеров, чтобы они не держали старые данные
+                OTSContainer.ItemsSource = Nothing
+                THed.ItemsSource = Nothing
+
                 _baseContext = If(Value, Enumerable.Empty(Of Otkaz)()).ToList()
                 ' Устанавливаем начальное состояние для фильтрации 0-уровня
                 _level0Filtered = _baseContext ' <-- Нужно, чтобы _level0Filtered указывал на начальные данные
@@ -623,6 +893,10 @@ Namespace Kas
             ' ПРИСВАИВАЕМ НОВЫЙ ОТФИЛЬТРОВАННЫЙ СПИСОК
             OTSContainer.ItemsSource = filtered
             THed.ItemsSource = filtered  ' ← для корректной работы Popup в заголовке (по вашему комментарию)
+
+            '🔥 _currentView должен указывать на тот же список
+            _currentView = filtered
+
             UpdateTotal()
             ScrollToPointedOTS()
         End Sub
@@ -652,6 +926,62 @@ Namespace Kas
 
         Private Sub RebuildCurrentView()
 
+            '' 0. Если Level0 не задан — нечего строить
+            'If _level0Filtered Is Nothing Then
+            '    ReleaseView()
+            '    UpdateTotal()
+            '    Return
+            'End If
+
+            '' 1. База — ленивая последовательность (не копируем!)
+            'Dim source As IEnumerable(Of Otkaz) = _level0Filtered
+
+            '' 2. THed-фильтры (Main уровень)
+            'Dim mainPred = THed.BuildCombinedPredicate()
+            'If mainPred IsNot Nothing Then
+            '    source = source.Where(mainPred)
+            'End If
+
+            '' 3. Поиск по Opis
+            'If Not String.IsNullOrEmpty(MW.CurrentSearchTerm) Then
+            '    Dim term = MW.CurrentSearchTerm ' захватываем локально
+            '    source = source.Where(Function(o) o IsNot Nothing AndAlso o.ContainsPhrase(term))
+            'End If
+
+            '' 4. Фильтр NumOTSUserTB
+            'If MW._filterNumbers IsNot Nothing AndAlso MW._filterNumbers.Count > 0 Then
+            '    If MW._isLokFilter Then
+            '        Dim nums = MW._filterNumbers ' локальная ссылка — замыкание короче
+            '        source = source.Where(Function(o) o IsNot Nothing AndAlso
+            '                                   Not String.IsNullOrEmpty(o.NumLok) AndAlso
+            '                                   nums.Any(Function(f) o.NumLok.Contains(f)))
+            '    Else
+            '        Dim ids = MW._filterNumbers
+            '        source = source.Where(Function(o) o IsNot Nothing AndAlso ids.Contains(o.Id))
+            '    End If
+            'End If
+
+            '' 5. ОДНА материализация + сортировка
+            'Dim result = source.OrderBy(Function(o) o.Nach).ToList()
+
+            '' 6. Отпускаем старые ссылки ПЕРЕД присвоением новых
+            'ReleaseView()
+
+            '' 7. Присваиваем
+            'OTSContainer.ItemsSource = result
+            'THed.ItemsSource = result
+            '_currentView = result
+
+            '' 8. Обновляем Total
+            'UpdateTotal()
+
+            ' 0. Если Level0 не задан — нечего строить
+            If _level0Filtered Is Nothing Then
+                ReleaseView()
+                UpdateTotal()
+                Return
+            End If
+
             ' 1. Базовый список = результат Level0-фильтров (уже включает ярлык)
             Dim source = _level0Filtered?.ToList()
 
@@ -678,6 +1008,11 @@ Namespace Kas
             ' 4. Сортируем
             source = source.OrderBy(Function(o) o.Nach).ToList()
 
+            ' 🔥 Сначала обнуляем, потом присваиваем — так UI отпустит старый список
+            OTSContainer.ItemsSource = Nothing
+            THed.ItemsSource = Nothing
+
+
             ' 5. Устанавливаем
             OTSContainer.ItemsSource = source
             THed.ItemsSource = source
@@ -688,7 +1023,11 @@ Namespace Kas
         End Sub
 
 
+
+
+
         Public Sub UpdateTotal()
+
 
             With My.Settings
                 If .NachPeriod.Date = Date.MinValue.Date OrElse .KonPeriod.Date = Date.MinValue.Date Then
@@ -709,13 +1048,15 @@ Namespace Kas
 
             InvisibleBottomButtons()
 
+            Dim source = TryCast(OTSContainer.ItemsSource, IEnumerable(Of Otkaz))
+            If source Is Nothing Then Return
 
-            Dim TotCnt As Integer = DirectCast(OTSContainer.ItemsSource, IEnumerable(Of Otkaz)).Where(Function(o) True).Count
-            Dim TotPCh As Single = DirectCast(OTSContainer.ItemsSource, IEnumerable(Of Otkaz)).Sum(Function(o) o.PCh)
+            Dim TotCnt As Integer = source.Where(Function(o) True).Count
+            Dim TotPCh As Single = source.Sum(Function(o) o.PCh)
             If TotCnt > 0 Then
                 Dim Fots, Lots As Date
-                Fots = DirectCast(OTSContainer.ItemsSource, IEnumerable(Of Otkaz)).First.Nach
-                Lots = DirectCast(OTSContainer.ItemsSource, IEnumerable(Of Otkaz)).Last.Nach
+                Fots = source.First.Nach
+                Lots = source.Last.Nach
                 FirstOTS.Text = $"Первый отказ от {Fots:dd.MM.yyyy HH:mm} "
                 LastOTS.Text = $"Последний отказ от {Lots:dd.MM.yyyy HH:mm} "
                 TotalOTS.Text = $"Найдено отказов - {TotCnt} на {TotPCh:F2} ч."
@@ -731,7 +1072,7 @@ Namespace Kas
                 ChkOK()
                 UpdateActionNotesVisibility()
             End If
-            TotCnt = Nothing
+            source = Nothing
 
         End Sub
 
@@ -828,6 +1169,9 @@ Namespace Kas
 
         Private Const INNER_SCROLLVIEWER_NAME As String = "InnerScrollViewer" ' <-- Константа для имени
         Private Sub OTSContainer_PreviewMouseWheel(sender As Object, e As MouseWheelEventArgs)
+
+
+
             ' Настройка шага прокрутки из Settings
             Const scrollStep As Double = 1.1 ' <-- Предположим, у тебя есть Settings.ScrollStep As Double = 1.0
             ' Если Settings нет, можно использовать локальную переменную или константу: Const scrollStep As Double = 1.0
@@ -846,6 +1190,39 @@ Namespace Kas
             End If
             ' Отключаем дальнейшую обработку события (важно, чтобы не прокручивался родительский элемент)
             e.Handled = True
+
+
+            'Dim innerScroll = TryCast(OTSContainer.Template.FindName(INNER_SCROLLVIEWER_NAME, OTSContainer), ScrollViewer)
+            'If innerScroll Is Nothing Then Return
+
+            'If e.Delta <> 0 Then
+            '    ' сколько элементов прокрутить за один "щелчок" колеса
+            '    Dim linesPerNotch As Double = 1.0  ' например, 3 строки за щелчок
+
+            '    ' высота одного элемента (предполагаем, что контейнеры одинаковой высоты)
+            '    Dim itemHeight As Double = 1.0
+            '    If OTSContainer.Items.Count > 0 Then
+            '        Dim container = OTSContainer.ItemContainerGenerator.ContainerFromIndex(0)
+            '        If container IsNot Nothing Then
+            '            Dim fe = TryCast(container, FrameworkElement)
+            '            If fe IsNot Nothing AndAlso fe.ActualHeight > 0 Then
+            '                itemHeight = fe.ActualHeight
+            '            End If
+            '        End If
+            '    End If
+
+            '    Dim notches As Double = e.Delta / 120.0
+            '    Dim offsetChange As Double = notches * itemHeight * linesPerNotch
+
+            '    innerScroll.ScrollToVerticalOffset(innerScroll.VerticalOffset - offsetChange)
+            'End If
+
+
+
+
+
+
+
 
         End Sub
 
@@ -915,6 +1292,7 @@ Namespace Kas
             MestoOTS_Dor0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             KrasREG0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             IsStation0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
+            Poosnik0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             MestoOTS0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             MyKlasLev10LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             MyKlasLev20LevelIndicator?.UpdateIsFiltered(_level0FilterState)
@@ -928,7 +1306,7 @@ Namespace Kas
             Dlit0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
 
             ' Добавь другие индикаторы
-            ' ------------------------------- KorDate
+            ' ------------------------------- Poosnik
 
             ' 🔥 Уведомляем внешний мир об изменении фильтров
             RaiseEvent FiltersChanged(Me, EventArgs.Empty)
@@ -965,6 +1343,8 @@ Namespace Kas
                     PripMash0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
                 Case "IsStation"
                     IsStation0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
+                Case "Poosnik"
+                    Poosnik0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
                 Case "MyKlasLev1"
                     MyKlasLev10LevelIndicator?.UpdateIsFiltered(_level0FilterState)
                 Case "MyKlasLev2"
@@ -989,7 +1369,7 @@ Namespace Kas
                     PCh0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
                 Case "Dlit"
                     Dlit0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
-                    ' Добавь другие случаи KorDate
+                    ' Добавь другие случаи Poosnik
             End Select
             e.Handled = True
             ' Перестраиваем уровень 0 и текущий вид
@@ -1323,7 +1703,19 @@ Namespace Kas
             BtnToExcelReport.Visibility = If(ToExcell, Visibility.Visible, Visibility.Collapsed)
         End Sub
 
+        Private Sub ReleaseView()
+            ' Обнуляем все ссылки на списки, кроме _baseContext
+            _currentView = Nothing
+            _level0Filtered = Nothing
 
+            ' Отвязываем UI
+            If OTSContainer IsNot Nothing Then OTSContainer.ItemsSource = Nothing
+            If THed IsNot Nothing Then THed.ItemsSource = Nothing
+
+            ' Если используете CollectionView — сбросьте фильтр
+            Dim cv = CollectionViewSource.GetDefaultView(OTSContainer.ItemsSource)
+            If cv IsNot Nothing Then cv.Filter = Nothing
+        End Sub
 
     End Class
 

@@ -167,6 +167,8 @@ Namespace Kas
 
             Catch ex As Exception
                 StatusCallback?.Invoke($"❌ Ошибка: {ex.Message}", Brushes.Red)
+            Finally
+                Fetcher.ForceCleanup()
             End Try
 
             e.Handled = True

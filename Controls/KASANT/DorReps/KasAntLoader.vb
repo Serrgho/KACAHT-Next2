@@ -608,15 +608,23 @@ Namespace Kas
 		''' </summary>
 		Public Function ParseInvestigationReport(html As String) As List(Of InvestigationReportItem)
 
-
 			Dim result As New List(Of InvestigationReportItem)
+
+			' Защита от пустого или невалидного HTML
+			If String.IsNullOrWhiteSpace(html) Then Return result
+
 			Dim doc As New HtmlAgilityPack.HtmlDocument()
-			doc.LoadHtml(html)
+			Try
+				doc.LoadHtml(html)
+			Catch ex As Exception
+				'LogWrite($"⚠ Ошибка парсинга HTML отчета: {ex.Message}")
+				Return result
+			End Try
 
 			Dim rows = doc.DocumentNode.SelectNodes("//tr")
 			If rows Is Nothing Then Return result
 
-			' ⭐ Текущая секция
+			' ⭐ Текущая секция и счетчики
 			Dim currentSection As String = ""
 			Dim inRegionsSection As Boolean = False
 			Dim prevRowName As String = ""
@@ -624,55 +632,61 @@ Namespace Kas
 
 			For Each row In rows
 				Dim cells = row.SelectNodes(".//td")
-				If cells Is Nothing Then Continue For
 
-				Dim firstCellText As String = cells(0).InnerText.Trim()
+				' 🔑 КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Проверяем наличие ячеек перед обращением к ним
+				If cells Is Nothing OrElse cells.Count = 0 Then Continue For
+
+				' Безопасное получение текста первой ячейки
+				Dim firstCellNode = cells(0)
+				If firstCellNode Is Nothing Then Continue For
+
+				Dim firstCellText As String = firstCellNode.InnerText.Trim()
 				If String.IsNullOrEmpty(firstCellText) Then Continue For
 
 				firstCellText = Regex.Replace(firstCellText, "\s+", " ")
 				firstCellText = firstCellText.Replace("&nbsp;", "").Trim()
 
 				' ⭐ ОПРЕДЕЛЯЕМ СЕКЦИИ ПО ЗАГОЛОВКАМ
-				If firstCellText.Contains("С разделением территориально по регионам") Then
-					inRegionsSection = True
-					currentSection = "Регионы"
-					prevRowName = firstCellText
-					Continue For
-				End If
+				Select Case True
+					Case firstCellText.Contains("С разделением территориально по регионам")
+						inRegionsSection = True
+						currentSection = "Регионы"
+						prevRowName = firstCellText
+						Continue For
 
-				If firstCellText.Contains("С разделением по виновным службам/дирекциям дорожного подчинения") Then
-					inRegionsSection = False
-					currentSection = "Виновные службы/дирекции"
-					prevRowName = firstCellText
-					Continue For
-				End If
+					Case firstCellText.Contains("С разделением по виновным службам/дирекциям дорожного подчинения")
+						inRegionsSection = False
+						currentSection = "Виновные службы/дирекции"
+						prevRowName = firstCellText
+						Continue For
 
-				If firstCellText.Contains("С разделением по виновным дирекциям центрального подчинения") Then
-					currentSection = "Виновные дирекции центрального подчинения"
-					prevRowName = firstCellText
-					Continue For
-				End If
+					Case firstCellText.Contains("С разделением по виновным дирекциям центрального подчинения")
+						currentSection = "Виновные дирекции центрального подчинения"
+						prevRowName = firstCellText
+						Continue For
 
-				If firstCellText.Contains("С разделением по виновным ДЗО") Then
-					currentSection = "Виновные ДЗО"
-					prevRowName = firstCellText
-					Continue For
-				End If
+					Case firstCellText.Contains("С разделением по виновным ДЗО")
+						currentSection = "Виновные ДЗО"
+						prevRowName = firstCellText
+						Continue For
 
-				If firstCellText.Contains("С разделением по виновности других организаций и прочих причин") Then
-					currentSection = "Прочие организации и причины"
-					prevRowName = firstCellText
-					Continue For
-				End If
+					Case firstCellText.Contains("С разделением по виновности других организаций")
+						currentSection = "Прочие организации и причины"
+						prevRowName = firstCellText
+						Continue For
+				End Select
 
+				' Пропускаем строки заголовков, у которых меньше 6 ячеек (обычно это подзаголовки)
 				If cells.Count < 6 Then
 					prevRowName = firstCellText
 					Continue For
 				End If
 
 				Dim name As String = firstCellText
-				If String.IsNullOrEmpty(name) Then Continue For
-				If name.Length < 2 Then Continue For
+				If name.Length < 2 Then
+					prevRowName = name
+					Continue For
+				End If
 
 				' ⭐ ПРОПУСКАЕМ РЕГ-1 И РЕГ-2
 				If name.Contains("РЕГ-1") OrElse name.Contains("РЕГ-2") Then
@@ -682,31 +696,25 @@ Namespace Kas
 
 				' ⭐ ПРОПУСКАЕМ ВСЕГО в разделе регионов
 				If (name = "ВСЕГО" OrElse name.Contains("ВСЕГО")) Then
-					If inRegionsSection Then
-						prevRowName = name
-						Continue For
-					End If
-					If prevRowName.Contains("РЕГ-1") OrElse prevRowName.Contains("РЕГ-2") Then
+					If inRegionsSection OrElse prevRowName.Contains("РЕГ-1") OrElse prevRowName.Contains("РЕГ-2") Then
 						prevRowName = name
 						Continue For
 					End If
 				End If
 
-				' ⭐ Пропускаем пустые строки-заглушки
-				If name.Length <= 3 AndAlso Not firstCellText.Contains("href") Then
-					Dim hasLink = cells(0).InnerHtml.Contains("href")
+				' ⭐ Пропускаем пустые строки-заглушки без ссылок
+				If name.Length <= 3 Then
+					' 🔑 БЕЗОПАСНАЯ ПРОВЕРКА НАЛИЧИЯ ССЫЛКИ
+					Dim hasLink = firstCellNode.InnerHtml.Contains("href", StringComparison.OrdinalIgnoreCase)
 					If Not hasLink Then
 						prevRowName = name
 						Continue For
 					End If
 				End If
 
+				' Извлекаем числа. Если в первой числовой колонке нет данных - пропускаем строку
 				Dim totalNum = ExtractNumberFromCell(cells(1))
-				If Not totalNum.HasValue Then
-					prevRowName = name
-					Continue For
-				End If
-				If totalNum.Value = 0 Then
+				If Not totalNum.HasValue OrElse totalNum.Value = 0 Then
 					prevRowName = name
 					Continue For
 				End If
@@ -720,28 +728,22 @@ Namespace Kas
 
 				Dim item As New InvestigationReportItem() With {
 					.Name = name,
-					.Section = currentSection,  ' ⭐ СОХРАНЯЕМ СЕКЦИЮ
+					.Section = currentSection,
 					.Order = orderCounter,
-					.Total = If(totalNum.HasValue, totalNum.Value, 0),
+					.Total = totalNum.Value,
 					.Accepted = If(acceptedNum.HasValue, acceptedNum.Value, 0),
 					.Overdue = If(overdueNum.HasValue, overdueNum.Value, 0),
 					.Investigated = If(investigatedNum.HasValue, investigatedNum.Value, 0),
 					.NotAccepted = If(notAcceptedNum.HasValue, notAcceptedNum.Value, 0)
 				}
 
-				' Данные за прошлый год
+				' Данные за прошлый год (если есть дополнительные колонки)
 				If cells.Count >= 11 Then
-					Dim totalPY = ExtractNumberFromCell(cells(6))
-					Dim acceptedPY = ExtractNumberFromCell(cells(7))
-					Dim overduePY = ExtractNumberFromCell(cells(8))
-					Dim investigatedPY = ExtractNumberFromCell(cells(9))
-					Dim notAcceptedPY = ExtractNumberFromCell(cells(10))
-
-					item.Total_PY = If(totalPY.HasValue, totalPY.Value, 0)
-					item.Accepted_PY = If(acceptedPY.HasValue, acceptedPY.Value, 0)
-					item.Overdue_PY = If(overduePY.HasValue, overduePY.Value, 0)
-					item.Investigated_PY = If(investigatedPY.HasValue, investigatedPY.Value, 0)
-					item.NotAccepted_PY = If(notAcceptedPY.HasValue, notAcceptedPY.Value, 0)
+					item.Total_PY = If(ExtractNumberFromCell(cells(6)).HasValue, ExtractNumberFromCell(cells(6)).Value, 0)
+					item.Accepted_PY = If(ExtractNumberFromCell(cells(7)).HasValue, ExtractNumberFromCell(cells(7)).Value, 0)
+					item.Overdue_PY = If(ExtractNumberFromCell(cells(8)).HasValue, ExtractNumberFromCell(cells(8)).Value, 0)
+					item.Investigated_PY = If(ExtractNumberFromCell(cells(9)).HasValue, ExtractNumberFromCell(cells(9)).Value, 0)
+					item.NotAccepted_PY = If(ExtractNumberFromCell(cells(10)).HasValue, ExtractNumberFromCell(cells(10)).Value, 0)
 				End If
 
 				result.Add(item)
@@ -749,6 +751,147 @@ Namespace Kas
 			Next
 
 			Return result
+
+			'Dim result As New List(Of InvestigationReportItem)
+			'Dim doc As New HtmlAgilityPack.HtmlDocument()
+			'doc.LoadHtml(html)
+
+			'Dim rows = doc.DocumentNode.SelectNodes("//tr")
+			'If rows Is Nothing Then Return result
+
+			'' ⭐ Текущая секция
+			'Dim currentSection As String = ""
+			'Dim inRegionsSection As Boolean = False
+			'Dim prevRowName As String = ""
+			'Dim orderCounter As Integer = 0
+
+			'For Each row In rows
+			'	Dim cells = row.SelectNodes(".//td")
+			'	If cells Is Nothing Then Continue For
+
+			'	Dim firstCellText As String = cells(0).InnerText.Trim()
+			'	If String.IsNullOrEmpty(firstCellText) Then Continue For
+
+			'	firstCellText = Regex.Replace(firstCellText, "\s+", " ")
+			'	firstCellText = firstCellText.Replace("&nbsp;", "").Trim()
+
+			'	' ⭐ ОПРЕДЕЛЯЕМ СЕКЦИИ ПО ЗАГОЛОВКАМ
+			'	If firstCellText.Contains("С разделением территориально по регионам") Then
+			'		inRegionsSection = True
+			'		currentSection = "Регионы"
+			'		prevRowName = firstCellText
+			'		Continue For
+			'	End If
+
+			'	If firstCellText.Contains("С разделением по виновным службам/дирекциям дорожного подчинения") Then
+			'		inRegionsSection = False
+			'		currentSection = "Виновные службы/дирекции"
+			'		prevRowName = firstCellText
+			'		Continue For
+			'	End If
+
+			'	If firstCellText.Contains("С разделением по виновным дирекциям центрального подчинения") Then
+			'		currentSection = "Виновные дирекции центрального подчинения"
+			'		prevRowName = firstCellText
+			'		Continue For
+			'	End If
+
+			'	If firstCellText.Contains("С разделением по виновным ДЗО") Then
+			'		currentSection = "Виновные ДЗО"
+			'		prevRowName = firstCellText
+			'		Continue For
+			'	End If
+
+			'	If firstCellText.Contains("С разделением по виновности других организаций и прочих причин") Then
+			'		currentSection = "Прочие организации и причины"
+			'		prevRowName = firstCellText
+			'		Continue For
+			'	End If
+
+			'	If cells.Count < 6 Then
+			'		prevRowName = firstCellText
+			'		Continue For
+			'	End If
+
+			'	Dim name As String = firstCellText
+			'	If String.IsNullOrEmpty(name) Then Continue For
+			'	If name.Length < 2 Then Continue For
+
+			'	' ⭐ ПРОПУСКАЕМ РЕГ-1 И РЕГ-2
+			'	If name.Contains("РЕГ-1") OrElse name.Contains("РЕГ-2") Then
+			'		prevRowName = name
+			'		Continue For
+			'	End If
+
+			'	' ⭐ ПРОПУСКАЕМ ВСЕГО в разделе регионов
+			'	If (name = "ВСЕГО" OrElse name.Contains("ВСЕГО")) Then
+			'		If inRegionsSection Then
+			'			prevRowName = name
+			'			Continue For
+			'		End If
+			'		If prevRowName.Contains("РЕГ-1") OrElse prevRowName.Contains("РЕГ-2") Then
+			'			prevRowName = name
+			'			Continue For
+			'		End If
+			'	End If
+
+			'	' ⭐ Пропускаем пустые строки-заглушки
+			'	If name.Length <= 3 AndAlso Not firstCellText.Contains("href") Then
+			'		Dim hasLink = cells(0).InnerHtml.Contains("href")
+			'		If Not hasLink Then
+			'			prevRowName = name
+			'			Continue For
+			'		End If
+			'	End If
+
+			'	Dim totalNum = ExtractNumberFromCell(cells(1))
+			'	If Not totalNum.HasValue Then
+			'		prevRowName = name
+			'		Continue For
+			'	End If
+			'	If totalNum.Value = 0 Then
+			'		prevRowName = name
+			'		Continue For
+			'	End If
+
+			'	Dim acceptedNum = ExtractNumberFromCell(cells(2))
+			'	Dim overdueNum = ExtractNumberFromCell(cells(3))
+			'	Dim investigatedNum = ExtractNumberFromCell(cells(4))
+			'	Dim notAcceptedNum = ExtractNumberFromCell(cells(5))
+
+			'	orderCounter += 1
+
+			'	Dim item As New InvestigationReportItem() With {
+			'		.Name = name,
+			'		.Section = currentSection,  ' ⭐ СОХРАНЯЕМ СЕКЦИЮ
+			'		.Order = orderCounter,
+			'		.Total = If(totalNum.HasValue, totalNum.Value, 0),
+			'		.Accepted = If(acceptedNum.HasValue, acceptedNum.Value, 0),
+			'		.Overdue = If(overdueNum.HasValue, overdueNum.Value, 0),
+			'		.Investigated = If(investigatedNum.HasValue, investigatedNum.Value, 0),
+			'		.NotAccepted = If(notAcceptedNum.HasValue, notAcceptedNum.Value, 0)
+			'	}
+
+			'	' Данные за прошлый год
+			'	If cells.Count >= 11 Then
+			'		Dim totalPY = ExtractNumberFromCell(cells(6))
+			'		Dim acceptedPY = ExtractNumberFromCell(cells(7))
+			'		Dim overduePY = ExtractNumberFromCell(cells(8))
+			'		Dim investigatedPY = ExtractNumberFromCell(cells(9))
+			'		Dim notAcceptedPY = ExtractNumberFromCell(cells(10))
+
+			'		item.Total_PY = If(totalPY.HasValue, totalPY.Value, 0)
+			'		item.Accepted_PY = If(acceptedPY.HasValue, acceptedPY.Value, 0)
+			'		item.Overdue_PY = If(overduePY.HasValue, overduePY.Value, 0)
+			'		item.Investigated_PY = If(investigatedPY.HasValue, investigatedPY.Value, 0)
+			'		item.NotAccepted_PY = If(notAcceptedPY.HasValue, notAcceptedPY.Value, 0)
+			'	End If
+
+			'	result.Add(item)
+			'	prevRowName = name
+			'Next
+
+			'Return result
 		End Function
 
 		Private Function ExtractNumberFromCell(cell As HtmlNode) As Integer?
@@ -941,6 +1084,10 @@ Namespace Kas
 
 			Dim States As New List(Of String) From {"ачато расслед", "ередан друго", "азначен", "ринят к уч"}
 
+			' маркеры "ередан друго", "азначен", "ринят к уч"
+			Dim States2 As New List(Of String) From {"ередан друго", "азначен", "ринят к уч"}
+
+
 			For Each rec In records
 				Dim id = rec.ViolId
 				If String.IsNullOrEmpty(id) OrElse id.Length < 5 Then Continue For
@@ -1078,6 +1225,9 @@ Namespace Kas
 
 				If States.Any(Function(s) StatusWeb?.ToLower().Contains(s) = True) AndAlso o.Zakryt > Date.MinValue Then
 					notes.Add("Восстановлен")
+				ElseIf States2.Any(Function(s) StatusWeb?.ToLower().Contains(s)) AndAlso (o.IsSaved) Then
+					'добавил для проверки на восстановленность сохраненных ОТС
+					notes.Add("Восстановлен")
 				End If
 
 				If Not isNew AndAlso o.ZaKemCode?.Contains("орог") Then notes.Add("Вернулся")
@@ -1122,6 +1272,8 @@ Namespace Kas
 
 
 		Sub ShowChangeFRM(oldId, id, existingO)
+
+
 			Dim changedIdsList As New ObservableCollection(Of IdMappingInfo)()
 			' Добавляем информацию в наш список для показа в окне
 			changedIdsList.Add(New IdMappingInfo With {
@@ -1130,55 +1282,135 @@ Namespace Kas
 										   .TargetOtkaz = existingO
 										   })
 			Dim frm As New FrmChangedIds(changedIdsList,
-												 onIdsSelectedAction:=Sub(oldnum, newId)
-																		  ' 1. Фильтруем глобальный OTSList, оставляя только эти 2 записи
-																		  Dim filteredList = OTSList.Where(Function(x) x.Id = oldnum OrElse x.Id = newId).ToList()
+				onIdsSelectedAction:=Sub(oldnum, newId)
+										 ' 1. Фильтруем глобальный OTSList, оставляя только эти 2 записи
+										 Dim filteredList = OTSList.Where(Function(x) x.Id = oldnum OrElse x.Id = newId).ToList()
 
-																		  ' 2. Вызываем ВАШУ процедуру, передавая ей готовый список из 2 элементов
-																		  AddOTSToContainer(filteredList)
-																		  MW.TRowsContainer.OTSContainer.ScrollIntoView(filteredList(0))
-																	  End Sub,
-												 onButtonClickAction:=Sub(oldnum, newId)
-																		  Dim oldOtkaz = OTSList.FirstOrDefault(Function(x) x.Id = oldnum)
-																		  Dim newOtkaz = OTSList.FirstOrDefault(Function(x) x.Id = newId)
+										 ' 2. Вызываем ВАШУ процедуру, передавая ей готовый список из 2 элементов
+										 AddOTSToContainer(filteredList)
+										 MW.TRowsContainer.OTSContainer.ScrollIntoView(filteredList(0))
+									 End Sub,
+				onButtonClickAction:=Sub(oldnum, newId)
+										 Dim oldOtkaz = OTSList.FirstOrDefault(Function(x) x.Id = oldnum)
+										 Dim newOtkaz = OTSList.FirstOrDefault(Function(x) x.Id = newId)
 
-																		  If oldOtkaz Is Nothing OrElse newOtkaz Is Nothing Then Return
+										 If oldOtkaz Is Nothing OrElse newOtkaz Is Nothing Then Return
 
-																		  ' 1. Добавляем запись в историю
-																		  Dim Zapis As String = $"Изменен № ОТС с {oldnum} на {newId}"
-																		  oldOtkaz.AddHistoryEntry(DateTime.Now, Zapis)
-																		  oldOtkaz.SelectedHistoryEntry.ShowDate = False
+										 ' 1. Добавляем запись в историю
+										 Dim Zapis As String = $"Изменен № ОТС с {oldnum} на {newId}"
+										 oldOtkaz.AddHistoryEntry(DateTime.Now, Zapis)
+										 oldOtkaz.SelectedHistoryEntry.ShowDate = False
 
-																		  ' 2. Удаляем НОВЫЙ отказ из глобального списка
-																		  OTSList.Remove(newOtkaz)
+										 ' 2. Удаляем НОВЫЙ отказ из глобального списка
+										 OTSList.Remove(newOtkaz)
 
-																		  ' 3. Меняем ID у СТАРОГО отказа на новый
-																		  oldOtkaz.Id = newId
-																		  oldOtkaz.NewId = ""
-																		  oldOtkaz.RemoveItemUpdateNote("!!!Изменен № ОТС")
-																		  If oldOtkaz.ZaKem?.ToLower.Contains("дорог") Then
-																			  oldOtkaz.AddUpdateNote("Вернулся")
+										 ' 3. Меняем ID у СТАРОГО отказа на новый
+										 oldOtkaz.Id = newId
+										 oldOtkaz.NewId = ""
+										 oldOtkaz.RemoveItemUpdateNote("!!!Изменен № ОТС")
+										 If oldOtkaz.ZaKem?.ToLower.Contains("дорог") Then
+											 oldOtkaz.AddUpdateNote("Вернулся")
+										 End If
 
-																		  End If
+										 ' 4. Выполняем команду 1 (фильтрация). Останется только 1 запись
+										 Dim filteredList = OTSList.Where(Function(x) x.Id = oldnum OrElse x.Id = newId).ToList()
+										 PointedYarlyk = MW.YarlykContainer.AllOTSYAR
+										 AddOTSToContainer(filteredList)
 
+										 ' 5. Удаляем обработанную пару из ObservableCollection.
+										 Dim itemToRemove = changedIdsList.FirstOrDefault(Function(x) x.OldId = oldnum AndAlso x.NewId = newId)
+										 If itemToRemove IsNot Nothing Then
+											 changedIdsList.Remove(itemToRemove)
+										 End If
 
-																		  ' 4. Выполняем команду 1 (фильтрация). Останется только 1 запись
-																		  Dim filteredList = OTSList.Where(Function(x) x.Id = oldnum OrElse x.Id = newId).ToList()
-																		  PointedYarlyk = MW.YarlykContainer.AllOTSYAR
-																		  AddOTSToContainer(filteredList)
+										 MW.InfoBLOK.AddItem($"✅ Отказ {oldnum} объединен с {newId}")
+									 End Sub,
+				onCancelClickAction:=Sub(oldnum, newId)
+										 ' 1. Находим старый отказ в глобальном списке
+										 Dim oldOtkaz = OTSList.FirstOrDefault(Function(x) x.Id = oldnum)
+										 If oldOtkaz Is Nothing Then Return
 
-																		  ' 5. Удаляем обработанную пару из ObservableCollection.
-																		  ' Строка в таблице исчезнет АВТОМАТИЧЕСКИ вместе с кнопкой!
-																		  Dim itemToRemove = changedIdsList.FirstOrDefault(Function(x) x.OldId = oldnum AndAlso x.NewId = newId)
-																		  If itemToRemove IsNot Nothing Then
-																			  changedIdsList.Remove(itemToRemove)
-																		  End If
+										 ' 2. Снимаем пометку и очищаем NewId (с защитой от чужого изменения)
+										 If oldOtkaz.NewId = newId Then
+											 oldOtkaz.NewId = ""
+											 oldOtkaz.RemoveItemUpdateNote("!!!Изменен № ОТС")
+										 End If
 
-																		  MW.InfoBLOK.AddItem($"✅ Отказ {oldnum} объединен с {newId}")
+										 ' 3. Обновляем визуализацию (по аналогии с onButtonClickAction)
+										 Dim filteredList = OTSList.Where(Function(x) x.Id = oldnum OrElse x.Id = newId).ToList()
+										 PointedYarlyk = MW.YarlykContainer.AllOTSYAR
+										 AddOTSToContainer(filteredList)
 
-																	  End Sub)
+										 MW.InfoBLOK.AddItem($"↩ Изменение отказа {oldnum} → {newId} отменено")
+									 End Sub)
 			frm.Owner = MW
 			frm.Show()
+
+
+
+
+
+
+
+
+
+			'Dim changedIdsList As New ObservableCollection(Of IdMappingInfo)()
+			'' Добавляем информацию в наш список для показа в окне
+			'changedIdsList.Add(New IdMappingInfo With {
+			'							   .OldId = oldId,
+			'							   .NewId = id,
+			'							   .TargetOtkaz = existingO
+			'							   })
+			'Dim frm As New FrmChangedIds(changedIdsList,
+			'									 onIdsSelectedAction:=Sub(oldnum, newId)
+			'															  ' 1. Фильтруем глобальный OTSList, оставляя только эти 2 записи
+			'															  Dim filteredList = OTSList.Where(Function(x) x.Id = oldnum OrElse x.Id = newId).ToList()
+
+			'															  ' 2. Вызываем ВАШУ процедуру, передавая ей готовый список из 2 элементов
+			'															  AddOTSToContainer(filteredList)
+			'															  MW.TRowsContainer.OTSContainer.ScrollIntoView(filteredList(0))
+			'														  End Sub,
+			'									 onButtonClickAction:=Sub(oldnum, newId)
+			'															  Dim oldOtkaz = OTSList.FirstOrDefault(Function(x) x.Id = oldnum)
+			'															  Dim newOtkaz = OTSList.FirstOrDefault(Function(x) x.Id = newId)
+
+			'															  If oldOtkaz Is Nothing OrElse newOtkaz Is Nothing Then Return
+
+			'															  ' 1. Добавляем запись в историю
+			'															  Dim Zapis As String = $"Изменен № ОТС с {oldnum} на {newId}"
+			'															  oldOtkaz.AddHistoryEntry(DateTime.Now, Zapis)
+			'															  oldOtkaz.SelectedHistoryEntry.ShowDate = False
+
+			'															  ' 2. Удаляем НОВЫЙ отказ из глобального списка
+			'															  OTSList.Remove(newOtkaz)
+
+			'															  ' 3. Меняем ID у СТАРОГО отказа на новый
+			'															  oldOtkaz.Id = newId
+			'															  oldOtkaz.NewId = ""
+			'															  oldOtkaz.RemoveItemUpdateNote("!!!Изменен № ОТС")
+			'															  If oldOtkaz.ZaKem?.ToLower.Contains("дорог") Then
+			'																  oldOtkaz.AddUpdateNote("Вернулся")
+
+			'															  End If
+
+
+			'															  ' 4. Выполняем команду 1 (фильтрация). Останется только 1 запись
+			'															  Dim filteredList = OTSList.Where(Function(x) x.Id = oldnum OrElse x.Id = newId).ToList()
+			'															  PointedYarlyk = MW.YarlykContainer.AllOTSYAR
+			'															  AddOTSToContainer(filteredList)
+
+			'															  ' 5. Удаляем обработанную пару из ObservableCollection.
+			'															  ' Строка в таблице исчезнет АВТОМАТИЧЕСКИ вместе с кнопкой!
+			'															  Dim itemToRemove = changedIdsList.FirstOrDefault(Function(x) x.OldId = oldnum AndAlso x.NewId = newId)
+			'															  If itemToRemove IsNot Nothing Then
+			'																  changedIdsList.Remove(itemToRemove)
+			'															  End If
+
+			'															  MW.InfoBLOK.AddItem($"✅ Отказ {oldnum} объединен с {newId}")
+
+			'														  End Sub)
+			'frm.Owner = MW
+			'frm.Show()
 		End Sub
 
 
@@ -1227,6 +1459,7 @@ Namespace Kas
 			Finally
 				btn.Content = originalText
 				btn.IsEnabled = True
+				Fetcher.ForceCleanup()
 			End Try
 		End Function
 
@@ -1266,6 +1499,7 @@ Namespace Kas
 			Finally
 				btn.Content = originalText
 				btn.IsEnabled = True
+				Fetcher.ForceCleanup()
 			End Try
 		End Function
 

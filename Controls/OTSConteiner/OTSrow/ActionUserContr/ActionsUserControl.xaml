@@ -540,7 +540,8 @@
 		<!--Изменен № ОТС-->
 		<Border x:Name="ChangeIdItem"
               MouseUp="EmptyFieldItem_MouseDown"
-              Tag="ИзмНомОТС" Cursor="Hand">
+              Tag="ИзмНомОТС" Cursor="Hand"
+              d:Visibility="Visible">
 
 			<Border.Style>
 				<Style TargetType="Border" BasedOn="{StaticResource ChangeIDNoteItemStyle}">

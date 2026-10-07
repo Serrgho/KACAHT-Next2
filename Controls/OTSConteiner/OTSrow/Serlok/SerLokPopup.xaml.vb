@@ -354,19 +354,33 @@ Namespace Kas
 
 
         Private Sub OkButton_Click(sender As Object, e As RoutedEventArgs)
+            Dim NL As String = NumLokTextBox.Text.Trim()
             If Not String.IsNullOrEmpty(_selectedSeries) Then
                 PointedOtkaz.SerLokExact = _selectedSeries
-                RaiseEvent SeriesSelected(Me, _selectedSeries)
+                'RaiseEvent SeriesSelected(Me, _selectedSeries)
             End If
             If Not String.IsNullOrEmpty(_selectedPripisLok) Then
                 PointedOtkaz.PripLok = _selectedPripisLok  ' ← добавили
             End If
             If Not String.IsNullOrEmpty(NumLokTextBox.Text.Trim()) Then
-                PointedOtkaz.NumLok = NumLokTextBox.Text.Trim()
+                PointedOtkaz.NumLok = NL
             End If
             ' ← УСТАНАВЛИВАЕМ VidT по серии
             PointedOtkaz.VidT = SerLokModule.GetVidTBySeries(_selectedSeries)
             RaiseEvent SeriesSelected(Me, _selectedSeries)
+
+            Dim Lst As New List(Of Otkaz)
+            Lst = OTSList.Where(Function(u) u.SerLokExact = _selectedSeries AndAlso u.NumLok = NL).ToList
+
+            If Lst.Count > 1 Then
+                For Each u In Lst
+                    u.Marked = True
+
+                Next
+                Dim wnd As New FoundOtkazWindow(Lst) With {.Owner = Window.GetWindow(Me)}
+                wnd.Show()
+            End If
+            Lst = Nothing
         End Sub
 
 

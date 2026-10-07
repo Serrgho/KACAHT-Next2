@@ -251,6 +251,9 @@
 						</Border>
 
 
+
+
+
 						<Border Width="35"  x:Name="VidT0LevelBorder"
                                 Style="{StaticResource FiltrTBlock}"
                                 PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
@@ -326,6 +329,24 @@
 							</Grid>
 						</Border>
 
+						<Border Width="70"  x:Name="Poosnik0LevelBorder"
+								Style="{StaticResource FiltrTBlock}"
+								PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
+								PreviewMouseRightButtonUp="OnLevel0FilterMouseRightDown"
+								local:FilterProperties.FieldType="Boolean"
+								local:FilterProperties.FilterLevel="Level0"
+								Tag="Poosnik">
+							<Grid>
+								<!-- Оберни в Grid, чтобы можно было наложить элементы -->
+								<TextBlock Text="Поосник Да/Нет" Style="{StaticResource TBSTYLE}"/>
+								<local:Level0FilterIndicator x:Name="Poosnik0LevelIndicator"
+												 PropertyName="Poosnik"
+												 HorizontalAlignment="Right"
+												 VerticalAlignment="Top"
+												 Margin="0,-2,-2,0"/>
+							</Grid>
+						</Border>
+
 
 
 
@@ -364,6 +385,18 @@
 												 Margin="0,-2,-2,0"/>
 							</Grid>
 						</Border>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -567,7 +600,7 @@
 				</ScrollViewer>
 			</Grid>
 
-			
+
 
 
 			<Grid Grid.Row="3" ShowGridLines="True">
@@ -583,23 +616,68 @@
 
 					<Grid>
 						<Grid.RowDefinitions>
-							
+
 							<RowDefinition Height="Auto"/>
-							
+
 							<RowDefinition Height="Auto"/>
-							
+
 							<RowDefinition Height="*"/>
-							
+
 							<RowDefinition Height="Auto"/>
 						</Grid.RowDefinitions>
-						
+
 						<local:TableHeader x:Name="THed" Grid.Row="0"/>
 
 						<Button x:Name="ToUpButton" Grid.Row="1" Style="{StaticResource PopupStyleButton}" Click="ToUpButton_Click"  Padding="-1" Content="▲▲▲▲▲▲▲" Foreground="DarkBlue" Height="20"/>
-
-					
-						
+						<!--VirtualizingStackPanel.ScrollUnit="Pixel"
+         ScrollViewer.CanContentScroll="True"-->
 						<ListBox Grid.Row="2"
+         x:Name="OTSContainer"
+         Margin="2"
+         Background="{StaticResource AppBackBrush}"
+         VirtualizingStackPanel.IsVirtualizing="True"
+         VirtualizingStackPanel.VirtualizationMode="Recycling"
+         ScrollViewer.CanContentScroll="True"
+         PreviewMouseWheel="OTSContainer_PreviewMouseWheel"
+         BorderThickness="0">
+							<ListBox.Resources>
+								<Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
+							</ListBox.Resources>
+
+							<ListBox.ItemContainerStyle>
+								<Style TargetType="ListBoxItem">
+									<Setter Property="Background" Value="Transparent"/>
+									<Setter Property="BorderThickness" Value="0"/>
+									<Setter Property="Focusable" Value="False"/>
+									<Setter Property="Template">
+										<Setter.Value>
+											<ControlTemplate TargetType="ListBoxItem">
+												<ContentPresenter />
+											</ControlTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</ListBox.ItemContainerStyle>
+
+							<ListBox.ItemTemplate>
+								<DataTemplate>
+									<local:OTSRowControl SearchTerm="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=CurrentSearchTerm}" />
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+
+							<ListBox.Template>
+								<ControlTemplate TargetType="ListBox">
+									<ScrollViewer x:Name="InnerScrollViewer"
+                          CanContentScroll="True"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+										<ItemsPresenter />
+									</ScrollViewer>
+								</ControlTemplate>
+							</ListBox.Template>
+						</ListBox>
+
+						<!--<ListBox Grid.Row="2"
 							  x:Name="OTSContainer"
 							  Margin="2"
 							  Background="{StaticResource AppBackBrush}"
@@ -642,14 +720,14 @@
 									</ScrollViewer>
 								</ControlTemplate>
 							</ListBox.Template>
-						</ListBox>
+						</ListBox>-->
 						<Button x:Name="ToDownButton" Grid.Row="3" Style="{StaticResource PopupStyleButton}" Click="ToDownButton_Click"  Padding="0" Content="▼▼▼▼▼▼▼" VerticalContentAlignment="Top" Foreground="DarkBlue" Height="20"/>
 					</Grid>
 				</ScrollViewer>
 
 			</Grid>
 
-			
+
 			<Grid Grid.Row="4" Background="{StaticResource ScrolBarBrush}">
 				<Grid>
 					<Grid.ColumnDefinitions>

@@ -321,8 +321,12 @@ Module ReportToWord
     End Sub
 
     Private Sub WriKORR()
-        Dim kat3Cnt = OTSList.Where(Function(o) o.Nach >= My.Settings.NachPeriod AndAlso
-                                         o.Nach <= My.Settings.KonPeriod).Where(Function(o) o.Kat = 3 AndAlso o.MestoOTS_Dor.Contains("раснояр") AndAlso o.KtoZakryl.ToLower.Contains("тч") AndAlso (o.Uslovie4)).Count
+
+        'Dim nachDateTime = Fetcher.NachDat.Date.AddHours(Fetcher.NachTim)
+        'Dim konDateTime = Fetcher.KonDat.Date.AddHours(Fetcher.KonTim).AddMinutes(Fetcher.KonMinut)
+        Dim kat3Cnt = OTSList.Where(Function(o) o.Nach >= Fetcher.NachDatTim AndAlso o.Nach <= Fetcher.KonDatTim).
+        Where(Function(o) o.Kat = 3 AndAlso o.MestoOTS_Dor.Contains("раснояр") AndAlso o.IsStation AndAlso o.ZaKem <> "тр" AndAlso o.Uslovie4).
+        Count
 
         AddTextBlock($"{vbTab}Проведенная работа: ", isBold:=True, addNewLine:=False)
         AddTextBlock($"произведена корректировка в 3 категорию по {kat3Cnt} отказам. Корректировка потерь поездо-часов от отказов {GetSumKor_TXT()}")
@@ -348,7 +352,7 @@ Module ReportToWord
             RedirectPart_CNT = OTS_SOURCE.Where(RedirOTS)
         End If
         OTS_SOURCE = Nothing
-
+        RedirOTS = Nothing
 
 
         Dim KorPart_PCH As Single = KorPart_CNT.Sum(Function(u) Math.Abs(u.KorPCH))

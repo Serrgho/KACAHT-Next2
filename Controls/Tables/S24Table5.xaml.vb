@@ -94,7 +94,7 @@ Namespace Kas
                 Case "sld"
                     Return o.ZaKem IsNot Nothing AndAlso o.ZaKem.ToLower.Contains("слд")
                 Case "zav"
-                    Return o.ZaKem IsNot Nothing AndAlso (o.ZaKem.ToLower.Contains("авод") OrElse o.ZaKem.ToLower.Contains("проч"))
+                    Return o.ZaKem IsNot Nothing AndAlso (o.ZaKem.ToLower.Contains("авод") OrElse o.ZaKem.ToLower.Contains("рочие пред"))
                 Case Else ' tche
                     Return Not IsTrpu(o) AndAlso (o.VRassled OrElse (o.ZaKem IsNot Nothing AndAlso o.ZaKem.ToLower().Contains("тч")))
             End Select

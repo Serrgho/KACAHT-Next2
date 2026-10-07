@@ -4,118 +4,115 @@ Imports OfficeOpenXml.Drawing
 
 Namespace Kas
     Partial Public Class Yarlyk
+
         Implements INotifyPropertyChanged
 
-        Private _HeaderText As String = "---"
-        Private _KolOTS As Integer = 0
-        Private _KolPCh As Single = 0
-        Private _Pointed As Boolean = False
-        Private _Zapros As Func(Of Otkaz, Boolean)
-        Private _ForeKolor As Brush
+        Private _headerText As String = "---"
+        Private _kolOts As Integer = 0
+        Private _kolPCh As Double = 0
+        Private _pointed As Boolean = False
+        Private _zapros As Func(Of Otkaz, Boolean)
+
         Public Event PropertyChanged As PropertyChangedEventHandler Implements INotifyPropertyChanged.PropertyChanged
+
         Protected Sub MyPropertyChanged(ByVal propertyName As String)
             RaiseEvent PropertyChanged(Me, New PropertyChangedEventArgs(propertyName))
         End Sub
 
         Public Property Pointed As Boolean
             Get
-                Return _Pointed
+                Return _pointed
             End Get
-            Set
-                _Pointed = Value
-                MyPropertyChanged(NameOf(Pointed))
-                'If Value Then
-                '    ForeKolor = Brushes.Red
-                'Else
-                '    ForeKolor = Brushes.Black
-                'End If
+            Set(value As Boolean)
+                If _pointed <> value Then
+                    _pointed = value
+                    MyPropertyChanged(NameOf(Pointed))
+                End If
             End Set
         End Property
-
-        'Public Property ForeKolor As Brush
-        '    Get
-        '        Return _ForeKolor
-        '    End Get
-        '    Set
-        '        ' Проверяем, изменилось ли значение
-        '        If _ForeKolor Is Nothing OrElse Not _ForeKolor.Equals(Value) Then
-        '            _ForeKolor = Value
-        '            ' Уведомляем об изменении свойства
-        '            MyPropertyChanged(NameOf(ForeKolor))
-        '        End If
-        '    End Set
-        'End Property
 
         Public Property HeaderText As String
             Get
-                Return _HeaderText
+                Return _headerText
             End Get
-            Set
-                If Value <> _HeaderText Then
-                    _HeaderText = Value
+            Set(value As String)
+                If value <> _headerText Then
+                    _headerText = value
                     MyPropertyChanged(NameOf(HeaderText))
                 End If
-
             End Set
         End Property
 
-
-        Public Property KolOTS As Integer
+        Public Property KolOts As Integer
             Get
-                Return _KolOTS
+                Return _kolOts
             End Get
-            Set
-                If Value <> _KolOTS Then
-                    _KolOTS = Value
-                    MyPropertyChanged(NameOf(KolOTS))
+            Set(value As Integer)
+                If value <> _kolOts Then
+                    _kolOts = value
+                    MyPropertyChanged(NameOf(KolOts))
                 End If
-
             End Set
         End Property
 
-        Public Property KolPCh As Single
+        Public Property KolPCh As Double
             Get
-                Return _KolPCh
+                Return _kolPCh
             End Get
-            Set
-                If Value <> _KolPCh Then
-                    _KolPCh = Value
+            Set(value As Double)
+                If Math.Abs(value - _kolPCh) > 0.001 Then
+                    _kolPCh = value
                     MyPropertyChanged(NameOf(KolPCh))
                 End If
-
             End Set
         End Property
 
         Public Property Zapros As Func(Of Otkaz, Boolean)
             Get
-                Return _Zapros
+                Return _zapros
             End Get
-            Set
-                _Zapros = Value
-                MyPropertyChanged(NameOf(Zapros))
-                KolOTS = GetFilteredOTSList(Value).Count
-
-                If Name = "KorrP" Then
-                    KolPCh = GetFilteredOTSList(Value).Sum(Function(j) j.KorPCH)
-                Else
-                    KolPCh = GetFilteredOTSList(Value).Sum(Function(j) j.PCh)
-                End If
-
+            Set(value As Func(Of Otkaz, Boolean))
+                _zapros = value
+                ' Мы НЕ вызываем расчет здесь, чтобы не тормозить при назначении
             End Set
         End Property
 
-        Function GetFilteredOTSList(filter As Func(Of Otkaz, Boolean)) As IEnumerable(Of Otkaz)
-            Return OTSList.Where(filter)
-        End Function
-        Sub New()
+        ''' <summary>
+        ''' Выполняет пересчет значений на основе текущего фильтра Zapros.
+        ''' Вызывайте этот метод после загрузки данных в OTSList.
+        ''' </summary>
+        Public Sub Recalculate()
+            If _zapros Is Nothing OrElse OTSList Is Nothing Then
+                KolOts = 0
+                KolPCh = 0
+                Return
+            End If
 
-            ' Этот вызов является обязательным для конструктора.
-            InitializeComponent()
+            Dim count As Integer = 0
+            Dim sumHours As Double = 0
 
-            ' Добавить код инициализации после вызова InitializeComponent().
-            DataContext = Me
-            'ForeKolor = Brushes.Black
+            ' Проходим по списку один раз
+            For Each item In OTSList
+                If _zapros(item) Then
+                    count += 1
+                    If Name = "KorrP" Then
+                        sumHours += item.KorPCH
+                    Else
+                        sumHours += item.PCh
+                    End If
+                End If
+            Next
+
+            KolOts = count
+            KolPCh = sumHours
         End Sub
+
+        Sub New()
+            InitializeComponent()
+            DataContext = Me
+        End Sub
+
+
 
     End Class
 End Namespace

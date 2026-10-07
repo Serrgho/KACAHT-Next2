@@ -39,7 +39,7 @@
 
                 <Button  x:Name="btnLoadInvestigationReport" Foreground="DarkRed" Content="🌐4 отчет - ТАБЛИЦА" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadInvestigationReport_Click" Width="auto"/>
 
-                <Button  x:Name="btnLoadOnlineSLDJournal" Foreground="DarkRed" Content="🌐КАС АНТ СЛД-ПФБ" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadOnlineSLDJournal_Click" Width="auto"/>
+                <!--<Button  x:Name="btnLoadOnlineSLDJournal" Foreground="DarkRed" Content="🌐КАС АНТ СЛД-ПФБ" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadOnlineSLDJournal_Click" Width="auto"/>-->
 
                 <Button  x:Name="btnLoadOverdueJournal" Content="🌐С наруш срока" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnLoadOverdueJournal_Click" Width="auto"/>
 

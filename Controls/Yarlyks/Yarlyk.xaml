@@ -7,9 +7,127 @@
              d:DataContext="{d:DesignInstance Type=local:Yarlyk}"
               xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
              mc:Ignorable="d">
-    
-    <UserControl.Resources>
-        <Style x:Key="UGridSty" TargetType="{x:Type Grid}">
+
+	<UserControl.Resources>
+		<!-- Стили остаются без изменений, как в вашем исходном коде -->
+		<Style x:Key="UGridSty" TargetType="{x:Type Grid}">
+			<Setter Property="Margin" Value="2"/>
+			<Setter Property="Background" Value="{StaticResource AppBackBrush}"/>
+			<Setter Property="Effect">
+				<Setter.Value>
+					<DropShadowEffect Color="{StaticResource ShadowColor}" BlurRadius="5" ShadowDepth="2" Opacity="0.7"/>
+				</Setter.Value>
+			</Setter>
+			<Style.Triggers>
+				<MultiDataTrigger>
+					<MultiDataTrigger.Conditions>
+						<Condition Binding="{Binding IsMouseOver, ElementName=RootGrid}" Value="True"/>
+					</MultiDataTrigger.Conditions>
+					<Setter Property="Background" Value="LightYellow"/>
+				</MultiDataTrigger>
+			</Style.Triggers>
+		</Style>
+
+		<Style x:Key="TBSty" TargetType="{x:Type TextBlock}">
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="HorizontalAlignment" Value="Stretch"/>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Height" Value="auto"/>
+			<Setter Property="Padding" Value="2"/>
+		</Style>
+
+		<Style x:Key="NumberTBSty" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource TBSty}">
+			<Setter Property="Padding" Value="1"/>
+			<Setter Property="Margin" Value="1"/>
+			<Style.Triggers>
+				<MultiDataTrigger>
+					<MultiDataTrigger.Conditions>
+						<Condition Binding="{Binding Pointed}" Value="True"/>
+					</MultiDataTrigger.Conditions>
+					<Setter Property="Foreground" Value="red"/>
+				</MultiDataTrigger>
+			</Style.Triggers>
+		</Style>
+
+		<Style x:Key="HeaderTBStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource NumberTBSty}">
+			<Setter Property="Padding" Value="3"/>
+			<Setter Property="Margin" Value="3"/>
+			<Setter Property="FontWeight" Value="Medium"/>
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="Foreground" Value="Black"/>
+			<Style.Triggers>
+				<MultiDataTrigger>
+					<MultiDataTrigger.Conditions>
+						<Condition Binding="{Binding IsMouseOver, ElementName=RootGrid}" Value="True"/>
+						<Condition Binding="{Binding Pointed}" Value="False"/>
+					</MultiDataTrigger.Conditions>
+					<Setter Property="Foreground" Value="Blue"/>
+				</MultiDataTrigger>
+			</Style.Triggers>
+		</Style>
+	</UserControl.Resources>
+
+	<Grid x:Name="RootGrid" Margin="3" MaxWidth="150">
+		<Grid.RowDefinitions>
+			<RowDefinition/>
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+
+		<Border x:Name="HeaderBorder" Grid.Row="0" CornerRadius="5 5 0 0" BorderThickness="1 1 1 0" BorderBrush="Black">
+			<Border.Background>
+				<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+					<GradientStop Color="{StaticResource AppBackColor}" Offset="0.135"/>
+					<GradientStop Color="{StaticResource SplitterColor}" Offset="1"/>
+				</LinearGradientBrush>
+			</Border.Background>
+			<TextBlock x:Name="HeaderTBlock" TextWrapping="Wrap" Text="{Binding HeaderText, FallbackValue='---'}" TextAlignment="Center" Style="{StaticResource HeaderTBStyle}"/>
+		</Border>
+
+		<Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Background="{StaticResource AppBackBrush}">
+			<Grid x:Name="ContentGrid" Style="{StaticResource UGridSty}">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
+
+				<!-- Первая строка: Кол-во -->
+				<TextBlock Text="Кол-во" Grid.Row="0" Grid.Column="0" TextAlignment="Left" Style="{StaticResource TBSty}" Margin="1"/>
+				<TextBlock x:Name="OTSKol" Grid.Row="0" Grid.Column="1" Text="{Binding KolOts, FallbackValue='---'}" TextAlignment="Right" Style="{StaticResource NumberTBSty}" FontWeight="Bold" />
+				<TextBlock Text=" ед." Grid.Row="0" Grid.Column="2" Style="{StaticResource TBSty}" TextAlignment="Right" Margin="1"/>
+
+				<!-- Вторая строка: Часы -->
+				<TextBlock Text="Часы" 
+   Grid.Row="1" Grid.Column="0"
+   TextAlignment="Left" 
+   Style="{StaticResource TBSty}" 
+   Margin="1"/>
+
+				<TextBlock x:Name="PChKol"
+   Grid.Row="1" Grid.Column="1"
+   Text="{Binding KolPCh, StringFormat={}{0:F2}, ConverterCulture=ru-RU, FallbackValue='---'}"
+   TextAlignment="Right" 
+   Style="{StaticResource NumberTBSty}" 
+   FontWeight="Bold" />
+
+				<TextBlock Text=" ч." 
+   Grid.Row="1" Grid.Column="2"
+   Style="{StaticResource TBSty}" 
+   TextAlignment="Right" 
+   Margin="1"/>
+				<!--<TextBlock Text="Часы" Grid.Row="1" Grid.Column="0" TextAlignment="Left" Style="{StaticResource TBSty}" Margin="1"/>
+				--><!-- Важно: StringFormat={} {0:F2} обеспечивает 2 знака после запятой --><!--
+				<TextBlock x:Name="PChKol" Grid.Row="1" Grid.Column="1" Text="{Binding KolPCh, StringFormat={}{0:F2}, FallbackValue=''}" TextAlignment="Right" Style="{StaticResource NumberTBSty}" FontWeight="Bold" />
+				<TextBlock Text=" ч." Grid.Row="1" Grid.Column="2" Style="{StaticResource TBSty}" TextAlignment="Right" Margin="1"/>-->
+			</Grid>
+		</Border>
+	</Grid>
+	<!--<UserControl.Resources>
+		<Style x:Key="UGridSty" TargetType="{x:Type Grid}" x:Shared="False">
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Background" Value="{StaticResource AppBackBrush}"/>
             <Setter Property="Effect">
@@ -50,7 +168,7 @@
             </Style.Triggers>
         </Style>
         
-        <!-- Стиль для заголовка -->
+        --><!-- Стиль для заголовка --><!--
         <Style x:Key="HeaderTBStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource NumberTBSty}">
             <Setter Property="Padding" Value="3"/>
             <Setter Property="Margin" Value="3"/>
@@ -59,11 +177,11 @@
             <Setter Property="Margin" Value="3"/>
 
             
-            <!-- Базовый цвет из свойства -->
+            --><!-- Базовый цвет из свойства --><!--
             <Setter Property="Foreground" Value="Black"/>
             <Style.Triggers>
                
-                <!-- Если мышь наведена И Pointed=False — синий -->
+                --><!-- Если мышь наведена И Pointed=False — синий --><!--
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding IsMouseOver, ElementName=RootGrid}" Value="True"/>
@@ -82,7 +200,7 @@
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <!--#FFA9A96C-->
+        --><!--#FFA9A96C--><!--
         <Border x:Name="HeaderBorder" Grid.Row="0" CornerRadius="5 5 0 0"  BorderThickness="1 1 1 0" BorderBrush="Black">
                     <Border.Background>
                         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -90,8 +208,8 @@
                             <GradientStop Color="{StaticResource SplitterColor}" Offset="1"/>
                         </LinearGradientBrush>
                     </Border.Background>
-            <!--Foreground="{Binding ForeKolor}"-->
-            <TextBlock  x:Name="HeaderTBlock" TextWrapping="Wrap" Text="{Binding HeaderText,FallbackValue=---}" TextAlignment="Center"  Style="{StaticResource HeaderTBStyle}"/>
+            --><!--Foreground="{Binding ForeKolor}"--><!--
+            <TextBlock  x:Name="HeaderTBlock" TextWrapping="Wrap" Text="{Binding HeaderText,FallbackValue=}" TextAlignment="Center"  Style="{StaticResource HeaderTBStyle}"/>
 
 
         </Border>
@@ -104,28 +222,29 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Левый текст: "Кол-во", "Потери" -->
+                    --><!-- Левый текст: "Кол-во", "Потери" --><!--
                     <ColumnDefinition Width="*"/>
-                    <!-- Число: растягивается -->
+                    --><!-- Число: растягивается --><!--
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Ед. изм.: "ед.", "ч." -->
+                    --><!-- Ед. изм.: "ед.", "ч." --><!--
                 </Grid.ColumnDefinitions>
 
-                <!-- Первая строка -->
+                --><!-- Первая строка --><!--
                 <TextBlock Text="Кол-во" 
                Grid.Row="0" Grid.Column="0"
                TextAlignment="Left" 
                Style="{StaticResource TBSty}" 
                Margin="1"/>
                 
-<!--Foreground="{Binding ForeKolor}"--> 
-                <TextBlock x:Name="OTSKol" 
-               Grid.Row="0" Grid.Column="1"
-               Text="{Binding KolOTS, FallbackValue=---}" 
-               TextAlignment="Right" 
-               Style="{StaticResource NumberTBSty}" 
-               
-               FontWeight="Bold" />
+--><!--Foreground="{Binding ForeKolor}"--><!--
+				<TextBlock x:Name="OTSKol" 
+           Grid.Row="0" Grid.Column="1"
+           Text="{Binding KolOts, FallbackValue=}" 
+           TextAlignment="Right" 
+           Style="{StaticResource NumberTBSty}" 
+           FontWeight="Bold" />
+
+				
 
                 <TextBlock Text=" ед." 
                Grid.Row="0" Grid.Column="2"
@@ -133,27 +252,26 @@
                TextAlignment="Right" 
                Margin="1"/>
 
-                <!-- Вторая строка -->
+                --><!-- Вторая строка --><!--
                 <TextBlock Text="Часы" 
                Grid.Row="1" Grid.Column="0"
                TextAlignment="Left" 
                Style="{StaticResource TBSty}" 
                Margin="1"/>
-<!--Foreground="{Binding ForeKolor}"--> 
-                <TextBlock x:Name="PChKol"
-               Grid.Row="1" Grid.Column="1"
-               Text="{Binding KolPCh, StringFormat={} {0:F2}, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}, FallbackValue=---}"
-               TextAlignment="Right" 
-               Style="{StaticResource NumberTBSty}" 
-               
-               FontWeight="Bold" />
+--><!--Foreground="{Binding ForeKolor}"--><!--
+				<TextBlock x:Name="PChKol"
+           Grid.Row="1" Grid.Column="1"
+           Text="{Binding KolPch, StringFormat={}{0:F2}, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}, FallbackValue=}"
+           TextAlignment="Right" 
+           Style="{StaticResource NumberTBSty}" 
+           FontWeight="Bold" />
 
-                <TextBlock Text=" ч." 
+				<TextBlock Text=" ч." 
                Grid.Row="1" Grid.Column="2"
                Style="{StaticResource TBSty}" 
                TextAlignment="Right" 
                Margin="1"/>
             </Grid>
         </Border>
-    </Grid>
+    </Grid>-->
 </UserControl>

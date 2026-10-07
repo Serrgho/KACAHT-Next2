@@ -71,24 +71,12 @@ Namespace Kas
                 End If
 
 
-                '' Проверка соединения только для данных СЛД (CentralFetcher)
-                'If Not Await CentralFetcher.EnsureConnectedAsync() Then
-                '    SafeShowMessage("Нет соединения с КАСАНТ!", "Ошибка", parentWin)
-                '    Return
-                'End If
-
-
-
 
                 ' === УНИВЕРСАЛЬНОЕ ФОРМИРОВАНИЕ ПЕРИОДОВ ===
+
+
                 Dim periods As New List(Of ReportPeriod)
                 Dim prevYear As Integer = _periodStart.Value.Year - 1
-
-                ' Базовая дата начала прошлого года (сдвиг на год назад)
-                Dim prevBaseDate As Date = _periodStart.Value.AddYears(-1)
-
-                ' Длительность выбранного периода в днях
-                Dim periodDuration As TimeSpan = _periodEnd.Value.Date - _periodStart.Value.Date
 
                 ' Индекс 0: Тек. год (выбранный пользователем диапазон)
                 periods.Add(New ReportPeriod With {
@@ -97,27 +85,82 @@ Namespace Kas
             .Title = $"Тек. год ({_periodStart.Value:dd.MM} - {_periodEnd.Value:dd.MM})"
         })
 
-
-
-
                 ' Индекс 1: Прош. год (весь период) 
-                ' Логика: берем ПОЛНЫЙ аналогичный месяц прошлого года, независимо от текущей даты.
-                ' Пример: Если сейчас 01.09-08.09.2026 -> берем 01.09.2025 - 30.09.2025
-                Dim prevYear0 As Integer = _periodStart.Value.Year - 1
-                Dim targetMonth As Integer = _periodStart.Value.Month
-
-                ' Начало: 1-е число нужного месяца прошлого года
-                Dim prevFullStart As New Date(prevYear0, targetMonth, 1)
-
-                ' Конец: ПОСЛЕДНИЙ день этого месяца в прошлом году
-                Dim daysInTargetMonth As Integer = DateTime.DaysInMonth(prevYear0, targetMonth)
-                Dim prevFullEnd As New Date(prevYear0, targetMonth, daysInTargetMonth)
+                ' ЛОГИКА: Берем полный аналогичный диапазон прошлого года.
+                ' Если выбрано 01.01-26.09 -> берем ВЕСЬ диапазон с 01.01 по ПОСЛЕДНИЙ ДЕНЬ СЕНТЯБРЯ прошлого года.
+                ' Если выбрано 01.09-26.09 -> берем ВЕСЬ СЕНТЯБРЬ прошлого года.
+                Dim prevFullStart As Date = _periodStart.Value.AddYears(-1)
+                Dim prevFullEnd As Date = New Date(prevYear, _periodEnd.Value.Month,
+                                           DateTime.DaysInMonth(prevYear, _periodEnd.Value.Month))
 
                 periods.Add(New ReportPeriod With {
-    .DateFrom = prevFullStart,
-    .DateTo = prevFullEnd,
-    .Title = "Прош. год (весь период)"
-})
+            .DateFrom = prevFullStart,
+            .DateTo = prevFullEnd,
+            .Title = "Прош. год (весь период)"
+        })
+
+                ' Индекс 2: Прош. год (с нач. периода)
+                ' ЛОГИКА: Точная копия выбранного диапазона в прошлом году.
+                ' 01.01-26.09 текущего -> 01.01-26.09 прошлого
+                Dim prevCumStart As Date = _periodStart.Value.AddYears(-1)
+                Dim prevCumEnd As Date = _periodEnd.Value.AddYears(-1)
+
+                ' Защита от високосных годов/коротких месяцев для конца периода
+                If prevCumEnd.Day > DateTime.DaysInMonth(prevCumEnd.Year, prevCumEnd.Month) Then
+                    prevCumEnd = New Date(prevCumEnd.Year, prevCumEnd.Month,
+                                  DateTime.DaysInMonth(prevCumEnd.Year, prevCumEnd.Month))
+                End If
+
+                periods.Add(New ReportPeriod With {
+            .DateFrom = prevCumStart,
+            .DateTo = prevCumEnd,
+            .Title = "Прош. год (с нач. периода)"
+        })
+                ' ============================================================
+
+
+
+
+
+
+
+                '                Dim periods As New List(Of ReportPeriod)
+                '                Dim prevYear As Integer = _periodStart.Value.Year - 1
+
+                '                ' Базовая дата начала прошлого года (сдвиг на год назад)
+                '                Dim prevBaseDate As Date = _periodStart.Value.AddYears(-1)
+
+                '                ' Длительность выбранного периода в днях
+                '                Dim periodDuration As TimeSpan = _periodEnd.Value.Date - _periodStart.Value.Date
+
+                '                ' Индекс 0: Тек. год (выбранный пользователем диапазон)
+                '                periods.Add(New ReportPeriod With {
+                '            .DateFrom = _periodStart.Value.Date,
+                '            .DateTo = _periodEnd.Value.Date,
+                '            .Title = $"Тек. год ({_periodStart.Value:dd.MM} - {_periodEnd.Value:dd.MM})"
+                '        })
+
+
+
+
+                '                ' Индекс 1: Прош. год (весь период) 
+                '                ' Логика: берем ПОЛНЫЙ аналогичный месяц прошлого года, независимо от текущей даты.
+                '                ' Пример: Если сейчас 01.09-08.09.2026 -> берем 01.09.2025 - 30.09.2025
+                '                Dim prevYear0 As Integer = _periodStart.Value.Year - 1
+                '                Dim targetMonth As Integer = _periodStart.Value.Month
+
+                '                ' Начало: 1-е число нужного месяца прошлого года
+                '                Dim prevFullStart As New Date(prevYear0, targetMonth, 1)
+
+                '                ' Конец: ПОСЛЕДНИЙ день этого месяца в прошлом году
+                '                Dim daysInTargetMonth As Integer = DateTime.DaysInMonth(prevYear0, targetMonth)
+                '                Dim prevFullEnd As New Date(prevYear0, targetMonth, daysInTargetMonth)
+
+                '                periods.Add(New ReportPeriod With {
+                '    .DateFrom = prevFullStart,
+                '    .DateTo = prevFullEnd,
+                '    .Title = "Прош. год (весь период)"
+                '})
 
 
 
@@ -143,18 +186,18 @@ Namespace Kas
 
 
 
-                ' Индекс 2: Прош. год (с нач. периода)
-                ' Логика: начинаем с того же числа/месяца прошлого года, что и старт текущего периода,
-                ' но заканчиваем ровно через столько же дней, сколько длится текущий период.
-                ' Например: 01.04-07.06 (67 дней) -> 01.04.прошлого + 67 дней = 07.06.прошлого
-                Dim prevCumStart As Date = prevBaseDate
-                Dim prevCumEnd As Date = prevCumStart.AddDays(periodDuration.TotalDays)
+                '        ' Индекс 2: Прош. год (с нач. периода)
+                '        ' Логика: начинаем с того же числа/месяца прошлого года, что и старт текущего периода,
+                '        ' но заканчиваем ровно через столько же дней, сколько длится текущий период.
+                '        ' Например: 01.04-07.06 (67 дней) -> 01.04.прошлого + 67 дней = 07.06.прошлого
+                '        Dim prevCumStart As Date = prevBaseDate
+                '        Dim prevCumEnd As Date = prevCumStart.AddDays(periodDuration.TotalDays)
 
-                periods.Add(New ReportPeriod With {
-            .DateFrom = prevCumStart,
-            .DateTo = prevCumEnd,
-            .Title = "Прош. год (с нач. периода)"
-        })
+                '        periods.Add(New ReportPeriod With {
+                '    .DateFrom = prevCumStart,
+                '    .DateTo = prevCumEnd,
+                '    .Title = "Прош. год (с нач. периода)"
+                '})
 
                 ' === ЗАГРУЗКА ДАННЫХ ПО ИНДЕКСАМ ===
                 Dim dataCurrent As PeriodData = Await FetchCombinedDataAsync(periods(0))
@@ -169,90 +212,6 @@ Namespace Kas
                 End If
             End Try
         End Sub
-
-
-        'Private Async Sub BuildAndFillRowsAsync()
-        '    Try
-        '        If _isMsgBoxActive Then Return
-
-        '        ' === ПРОВЕРКА ВХОДНЫХ ПАРАМЕТРОВ ===
-        '        If Not _periodStart.HasValue OrElse Not _periodEnd.HasValue Then
-        '            SafeShowMessage("Не задан период для отчета!", "Ошибка Таблицы 10")
-        '            Return
-        '        End If
-
-        '        Dim parentWin As Window = Window.GetWindow(Me)
-        '        If parentWin Is Nothing Then parentWin = Application.Current.MainWindow
-
-        '        ' Проверка соединения только для данных СЛД (CentralFetcher)
-        '        If Not Await CentralFetcher.EnsureConnectedAsync() Then
-        '            SafeShowMessage("Нет соединения с КАСАНТ!", "Ошибка", parentWin)
-        '            Return
-        '        End If
-
-        '        ' === ФОРМИРОВАНИЕ ПЕРИОДОВ СТРОГО ПО СТРУКТУРЕ ТАБЛИЦЫ ===
-        '        Dim periods As New List(Of ReportPeriod)
-
-        '        ' Определяем прошлый год на основе переданного периода
-        '        Dim prevYear As Integer = _periodStart.Value.Year - 1
-
-        '        ' 1. Период Тек. год (текущий выбранный месяц)
-        '        periods.Add(New ReportPeriod With {
-        '    .DateFrom = _periodStart.Value.Date,
-        '    .DateTo = _periodEnd.Value.Date,
-        '    .Title = $"Тек. год ({_periodStart.Value:dd.MM} - {_periodEnd.Value:dd.MM})",
-        '    .IsCurrentYear = True,
-        '    .PeriodNumber = 1
-        '})
-
-        '        ' 2. Период Прош. год (весь период): полный аналогичный месяц прошлого года
-        '        ' Например: если выбрано 01.09-30.09.2026, то здесь будет 01.09-30.09.2025
-        '        Dim prevMonthFullStart As New Date(prevYear, _periodStart.Value.Month, 1)
-        '        Dim prevMonthFullEnd As New Date(prevYear, _periodStart.Value.Month,
-        '                                 DateTime.DaysInMonth(prevYear, _periodStart.Value.Month))
-
-        '        periods.Add(New ReportPeriod With {
-        '    .DateFrom = prevMonthFullStart,
-        '    .DateTo = prevMonthFullEnd,
-        '    .Title = $"Прош. год (весь период)",
-        '    .IsCurrentYear = False,
-        '    .PeriodNumber = 1
-        '})
-
-        '        ' 3. Период Прош. год (с нач. периода): тот же месяц прошлого года, но только до той же даты
-        '        ' Например: если сегодня 5 сентября, то здесь будет 01.09-05.09.2025
-        '        ' ВАЖНО: используем Day из _periodEnd, так как он отражает "текущую" дату внутри месяца
-        '        Dim currentDayInMonth As Integer = Math.Min(_periodEnd.Value.Day,
-        '                                            DateTime.DaysInMonth(prevYear, _periodStart.Value.Month))
-        '        Dim prevMonthCumEnd As New Date(prevYear, _periodStart.Value.Month, currentDayInMonth)
-
-        '        periods.Add(New ReportPeriod With {
-        '    .DateFrom = prevMonthFullStart, ' Всегда с 1-го числа месяца
-        '    .DateTo = prevMonthCumEnd,      ' До той же даты, что и в тек. периоде
-        '    .Title = $"Прош. год (с нач. периода)",
-        '    .IsCurrentYear = False,
-        '    .PeriodNumber = 2
-        '})
-
-        '        Dim pCurrent = periods.FirstOrDefault(Function(p) p.IsCurrentYear AndAlso p.PeriodNumber = 1)
-        '        Dim pPrevFull = periods.FirstOrDefault(Function(p) Not p.IsCurrentYear AndAlso p.PeriodNumber = 1)
-        '        Dim pPrevCum = periods.FirstOrDefault(Function(p) Not p.IsCurrentYear AndAlso p.PeriodNumber = 2)
-
-        '        Dim dataCurrent As PeriodData = Await FetchCombinedDataAsync(pCurrent)
-        '        Dim dataPrevFull As PeriodData = Await FetchCombinedDataAsync(pPrevFull)
-        '        Dim dataPrevCum As PeriodData = Await FetchCombinedDataAsync(pPrevCum)
-
-        '        BuildGrid(dataCurrent, dataPrevFull, dataPrevCum)
-
-        '    Catch ex As Exception
-        '        If Not _isMsgBoxActive Then
-        '            SafeShowMessage(ex.Message, "Ошибка Таблицы 10")
-        '        End If
-        '    End Try
-        'End Sub
-
-
-
 
 
 
@@ -454,53 +413,6 @@ Namespace Kas
 
 
 
-            'Dim sumY26T_B As Double = 0
-            'Dim sumY26S_O As Integer = 0, sumY26S_B As Double = 0
-            'Dim sumY26Total As Double = 0
-
-            'Dim sumY25FT_B As Double = 0
-            'Dim sumY25FS_O As Integer = 0, sumY25FS_B As Double = 0
-            'Dim sumY25FTotal As Double = 0
-
-            'Dim sumY25CT_B As Double = 0
-            'Dim sumY25CS_O As Integer = 0, sumY25CS_B As Double = 0
-            'Dim sumY25CTotal As Double = 0
-
-            'For i As Integer = 0 To depoSLD.Count - 1
-            '    Dim depotName As String = depoSLD(i).DisplayName
-            '    Dim rIdx As Integer = MainGrid.RowDefinitions.Count
-            '    MainGrid.RowDefinitions.Add(New RowDefinition With {.Height = GridLength.Auto})
-
-            '    AddCell(rIdx, 0, depotName, "HeaderBorder", "HeaderTextStyle", isBold:=True)
-
-            '    ' --- Ищем значения по соответствующим ключам ---
-            '    Dim v26S As Integer = GetVal(d26?.DepotSld, depoSLD(i).Keywords)
-            '    Dim v25FS As Integer = GetVal(d25F?.DepotSld, depoSLD(i).Keywords)
-            '    Dim v25CS As Integer = GetVal(d25C?.DepotSld, depoSLD(i).Keywords)
-
-            '    Dim v26O As Integer = GetVal(d26?.DepotOts, depoTCH(i).Keywords)
-            '    Dim v25FO As Integer = GetVal(d25F?.DepotOts, depoTCH(i).Keywords)
-            '    Dim v25CO As Integer = GetVal(d25C?.DepotOts, depoTCH(i).Keywords)
-
-            '    ' --- Заполнение строк (индексы колонок под новый XAML) ---
-            '    ' Тек. год (Cols 1-4)
-            '    FillRowValues(rIdx, 1, v26O, v26S, sumY26T_B, sumY26S_O, sumY26S_B, sumY26Total)
-
-            '    ' Прош. год весь (Cols 5-8)
-            '    FillRowValues(rIdx, 5, v25FO, v25FS, sumY25FT_B, sumY25FS_O, sumY25FS_B, sumY25FTotal)
-
-            '    ' Прош. год нараст. (Cols 9-12)
-            '    FillRowValues(rIdx, 9, v25CO, v25CS, sumY25CT_B, sumY25CS_O, sumY25CS_B, sumY25CTotal)
-            'Next
-
-            '' Итоговая строка
-            'Dim tIdx As Integer = MainGrid.RowDefinitions.Count
-            'MainGrid.RowDefinitions.Add(New RowDefinition With {.Height = GridLength.Auto})
-            'AddCell(tIdx, 0, "ФАКТ:", "TotalBorder", "HeaderTextStyle", isBold:=True)
-
-            'AddTotalCells(tIdx, 1, sumY26T_B, sumY26S_O, sumY26S_B, sumY26Total)
-            'AddTotalCells(tIdx, 5, sumY25FT_B, sumY25FS_O, sumY25FS_B, sumY25FTotal)
-            'AddTotalCells(tIdx, 9, sumY25CT_B, sumY25CS_O, sumY25CS_B, sumY25CTotal)
 
 
         End Sub
@@ -533,63 +445,10 @@ Namespace Kas
 
 
 
-            'Dim bT As Double = CDbl(otsTch)          ' Т Баллы (черный)
-            'Dim bS As Double = Math.Round(otsSld * 0.5, 1) ' СЛД Баллы (КРАСНЫЙ)
-            'Dim bTot As Double = Math.Round(bT + bS, 1)    ' Всего (КРАСНЫЙ)
 
-            'AddCellValue(row, startCol, bT)            ' Col N: T Баллы (черный)
-            'AddCellValue(row, startCol + 1, otsSld)    ' Col N+1: SLD ОТС (черный)
-            'AddCellValue(row, startCol + 2, bS, True)  ' Col N+2: SLD Баллы (КРАСНЫЙ)
-            'AddCellValue(row, startCol + 3, bTot, True) ' Col N+3: Всего (КРАСНЫЙ)
-
-            'sumTB += bT : sumSO += otsSld : sumSB += bS : sumTotal += bTot
         End Sub
 
 
-
-        'Private Sub FillRowValues(row As Integer, startCol As Integer,
-        '                  otsTch As Integer, otsSld As Integer,
-        '                  ByRef sumTB As Double, ByRef sumSO As Integer, ByRef sumSB As Double, ByRef sumTotal As Double)
-
-
-        '    ' T: Баллы = ОТС (1 отказ = 1 балл)
-        '    Dim bT As Double = CDbl(otsTch)
-
-        '    ' SLD: Баллы = ОТС * 0.5
-        '    Dim bS As Double = Math.Round(otsSld * 0.5, 1)
-
-        '    ' Всего: сумма баллов
-        '    Dim bTot As Double = Math.Round(bT + bS, 1)
-
-        '    AddCellValue(row, startCol, bT)       ' Col N: T Баллы
-        '    AddCellValue(row, startCol + 1, otsSld) ' Col N+1: SLD ОТС
-        '    AddCellValue(row, startCol + 2, bS)   ' Col N+2: SLD Баллы
-        '    AddCellValue(row, startCol + 3, bTot) ' Col N+3: Всего
-
-        '    ' Накопление итогов
-        '    sumTB += bT
-        '    sumSO += otsSld
-        '    sumSB += bS
-        '    sumTotal += bTot
-
-
-        '    'Dim bT As Double = Math.Round(ots * 0.5, 1)
-        '    'Dim bS As Double = Math.Round(sld * 0.5, 1)
-        '    'Dim bTot As Double = Math.Round((ots + sld) * 0.5, 1)
-
-        '    'AddCellValue(row, startCol, ots)       ' Т ОТС
-        '    'AddCellValue(row, startCol + 1, bT)    ' Т Баллы
-        '    'AddCellValue(row, startCol + 2, sld)   ' СЛД ОТС
-        '    'AddCellValue(row, startCol + 3, bS)    ' СЛД Баллы
-        '    'AddCellValue(row, startCol + 4, bTot)  ' Всего
-        'End Sub
-
-        'Private Sub UpdateSums(ots As Integer, sld As Integer,
-        '                       ByRef sumTO As Integer, ByRef sumTB As Double,
-        '                       ByRef sumSO As Integer, ByRef sumSB As Double)
-        '    sumTO += ots : sumTB += Math.Round(ots * 0.5, 1)
-        '    sumSO += sld : sumSB += Math.Round(sld * 0.5, 1)
-        'End Sub
 
 
         Private Sub AddTotalCells(row As Integer, startCol As Integer,
@@ -607,70 +466,7 @@ Namespace Kas
 
 
 
-        'Private Sub AddTotalCells(row As Integer, startCol As Integer,
-        '                  sumTB As Double, sumSO As Integer, sumSB As Double, sumTotal As Double)
-        '    AddCell(row, startCol, sumTB.ToString("F1"), "TotalBorder", "CellStyle")      ' T Баллы (черный )
-        '    AddCell(row, startCol + 1, sumSO.ToString(), "TotalBorder", "CellStyle", isBold:=True)      ' SLD ОТС (черный жирный)
-        '    AddCell(row, startCol + 2, sumSB.ToString("F1"), "TotalBorder", "CellStyle", isBold:=True, isRed:=True)  ' SLD Баллы (КРАСНЫЙ жирный)
-        '    AddCell(row, startCol + 3, sumTotal.ToString("F1"), "TotalBorder", "CellStyle", isBold:=True, isRed:=True) ' Всего (КРАСНЫЙ жирный)
-        'End Sub
 
-        'Private Sub AddTotalCells(row As Integer, startCol As Integer,
-        '                  sumTB As Double, sumSO As Integer, sumSB As Double, sumTotal As Double)
-        '    AddCell(row, startCol, sumTB.ToString("F1"), "TotalBorder", "CellStyle", isBold:=True)      ' T Баллы
-        '    AddCell(row, startCol + 1, sumSO.ToString(), "TotalBorder", "CellStyle", isBold:=True)      ' SLD ОТС
-        '    AddCell(row, startCol + 2, sumSB.ToString("F1"), "TotalBorder", "CellStyle", isBold:=True)  ' SLD Баллы
-        '    AddCell(row, startCol + 3, sumTotal.ToString("F1"), "TotalBorder", "CellStyle", isBold:=True) ' Всего
-        'End Sub
-
-
-
-        'Private Sub AddTotalCells(row As Integer, startCol As Integer,
-        '                          sumTO As Integer, sumTB As Double,
-        '                          sumSO As Integer, sumSB As Double)
-        '    Dim bTotT As Double = Math.Round(sumTB, 1)
-        '    Dim bTotS As Double = Math.Round(sumSB, 1)
-        '    Dim bGrand As Double = Math.Round(sumTB + sumSB, 1)
-
-        '    AddCell(row, startCol, sumTO.ToString(), "TotalBorder", "CellStyle", isBold:=True)
-        '    AddCell(row, startCol + 1, bTotT.ToString("F1"), "TotalBorder", "CellStyle", isBold:=True)
-        '    AddCell(row, startCol + 2, sumSO.ToString(), "TotalBorder", "CellStyle", isBold:=True)
-        '    AddCell(row, startCol + 3, bTotS.ToString("F1"), "TotalBorder", "CellStyle", isBold:=True)
-        '    AddCell(row, startCol + 4, bGrand.ToString("F1"), "TotalBorder", "CellStyle", isBold:=True)
-        'End Sub
-
-        ' ==================== ЗАГОЛОВКИ ====================
-
-        'Private Sub AddHeaderRow()
-        '    AddMergedHeader(0, 1, 5, "2026 год")
-        '    AddMergedHeader(0, 6, 10, "2025 год (весь период)")
-        '    AddMergedHeader(0, 11, 15, "2025 год (нараст. итогом)")
-
-        '    Dim offsets As Integer() = {1, 6, 11}
-        '    For Each off In offsets
-        '        AddMergedHeader(1, off, off + 1, "Т")
-        '        AddMergedHeader(1, off + 2, off + 3, "СЛД")
-        '        AddCell(1, off + 4, "Всего" & vbCrLf & "баллов", "HeaderBorder", "HeaderTextStyle")
-
-        '        AddCell(2, off, "ОТС", "HeaderBorder", "HeaderTextStyle")
-        '        AddCell(2, off + 1, "Баллы", "HeaderBorder", "HeaderTextStyle")
-        '        AddCell(2, off + 2, "ОТС", "HeaderBorder", "HeaderTextStyle")
-        '        AddCell(2, off + 3, "Баллы", "HeaderBorder", "HeaderTextStyle")
-        '    Next
-        'End Sub
-
-        'Private Sub AddMergedHeader(row As Integer, fromCol As Integer, toCol As Integer, text As String)
-        '    Dim b As New Border()
-        '    b.Style = CType(FindResource("HeaderBorder"), Style)
-        '    b.SetValue(Grid.ColumnSpanProperty, toCol - fromCol + 1)
-        '    Dim t As New TextBlock()
-        '    t.Style = CType(FindResource("HeaderTextStyle"), Style)
-        '    t.Text = text
-        '    b.Child = t
-        '    Grid.SetRow(b, row)
-        '    Grid.SetColumn(b, fromCol)
-        '    MainGrid.Children.Add(b)
-        'End Sub
 
 
         Private Sub AddCell(row As Integer, col As Integer, text As String,
@@ -708,30 +504,6 @@ Namespace Kas
 
 
 
-        'Private Sub AddCell(row As Integer, col As Integer, text As String,
-        '                    borderStyleKey As String, textStyleKey As String,
-        '                    Optional isBold As Boolean = False)
-        '    Dim b As New Border()
-        '    b.Style = CType(FindResource(borderStyleKey), Style)
-        '    Dim t As New TextBlock()
-        '    t.Style = CType(FindResource(textStyleKey), Style)
-        '    t.Text = text
-        '    If isBold Then t.FontWeight = FontWeights.Bold
-
-        '    If row > 2 AndAlso Not text.StartsWith("ФАКТ") Then
-        '        t.Background = Brushes.Transparent
-        '        AddHandler t.MouseEnter, AddressOf Cell_MouseEnterForSelection
-        '        AddHandler t.MouseLeave, AddressOf Cell_MouseLeaveForSelection
-        '        AddHandler t.PreviewMouseLeftButtonDown, AddressOf Cell_PreviewMouseDownForSelection
-        '        AddHandler t.MouseRightButtonDown, AddressOf CopyColumnToClipboard_Click
-        '    End If
-
-        '    b.Child = t
-        '    Grid.SetRow(b, row)
-        '    Grid.SetColumn(b, col)
-        '    MainGrid.Children.Add(b)
-        'End Sub
-
 
         Private Sub AddCellValue(row As Integer, col As Integer, value As Object, Optional isRed As Boolean = False)
             Dim txt As String = ""
@@ -752,17 +524,7 @@ Namespace Kas
         End Sub
 
 
-        'Private Sub AddCellValue(row As Integer, col As Integer, value As Object)
-        '    Dim txt As String = ""
-        '    If TypeOf value Is Integer Then
-        '        Dim v As Integer = CInt(value)
-        '        txt = If(v > 0, v.ToString(), "")
-        '    ElseIf TypeOf value Is Double Then
-        '        Dim v As Double = CDbl(value)
-        '        txt = If(v > 0, v.ToString("F1"), "")
-        '    End If
-        '    AddCell(row, col, txt, "CellBorder", "CellStyle")
-        'End Sub
+
 
         Private Function GetVal(dict As Dictionary(Of String, Integer), keywords As String()) As Integer
             If dict Is Nothing Then Return 0
@@ -814,29 +576,6 @@ Namespace Kas
 
 
 
-
-
-
-
-        'Private Sub HighlightColumn(col As Integer)
-        '    For Each c In _selectedCells : c.Background = DefaultBrush : Next
-        '    _selectedCells.Clear()
-        '    If col < 1 OrElse col > 15 Then Return
-
-        '    For r As Integer = 3 To MainGrid.RowDefinitions.Count - 2
-        '        Dim border As Border = FindChildByGridCoords(MainGrid, r, col)
-        '        If border IsNot Nothing Then
-        '            Dim tb As TextBlock = TryCast(border.Child, TextBlock)
-        '            If tb IsNot Nothing Then
-        '                tb.Background = SelectionBrush
-        '                _selectedCells.Add(tb)
-        '            End If
-        '        End If
-        '    Next
-        '    _selectedCells.Sort(Function(a, b) Grid.GetRow(TryCast(a.Parent, Border)).CompareTo(Grid.GetRow(TryCast(b.Parent, Border))))
-        'End Sub
-
-
         Private Function FindChildByGridCoords(grid As Grid, row As Integer, col As Integer) As Border
             For Each child In grid.Children
                 If TypeOf child Is Border Then
@@ -847,21 +586,6 @@ Namespace Kas
             Return Nothing
         End Function
 
-
-
-
-
-
-
-        'Private Function FindChildByGridCoords(grid As Grid, row As Integer, col As Integer) As Border
-        '    For Each child In grid.Children
-        '        If TypeOf child Is Border Then
-        '            Dim b As Border = CType(child, Border)
-        '            If Grid.GetRow(b) = row AndAlso Grid.GetColumn(b) = col Then Return b
-        '        End If
-        '    Next
-        '    Return Nothing
-        'End Function
 
 
         Private Sub Cell_MouseEnterForSelection(sender As Object, e As MouseEventArgs)
@@ -883,13 +607,6 @@ Namespace Kas
             HighlightColumn(col)
         End Sub
 
-        'Private Sub Cell_MouseEnterForSelection(sender As Object, e As MouseEventArgs)
-        '    Dim tb As TextBlock = TryCast(sender, TextBlock)
-        '    If tb Is Nothing Then Return
-        '    Dim parentBorder As Border = TryCast(tb.Parent, Border)
-        '    If parentBorder Is Nothing Then Return
-        '    HighlightColumn(Grid.GetColumn(parentBorder))
-        'End Sub
 
         Private Sub Cell_MouseLeaveForSelection(sender As Object, e As MouseEventArgs)
             If _selectedCells.Count = 0 Then Return
@@ -927,16 +644,6 @@ Namespace Kas
 
             HighlightColumn(col)
         End Sub
-
-
-
-        'Private Sub Cell_PreviewMouseDownForSelection(sender As Object, e As MouseButtonEventArgs)
-        '    Dim tb As TextBlock = TryCast(sender, TextBlock)
-        '    If tb Is Nothing Then Return
-        '    Dim parentBorder As Border = TryCast(tb.Parent, Border)
-        '    If parentBorder Is Nothing Then Return
-        '    HighlightColumn(Grid.GetColumn(parentBorder))
-        'End Sub
 
 
 
@@ -978,37 +685,6 @@ Namespace Kas
 
 
 
-
-
-
-
-
-        'Private Sub CopyColumnToClipboard_Click(sender As Object, e As MouseButtonEventArgs)
-        '    If _selectedCells.Count = 0 Then
-        '        MessageBox.Show("Выделите столбец мышью!", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning)
-        '        e.Handled = True
-        '        Return
-        '    End If
-        '    Dim sb As New System.Text.StringBuilder()
-        '    For i As Integer = 0 To _selectedCells.Count - 1
-        '        sb.Append(_selectedCells(i).Text & vbTab)
-        '        If i < _selectedCells.Count - 1 Then sb.Append(vbCrLf)
-        '    Next
-        '    Clipboard.SetText(sb.ToString())
-        '    e.Handled = True
-        'End Sub
-
-        'Private Sub S24Table10_Unloaded(sender As Object, e As RoutedEventArgs) Handles Me.Unloaded
-        '    ' ВЫЗЫВАЕМ ТВОЙ УНИВЕРСАЛЬНЫЙ ОТПИСЧИК
-        '    UnsubscribeAllEvents(Me)
-
-
-
-        '    ' ОТПИСЫВАЕМСЯ ОТ Unloaded (ЧТОБЫ НЕ БЫЛО ЦИКЛИЧЕСКИХ ССЫЛОК)
-        '    RemoveHandler Me.Unloaded, AddressOf S24Table10_Unloaded
-
-        '    GC.Collect()
-        'End Sub
     End Class
 
 End Namespace

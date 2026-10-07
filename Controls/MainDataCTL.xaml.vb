@@ -68,38 +68,67 @@ Namespace Kas
 
             Try
                 ' --- ШАГ 1: Формирование ссылки (Синхронно, быстро) ---
+
+                'MW.MemMonitor.BeginMeasure("1. BuildJournalUrl")
+
+
                 SetStatus("Загрузка 4 отчета...")
                 Dim journalUrl = BuildJournalUrl(Fetcher.NachDat, Fetcher.KonDat, Fetcher.NachTim, endHour:=23, 88, endMin:=59)
 
-                ' Небольшая пауза, чтобы UI успел показать текст статуса перед тяжелой загрузкой
-                Await Task.Delay(50)
+                '' Небольшая пауза, чтобы UI успел показать текст статуса перед тяжелой загрузкой
+                'Await Task.Delay(50)
+
+
+                'MW.MemMonitor.EndMeasure()
+
 
                 ' --- ШАГ 2: Загрузка журнала (Асинхронно, долго) ---
+                ' MW.MemMonitor.BeginMeasure("2. FetchAllJournalPages")
+
                 SetStatus("Загрузка токенов ген. отч...")
                 Dim webRecords As List(Of JournalRecord) = Await Fetcher.FetchAllJournalPagesAsync(journalUrl, saveExcel:=True)
+                'MW.MemMonitor.EndMeasure()
 
                 ' --- ШАГ 3: Загрузка Генерального отчета (Асинхронно, долго) ---
+                'MW.MemMonitor.BeginMeasure("3. GetGenOtchRows")
+
                 SetStatus("Загрузка экселя ген. отч....")
                 Dim Rows As List(Of GenReportRow) = Await GetGenOtchRows(True)
+                ' MW.MemMonitor.EndMeasure()
+
 
                 ' --- ШАГ 4: Обработка данных журнала (Синхронно, может быть тяжело) ---
+                ' MW.MemMonitor.BeginMeasure("4. ProcessWebJournalData")
+
                 SetStatus("Обработка отказов из 4 отчета...")
                 ProcessWebJournalData(webRecords)
+                ' MW.MemMonitor.EndMeasure()
 
                 ' --- ШАГ 5: Синхронизация с генеральным отчетом (Синхронно) ---
+                ' MW.MemMonitor.BeginMeasure("5. SyncGenOTSReport")
+
                 SetStatus("Обработка отказов из ген. отч...")
                 SyncGenOTSReport(Rows)
+                ' MW.MemMonitor.EndMeasure()
+
 
                 ' Добавляем в основной список
+                ' MW.MemMonitor.BeginMeasure("6. AddOTSToContainer")
+
                 AddOTSToContainer(OTSList)
+                ' MW.MemMonitor.EndMeasure()
+
 
                 ' --- ШАГ 6: Обновление фильтров и итогов (Синхронно) ---
+                ' MW.MemMonitor.BeginMeasure("7. UpdateFilters")
+
                 SetStatus("Обновление списка отказов...")
                 With MW.TRowsContainer
                     .ClearAll0LevelFilters()
                     .THed.ClearAllFilters()
                     .UpdateTotal()
                 End With
+                ' MW.MemMonitor.EndMeasure()
 
                 SetStatus("Готово!")
 
@@ -113,7 +142,10 @@ Namespace Kas
 
                 ' !!! КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Принудительная очистка памяти после завершения всех операций
                 ' 1. Очищаем KasantFetcher (тот, что грузил журнал и HTML)
+                ' Замер самой очистки — интересно, сколько она реально освобождает
+                ' MW.MemMonitor.BeginMeasure("8. ForceCleanup")
                 Fetcher.ForceCleanup()
+                '  MW.MemMonitor.EndMeasure()
 
                 ' 2. Очищаем CentralFetcher (тот, что грузил тяжелые Excel отчеты)
                 ' Убедитесь, что метод ForceCleanup добавлен и в класс Report341Fetcher (CentralFetcher)
@@ -401,9 +433,20 @@ Namespace Kas
 
 
         Private Sub LoadData_Click(sender As Object, e As RoutedEventArgs)
+
             If ImportOTS() Then
                 ResetPeriodSUB()
             End If
+
+            'MW.MemMonitor.BeginMeasure("ImportOTS (total)")
+            'Try
+
+            'Finally
+            '    MW.MemMonitor.EndMeasure()
+
+            'End Try
+
+
         End Sub
 
 
@@ -441,19 +484,39 @@ Namespace Kas
 
             ' 2. Загружаем данные
             Try
+                ' Замер только самого чтения Excel — самого тяжёлого шага
+                ' MW.MemMonitor.BeginMeasure("LoadOTSFromExcel")
                 OTSList = LoadOTSFromExcel(selectedFilePath)
+                ' MW.MemMonitor.EndMeasure()
 
-                ' Если загрузка вернула Nothing или пустой список (зависит от реализации LoadOTSFromExcel), 
-                ' можно добавить проверку, но обычно она внутри. 
-
-                ' 3. Обновляем настройки и тултип ТОЛЬКО при успешной загрузке
+                ' Отдельный замер для обновления настроек и тултипа —
+                ' вдруг там тоже что-то тяжёлое (перерисовка, форматирование)
+                'MW.MemMonitor.BeginMeasure("UpdateCurrentFileAndTooltip")
                 UpdateCurrentFileAndTooltip(selectedFilePath)
+                'MW.MemMonitor.EndMeasure()
 
                 Return True
             Catch ex As Exception
+                ' Если упало внутри LoadOTSFromExcel — закрываем замер принудительно,
+                ' иначе _isMeasuring останется True и все последующие замеры будут игнорироваться
+
                 ShowMSG(MW, $"Ошибка при чтении Excel:{Environment.NewLine}{ex.Message}", "Ошибка импорта")
                 Return False
             End Try
+            'Try
+            '    OTSList = LoadOTSFromExcel(selectedFilePath)
+
+            '    ' Если загрузка вернула Nothing или пустой список (зависит от реализации LoadOTSFromExcel), 
+            '    ' можно добавить проверку, но обычно она внутри. 
+
+            '    ' 3. Обновляем настройки и тултип ТОЛЬКО при успешной загрузке
+            '    UpdateCurrentFileAndTooltip(selectedFilePath)
+
+            '    Return True
+            'Catch ex As Exception
+            '    ShowMSG(MW, $"Ошибка при чтении Excel:{Environment.NewLine}{ex.Message}", "Ошибка импорта")
+            '    Return False
+            'End Try
 
         End Function
 

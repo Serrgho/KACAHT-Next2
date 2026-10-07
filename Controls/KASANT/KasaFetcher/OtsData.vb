@@ -27,13 +27,18 @@
 		Public Property FactStartTime As String
 		Public Property FactEndTime As String
 		Public Property FactDuration As String
-
+		Public Property HasHelperLoco As Boolean = False       ' Признак наличия
+		Public Property HelperLocoInfo As String = ""          ' Текст (номер поезда, приказ)
 
 		Public Property DelayedTrains As List(Of TrainDelay)
 		Public Property History As List(Of HistoryRecord)
 		Public Property PeredanOnOtherDor As String
 		Public Property AttachedFiles As New List(Of AttachedFile)
+		Public Property ServiceOrgDetails As String = "" ' Детали сервиса + договор
+		Public Property EasaprStatus As String = ""      ' Статус из ЕАСАПР
 
+		' Список пар "Параметр - Значение" из блока alien_guilty_table
+		Public Property AlienGuiltyParams As New List(Of KeyValuePair(Of String, String))
 		Public Sub New()
 			DelayedTrains = New List(Of TrainDelay)
 			History = New List(Of HistoryRecord)

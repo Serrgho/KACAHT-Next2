@@ -41,6 +41,30 @@ Namespace Kas
 		Private _konMinut As Integer = 0
 		Private _DorOfOTS As Integer = 88
 
+
+		''' <summary>
+		''' Возвращает полную дату и время начала периода (из NachDat и NachTim)
+		''' </summary>
+		Public ReadOnly Property NachDatTim As DateTime
+			Get
+				' Создаем DateTime из даты NachDat и времени NachTim (часы)
+				Return New DateTime(NachDat.Year, NachDat.Month, NachDat.Day, NachTim, 0, 0)
+			End Get
+		End Property
+
+		''' <summary>
+		''' Возвращает полную дату и время конца периода (из KonDat, KonTim и KonMinut)
+		''' </summary>
+		Public ReadOnly Property KonDatTim As DateTime
+			Get
+				' Создаем DateTime из даты KonDat и времени KonTim (часы) и KonMinut (минуты)
+				Return New DateTime(KonDat.Year, KonDat.Month, KonDat.Day, KonTim, KonMinut, 0)
+			End Get
+		End Property
+
+
+
+
 		' Свойства с уведомлением об изменении
 		Public Property NachDat As Date
 			Get
@@ -62,6 +86,7 @@ Namespace Kas
 					' Уведомляем, что NachKon_TXT изменился
 					RaisePropertyChanged(NameOf(NachDat))
 					RaisePropertyChanged(NameOf(NachKon_TXT))
+					RaisePropertyChanged(NameOf(NachDatTim))
 				End If
 			End Set
 		End Property
@@ -80,6 +105,7 @@ Namespace Kas
 					_konDat = value
 					RaisePropertyChanged(NameOf(KonDat))
 					RaisePropertyChanged(NameOf(NachKon_TXT))
+					RaisePropertyChanged(NameOf(KonDatTim))
 				End If
 			End Set
 		End Property
@@ -102,6 +128,7 @@ Namespace Kas
 					_nachTim = value
 
 					RaisePropertyChanged(NameOf(NachTim))
+					RaisePropertyChanged(NameOf(NachDatTim))
 				End If
 			End Set
 		End Property
@@ -115,7 +142,8 @@ Namespace Kas
 					_konTim = value
 					' Уведомляем, что NachKon_TXT изменился
 					RaisePropertyChanged(NameOf(KonTim))
-					End If
+					RaisePropertyChanged(NameOf(KonDatTim))
+				End If
             End Set
 		End Property
 
@@ -128,6 +156,7 @@ Namespace Kas
 					_konMinut = value
 					' Уведомляем, что NachKon_TXT изменился
 					RaisePropertyChanged(NameOf(KonMinut))
+					RaisePropertyChanged(NameOf(KonDatTim))
 				End If
 			End Set
 		End Property
@@ -210,24 +239,40 @@ Namespace Kas
 		' ПРИНУДИТЕЛЬНАЯ ОЧИСТКА ПАМЯТИ
 		' =================================================================
 		Public Sub ForceCleanup()
+
 			Try
-				' Логируем текущее состояние памяти до очистки
-				Dim memBefore As Long = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024
+				' 1. Очищаем накопленный лог парсинга, если он стал огромным
+				If log.Length > 0 Then
+					log.Clear()
+				End If
 
-				' 1. Запрашиваем сборку мусора
+				' 2. Запрашиваем сборку мусора
 				GC.Collect()
-				' 2. Ждем завершения всех финализаторов
 				GC.WaitForPendingFinalizers()
-				' 3. Повторная сборка для освобождения объектов, ставших доступными после шага 2
 				GC.Collect()
 
-				Dim memAfter As Long = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024
-				' Можно раскомментировать логирование, если нужно видеть эффект в файле
-				' System.IO.File.AppendAllText(System.IO.Path.Combine(GetDebugFolder(), "memory_log.txt"), 
-				'     $"[Cleanup] Before: {memBefore} MB -> After: {memAfter} MB{vbCrLf}", Encoding.UTF8)
 			Catch ex As Exception
-				' Игнорируем ошибки очистки, чтобы не ломать основной поток
+				' Игнорируем ошибки очистки
 			End Try
+
+			'Try
+			'	' Логируем текущее состояние памяти до очистки
+			'	Dim memBefore As Long = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024
+
+			'	' 1. Запрашиваем сборку мусора
+			'	GC.Collect()
+			'	' 2. Ждем завершения всех финализаторов
+			'	GC.WaitForPendingFinalizers()
+			'	' 3. Повторная сборка для освобождения объектов, ставших доступными после шага 2
+			'	GC.Collect()
+
+			'	Dim memAfter As Long = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024
+			'	' Можно раскомментировать логирование, если нужно видеть эффект в файле
+			'	' System.IO.File.AppendAllText(System.IO.Path.Combine(GetDebugFolder(), "memory_log.txt"), 
+			'	'     $"[Cleanup] Before: {memBefore} MB -> After: {memAfter} MB{vbCrLf}", Encoding.UTF8)
+			'Catch ex As Exception
+			'	' Игнорируем ошибки очистки, чтобы не ломать основной поток
+			'End Try
 		End Sub
 
 		Public Async Function IsLoggedInAsync() As Task(Of Boolean)
@@ -801,58 +846,174 @@ Namespace Kas
 		End Sub
 
 
-		' ================= 9. ВИНОВНАЯ ОРГАНИЗАЦИЯ =================
+
+
+		' ================= 9. ВИНОВНЫЕ (УНИВЕРСАЛЬНЫЙ GRID) =================
 		Public Sub ParseVinovnikOrganization(doc As HtmlDocument, result As OtsData)
-			' 1. Сначала пробуем стандартный поиск (сервисная/сторонняя организация)
-			Dim alienTable = doc.DocumentNode.SelectSingleNode("//table[@id='alien_guilty_table']")
-			If alienTable IsNot Nothing Then
-				Dim orgRow = alienTable.SelectSingleNode(".//tr[td[contains(., 'Наименование предприятия') or contains(., 'Наименования сервисной')]]")
-				If orgRow IsNot Nothing Then
-					Dim cells = orgRow.SelectNodes(".//td")
-					If cells IsNot Nothing AndAlso cells.Count >= 2 Then
-						Dim rawText = CleanText(cells(1).InnerText)
-						result.ThirdPartyOrg = CleanThirdPartyOrg(rawText)
-						log.AppendLine($"✓ Отнесен на (сервис): {result.ThirdPartyOrg}")
-						Exit Sub ' Нашли сервисную, выходим
-					End If
-				End If
-			End If
-
-
-
-
-
-
-			' 2. Если сервисную не нашли, проверяем на "эксплуатационный" характер
-			' Ищем текст в документе
-			' 2. Если сервисную не нашли, проверяем на "эксплуатационный" характер
-			Dim isExploitation = doc.DocumentNode.InnerHtml.Contains("Характер причины отказа</b>: эксплуатационный")
-
-			If isExploitation Then
-				Dim respTable = doc.DocumentNode.SelectSingleNode("//table[@id='responsible_table']")
-				If respTable IsNot Nothing Then
-					' Ищем строку, в которой НЕТ атрибута background (заголовки обычно с ним) 
-					' и которая содержит данные (больше 4 ячеек)
-					Dim dataRow = respTable.SelectSingleNode(".//tr[not(td[@style[contains(., 'background')]]) and count(td) >= 4]")
-
-					' Если XPath выше не сработал, берем просто последнюю строку таблицы
-					If dataRow Is Nothing Then
-						dataRow = respTable.SelectNodes(".//tr").LastOrDefault()
-					End If
-
-					If dataRow IsNot Nothing Then
-						Dim cells = dataRow.SelectNodes("td")
-						If cells IsNot Nothing AndAlso cells.Count >= 4 Then
-							' Индекс 3 — это 4-я колонка "Подразделение"
-							result.ThirdPartyOrg = CleanText(cells(3).InnerText)
-							log.AppendLine($"✓ Отнесен на (эксплуатация): {result.ThirdPartyOrg}")
+			Try
+				' === 1. Определяем ThirdPartyOrg (как раньше — правильно) ===
+				Dim alienTable = doc.DocumentNode.SelectSingleNode("//table[@id='alien_guilty_table']")
+				If alienTable IsNot Nothing Then
+					Dim orgRow = alienTable.SelectSingleNode(".//tr[td[contains(., 'Наименование предприятия') or contains(., 'Наименования сервисной') or contains(., 'Наименование сторонней')]]")
+					If orgRow IsNot Nothing Then
+						Dim cells = orgRow.SelectNodes(".//td")
+						If cells IsNot Nothing AndAlso cells.Count >= 2 Then
+							Dim rawText = GetCleanTextFromNode(cells(1))
+							result.ThirdPartyOrg = CleanThirdPartyOrg(rawText)
+							log.AppendLine($"✓ Отнесен на (сервис): {result.ThirdPartyOrg}")
 						End If
 					End If
 				End If
+
+				' === 2. Если сервисную не нашли — проверяем "эксплуатационный" ===
+				If String.IsNullOrWhiteSpace(result.ThirdPartyOrg) Then
+					Dim isExploitation = doc.DocumentNode.InnerHtml.Contains("Характер причины отказа</b>: эксплуатационный")
+
+					If isExploitation Then
+						Dim respTable = doc.DocumentNode.SelectSingleNode("//table[@id='responsible_table']")
+						If respTable IsNot Nothing Then
+							Dim dataRow = respTable.SelectSingleNode(".//tr[not(td[@style[contains(., 'background')]]) and count(td) >= 4]")
+							If dataRow Is Nothing Then
+								dataRow = respTable.SelectNodes(".//tr").LastOrDefault()
+							End If
+
+							If dataRow IsNot Nothing Then
+								Dim cells = dataRow.SelectNodes("td")
+								If cells IsNot Nothing AndAlso cells.Count >= 4 Then
+									result.ThirdPartyOrg = GetCleanTextFromNode(cells(3))
+									log.AppendLine($"✓ Отнесен на (эксплуатация): {result.ThirdPartyOrg}")
+								End If
+							End If
+						End If
+					End If
+				End If
+
+				' === 3. Параллельно собираем AlienGuiltyParams (только для инфо-вывода) ===
+				' ВАЖНО: ThirdPartyOrg здесь НЕ трогаем!
+				If alienTable IsNot Nothing Then
+					result.AlienGuiltyParams.Clear()
+
+					Dim rows = alienTable.SelectNodes("./tr | ./tbody/tr")
+
+					If rows IsNot Nothing Then
+						For Each row In rows
+							Dim tds = row.SelectNodes("./td")
+							If tds Is Nothing OrElse tds.Count < 2 Then Continue For
+
+							Dim rawLabel = GetCleanTextFromNode(tds(0))
+							Dim rawValue = GetCleanTextFromNode(tds(1))
+
+							Dim label = rawLabel.Trim()
+							Dim value = rawValue.Trim()
+
+							If String.IsNullOrWhiteSpace(label) OrElse String.IsNullOrWhiteSpace(value) Then Continue For
+							If value = "-" Then Continue For
+							If label.ToLower().Contains("клеймо") AndAlso value = "0" Then Continue For
+
+							result.AlienGuiltyParams.Add(New KeyValuePair(Of String, String)(label, value))
+						Next
+					End If
+
+					log.AppendLine($"✓ Сторонний виновный: найдено {result.AlienGuiltyParams.Count} строк")
+				End If
+
+			Catch ex As Exception
+				log.AppendLine($"!!! Ошибка парсинга виновных: {ex.Message}")
+			End Try
+		End Sub
+
+		' Вспомогательная функция: собирает текст из всех текстовых узлов,
+		' НЕ трогает переносы строк, схлопывает только пробелы и табы.
+		Private Function GetCleanTextFromNode(node As HtmlAgilityPack.HtmlNode) As String
+			If node Is Nothing Then Return ""
+
+			Dim sb As New System.Text.StringBuilder()
+
+			Dim textNodes = node.SelectNodes(".//text()")
+
+			If textNodes IsNot Nothing Then
+				For Each txtNode In textNodes
+					Dim txt = txtNode.InnerText
+					' NBSP -> обычный пробел
+					txt = txt.Replace(ChrW(160), " "c).Replace("&nbsp;", " ")
+					' Схлопываем ТОЛЬКО пробелы и табы, НЕ трогаем переносы строк
+					txt = System.Text.RegularExpressions.Regex.Replace(txt, "[ \t]+", " ")
+					' Нормализуем переносы
+					txt = txt.Replace(vbCrLf, vbLf).Replace(vbCr, vbLf)
+
+					If Not String.IsNullOrWhiteSpace(txt) Then
+						If sb.Length > 0 AndAlso Not sb.ToString().EndsWith(vbLf) Then
+							sb.Append(" ")
+						End If
+						sb.Append(txt)
+					End If
+				Next
 			End If
 
+			Return sb.ToString().Trim()
+		End Function
 
-		End Sub
+
+
+
+
+
+
+
+
+
+		'' ================= 9. ВИНОВНАЯ ОРГАНИЗАЦИЯ =================
+		'Public Sub ParseVinovnikOrganization(doc As HtmlDocument, result As OtsData)
+		'	' 1. Сначала пробуем стандартный поиск (сервисная/сторонняя организация)
+		'	Dim alienTable = doc.DocumentNode.SelectSingleNode("//table[@id='alien_guilty_table']")
+		'	If alienTable IsNot Nothing Then
+		'		Dim orgRow = alienTable.SelectSingleNode(".//tr[td[contains(., 'Наименование предприятия') or contains(., 'Наименования сервисной')]]")
+		'		If orgRow IsNot Nothing Then
+		'			Dim cells = orgRow.SelectNodes(".//td")
+		'			If cells IsNot Nothing AndAlso cells.Count >= 2 Then
+		'				Dim rawText = CleanText(cells(1).InnerText)
+		'				result.ThirdPartyOrg = CleanThirdPartyOrg(rawText)
+		'				log.AppendLine($"✓ Отнесен на (сервис): {result.ThirdPartyOrg}")
+		'				Exit Sub ' Нашли сервисную, выходим
+		'			End If
+		'		End If
+		'	End If
+
+
+
+
+
+
+		'' 2. Если сервисную не нашли, проверяем на "эксплуатационный" характер
+		'' Ищем текст в документе
+		'' 2. Если сервисную не нашли, проверяем на "эксплуатационный" характер
+		'Dim isExploitation = doc.DocumentNode.InnerHtml.Contains("Характер причины отказа</b>: эксплуатационный")
+
+		'	If isExploitation Then
+		'		Dim respTable = doc.DocumentNode.SelectSingleNode("//table[@id='responsible_table']")
+		'		If respTable IsNot Nothing Then
+		'			' Ищем строку, в которой НЕТ атрибута background (заголовки обычно с ним) 
+		'			' и которая содержит данные (больше 4 ячеек)
+		'			Dim dataRow = respTable.SelectSingleNode(".//tr[not(td[@style[contains(., 'background')]]) and count(td) >= 4]")
+
+		'			' Если XPath выше не сработал, берем просто последнюю строку таблицы
+		'			If dataRow Is Nothing Then
+		'				dataRow = respTable.SelectNodes(".//tr").LastOrDefault()
+		'			End If
+
+		'			If dataRow IsNot Nothing Then
+		'				Dim cells = dataRow.SelectNodes("td")
+		'				If cells IsNot Nothing AndAlso cells.Count >= 4 Then
+		'					' Индекс 3 — это 4-я колонка "Подразделение"
+		'					result.ThirdPartyOrg = CleanText(cells(3).InnerText)
+		'					log.AppendLine($"✓ Отнесен на (эксплуатация): {result.ThirdPartyOrg}")
+		'				End If
+		'			End If
+		'		End If
+		'	End If
+
+
+		'End Sub
 
 
 		' ================= 7. ПОСЛЕДСТВИЯ (СОБЫТИЯ, КОРПОРАТИВ И Т.Д.) =================
@@ -877,6 +1038,17 @@ Namespace Kas
 							If text.ToLower().Contains("орпоративное нарушение") Then
 								result.Korporativ = text
 							End If
+							' === НОВОЕ: ПАРСИНГ ВСПОМОГАТЕЛЬНОГО ЛОКОМОТИВА ===
+							If text.Contains("дан вспомогательный локомотив") OrElse
+					   text.Contains("вспом. локомотив") OrElse
+					   text.Contains("оказана помощь") Then
+
+								result.HasHelperLoco = True
+								' Сохраняем полный текст для отображения
+								result.HelperLocoInfo = Regex.Replace(text, "\s+", " ").Trim()
+								log.AppendLine($"✓ Вспом. локомотив: {result.HelperLocoInfo}")
+							End If
+							' ================================================
 						End If
 					Next
 
@@ -1442,14 +1614,7 @@ Namespace Kas
 		End Function
 
 
-		'''' <summary>
-		'''' Оптимизированная версия — принимает скомпилированный шаблон
-		'''' </summary>
-		'Private Function ExtractHiddenValueOptimized(html As String, patternBase As String, fieldValue As String) As String
-		'    Dim pattern = String.Format(patternBase, Regex.Escape(fieldValue))
-		'    Dim m = Regex.Match(html, pattern, RegexOptions.IgnoreCase Or RegexOptions.Singleline)
-		'    Return If(m.Success, m.Groups(1).Value.Trim(), "")
-		'End Function
+
 
 		Private Function HasNextPage(html As String, currentPage As Integer) As Boolean
 			Dim nextNum As String = (currentPage + 1).ToString()
@@ -1492,10 +1657,11 @@ Namespace Kas
 			Dim allRecords As New List(Of JournalRecord)
 			Dim seenIds As New HashSet(Of String)
 			Dim page As Integer = 1
-			Dim logPath = System.IO.Path.Combine(GetDebugFolder(), "fetch_log.txt")
+
 			Dim logLock As New Object()
 			Dim sw As New Stopwatch() ' ⏱ Таймер для замеров
 
+			Dim logPath = System.IO.Path.Combine(GetDebugFolder(), "fetch_log.txt")
 			Dim LogWrite = Sub(msg As String)
 							   SyncLock logLock
 								   System.IO.File.AppendAllText(logPath, $"[{DateTime.Now:HH:mm:ss.fff}] {msg}{vbCrLf}", Encoding.UTF8)
@@ -1581,6 +1747,7 @@ Namespace Kas
 
 							' ⏱ ЗАМЕР СЕТИ
 							sw.Restart()
+
 							Using tableResp = Await _httpClient.SendAsync(tableReq)
 								If Not tableResp.IsSuccessStatusCode Then Exit While
 
@@ -1643,6 +1810,10 @@ Namespace Kas
 					Catch ex As Exception
 						LogWrite($"💥 Ошибка обработки страницы {page}: {ex.Message}")
 						Exit While
+					Finally
+						' Гарантированная очистка локальных переменных метода
+						html = Nothing
+
 					End Try
 
 					page += 1
@@ -1650,114 +1821,6 @@ Namespace Kas
 				End While
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-				'While True
-				'	LogWrite($"📥 Страница {page}: подготовка...")
-
-				'	' 🔹 ЭТАП 1: Сообщаем серверу, какую страницу хотим (только для стр. 2+)
-				'	If page > 1 Then
-				'		LogWrite($"📤 Вызов tabSaveStatus для страницы {page}...")
-				'		Dim statusContent = New FormUrlEncodedContent(New Dictionary(Of String, String) From {
-				'			{"tab", reportTab},
-				'			{"activePage", page.ToString()},
-				'			{"operation", "update_journal_table_commit()"},
-				'			{"_", ""}
-				'		})
-
-				'		Using statusReq As New HttpRequestMessage(HttpMethod.Post, saveStatusUrl)
-				'			statusReq.Content = statusContent
-				'			statusReq.Headers.Referrer = New Uri($"{baseUrl}/kasant/journal.jsp?tab={reportTab}")
-				'			statusReq.Headers.TryAddWithoutValidation("X-Requested-With", "XMLHttpRequest")
-				'			statusReq.Headers.TryAddWithoutValidation("Accept", "text/javascript, text/html, application/xml, text/xml, */*")
-				'			statusReq.Headers.TryAddWithoutValidation("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
-				'			statusReq.Headers.TryAddWithoutValidation("X-Prototype-Version", "1.5.0")
-
-				'			Dim statusResp = Await _httpClient.SendAsync(statusReq)
-				'			Dim statusResult = Await statusResp.Content.ReadAsStringAsync()
-				'			LogWrite($"📡 Ответ tabSaveStatus: {statusResult.Trim()}")
-				'		End Using
-				'		Await Task.Delay(150)
-				'	End If
-
-				'	' 🔹 ЭТАП 2: Получаем таблицу для сохранённой страницы + ⏱ ЗАМЕР ВРЕМЕНИ
-				'	LogWrite($"📥 Запрос таблицы для страницы {page}...")
-				'	Dim rndVal = DateTimeOffset.Now.ToUnixTimeMilliseconds()
-
-				'	Using tableReq As New HttpRequestMessage(HttpMethod.Post, $"{tableUrl}?tab={reportTab}")
-				'		tableReq.Content = New StringContent($"=undefined&rndval={rndVal}", Encoding.UTF8, "application/x-www-form-urlencoded")
-				'		tableReq.Headers.Referrer = New Uri($"{baseUrl}/kasant/journal.jsp?tab={reportTab}")
-				'		tableReq.Headers.TryAddWithoutValidation("X-Requested-With", "XMLHttpRequest")
-				'		tableReq.Headers.TryAddWithoutValidation("Accept", "*/*")
-				'		tableReq.Headers.TryAddWithoutValidation("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
-
-				'		' ⏱ ЗАМЕР СЕТИ
-				'		sw.Restart()
-				'		Dim tableResp = Await _httpClient.SendAsync(tableReq)
-				'		'Dim html = Await tableResp.Content.ReadAsStringAsync()
-				'		Dim bytes = Await tableResp.Content.ReadAsByteArrayAsync()
-				'		Dim html = Encoding.GetEncoding("windows-1251").GetString(bytes)
-				'		sw.Stop()
-				'		Dim networkMs = sw.ElapsedMilliseconds
-
-				'		If Not tableResp.IsSuccessStatusCode OrElse String.IsNullOrWhiteSpace(html) Then Exit While
-
-				'		' ⏱ ЗАМЕР ПАРСИНГА
-				'		sw.Restart()
-				'		Dim pageRecords = ParseJournalList(html)
-				'		sw.Stop()
-				'		Dim parseMs = sw.ElapsedMilliseconds
-
-				'		' 📊 Вывод замеров в лог
-				'		LogWrite($"⏱ Стр. {page}: сеть {networkMs}мс | парсинг {parseMs}мс | найдено {pageRecords.Count}")
-
-				'		' === >>> ВСТАВКА НАЧАЛО <<< ===
-				'		If pageRecords.Count = 0 Then
-				'			Dim emptyPath = System.IO.Path.Combine(GetDebugFolder(),
-				'	  $"debug_empty_page{page}_{DateTime.Now:yyyyMMdd_HHmmss}.html")
-				'			System.IO.File.WriteAllText(emptyPath, html, Encoding.GetEncoding("windows-1251"))
-				'			LogWrite($"⚠ Пустая страница {page}, HTML сохранён: {emptyPath}")
-				'			Exit While
-				'		End If
-				'		' === >>> ВСТАВКА КОНЕЦ <<< ===
-
-
-				'		'If pageRecords.Count = 0 Then Exit While
-
-				'		' 🔹 Добавление уникальных
-				'		Dim addedCount As Integer = 0
-				'		For Each rec In pageRecords
-				'			If seenIds.Contains(rec.ViolId) Then
-				'				' LogWrite($"⚠ Дубль: {rec.ViolId} (стр. {page})") ' Закомментировано, чтобы не спамить лог
-				'			Else
-				'				seenIds.Add(rec.ViolId)
-				'				allRecords.Add(rec)
-				'				addedCount += 1
-				'			End If
-				'		Next
-				'		LogWrite($"➕ Добавлено: {addedCount}. Всего: {allRecords.Count}")
-				'		progress?.Report(allRecords.Count)
-
-				'		If Not HasNextPage(html, page) Then
-				'			LogWrite($"🏁 Последняя страница: {page}")
-				'			Exit While
-				'		End If
-				'	End Using
-
-				'	page += 1
-				'	Await Task.Delay(200)
-				'End While
 
 			Catch ex As Exception
 				LogWrite($"💥 Ошибка: {ex.Message}")
@@ -1801,6 +1864,9 @@ Namespace Kas
 
 				Catch ex As Exception
 					LogWrite($"💥 Ошибка при сохранении Excel: {ex.Message}")
+				Finally
+					' Финальная очистка после выхода из метода
+					ForceCleanup()
 				End Try
 			End If
 
@@ -1822,31 +1888,84 @@ Namespace Kas
 			Try
 				Dim debugFolder = GetDebugFolder()
 
-				' Просто загружаем HTML
+				' 1. Загружаем HTML
 				Using response = Await _httpClient.GetAsync(reportUrl)
 					response.EnsureSuccessStatusCode()
 					bytes = Await response.Content.ReadAsByteArrayAsync()
+
+					' Проверяем, не пришел ли пустой ответ
+					If bytes Is Nothing OrElse bytes.Length = 0 Then
+						'LogWrite("⚠ Получен пустой ответ от сервера при загрузке отчета")
+						Return New List(Of InvestigationReportItem)()
+					End If
+
 					html = Encoding.GetEncoding("windows-1251").GetString(bytes)
 				End Using
 
-				' Сохраняем для отладки (если нужно)
+				' 2. 🔑 ПРОВЕРКА НА РАЗЛОГИН ИЛИ ОШИБКУ СЕРВЕРА
+				' Если сервер вернул форму входа или техническую ошибку, парсить бессмысленно
+				If html.Contains("anauth_panel") OrElse
+				   html.Contains("id_prog") OrElse
+				   html.Contains("Ошибка выполнения запроса") OrElse
+				   html.Length < 1000 Then ' Слишком короткий ответ обычно означает ошибку
+
+					'LogWrite("⚠ Сессия неактивна или ошибка сервера. Попытка переподключения...")
+
+					' Пробуем перелогиниться
+					Dim loginOk = Await EnsureConnectedAsync()
+
+					If Not loginOk Then
+						'LogWrite("❌ Не удалось восстановить сессию.")
+						Return New List(Of InvestigationReportItem)()
+					End If
+
+					' Повторяем запрос после успешного входа
+					'LogWrite("✅ Вход выполнен. Повторная загрузка отчета...")
+					Using response = Await _httpClient.GetAsync(reportUrl)
+						response.EnsureSuccessStatusCode()
+						bytes = Await response.Content.ReadAsByteArrayAsync()
+						html = Encoding.GetEncoding("windows-1251").GetString(bytes)
+					End Using
+
+					' Если после повторного входа все равно пришла страница входа - выходим
+					If html.Contains("anauth_panel") Then
+						'LogWrite("❌ После перелогина всё ещё приходит форма входа.")
+						Return New List(Of InvestigationReportItem)()
+					End If
+				End If
+
+				' 3. Сохраняем для отладки (если нужно)
 				Dim fileName = If(reportUrl.Contains("dt_nd"), "investigation_report_current.html", "investigation_report_previous.html")
 				System.IO.File.WriteAllText(System.IO.Path.Combine(debugFolder, fileName), html, Encoding.GetEncoding("windows-1251"))
 
-				' Парсим и возвращаем
+				' 4. Парсим и возвращаем
+				' ВАЖНО: Убедитесь, что внутри ParseInvestigationReport есть проверки на Nothing
 				Return ParseInvestigationReport(html)
+
+			Catch ex As NullReferenceException
+				' Специальный перехват для вашей ошибки
+				'LogWrite($"💥 NullReferenceException в FetchInvestigationReportAsync: {ex.Message}")
+				'LogWrite($"📍 StackTrace: {ex.StackTrace}")
+
+				' Сохраняем проблемный HTML, чтобы понять, что пришло с сервера
+				If Not String.IsNullOrEmpty(html) Then
+					Dim errorPath = System.IO.Path.Combine(GetDebugFolder(), $"ERROR_null_ref_{DateTime.Now:yyyyMMdd_HHmmss}.html")
+					System.IO.File.WriteAllText(errorPath, html, Encoding.GetEncoding("windows-1251"))
+					'LogWrite($"💾 Проблемная страница сохранена: {errorPath}")
+				End If
+
+				Return New List(Of InvestigationReportItem)()
 
 			Catch ex As Exception
 				Dim debugFolder = GetDebugFolder()
 				System.IO.File.WriteAllText(System.IO.Path.Combine(debugFolder, "investigation_report_error.txt"),
-		$"Ошибка: {ex.Message}{vbCrLf}{vbCrLf}{ex.StackTrace}")
+					$"Ошибка: {ex.Message}{vbCrLf}{vbCrLf}{ex.StackTrace}")
 				Return New List(Of InvestigationReportItem)()
+
 			Finally
-				' === КЛЮЧЕВОЕ ДЛЯ ПАМЯТИ ===
-				' Освобождаем большие массивы данных сразу после использования
+				' === ОСВОБОЖДЕНИЕ ПАМЯТИ ===
 				html = Nothing
 				bytes = Nothing
-				' Принудительно запускаем сборщик мусора
 				GC.Collect()
 			End Try
 
@@ -1855,19 +1974,20 @@ Namespace Kas
 
 
 
-
+			'	Dim html As String = Nothing
+			'	Dim bytes As Byte() = Nothing
 
 			'	Try
 			'		Dim debugFolder = GetDebugFolder()
 
 			'		' Просто загружаем HTML
-			'		Dim response = Await _httpClient.GetAsync(reportUrl)
-			'		response.EnsureSuccessStatusCode()
+			'		Using response = Await _httpClient.GetAsync(reportUrl)
+			'			response.EnsureSuccessStatusCode()
+			'			bytes = Await response.Content.ReadAsByteArrayAsync()
+			'			html = Encoding.GetEncoding("windows-1251").GetString(bytes)
+			'		End Using
 
-			'		Dim bytes = Await response.Content.ReadAsByteArrayAsync()
-			'		Dim html = Encoding.GetEncoding("windows-1251").GetString(bytes)
-
-			'		' Сохраняем для отладки
+			'		' Сохраняем для отладки (если нужно)
 			'		Dim fileName = If(reportUrl.Contains("dt_nd"), "investigation_report_current.html", "investigation_report_previous.html")
 			'		System.IO.File.WriteAllText(System.IO.Path.Combine(debugFolder, fileName), html, Encoding.GetEncoding("windows-1251"))
 
@@ -1879,7 +1999,17 @@ Namespace Kas
 			'		System.IO.File.WriteAllText(System.IO.Path.Combine(debugFolder, "investigation_report_error.txt"),
 			'$"Ошибка: {ex.Message}{vbCrLf}{vbCrLf}{ex.StackTrace}")
 			'		Return New List(Of InvestigationReportItem)()
+			'	Finally
+			'		' === КЛЮЧЕВОЕ ДЛЯ ПАМЯТИ ===
+			'		' Освобождаем большие массивы данных сразу после использования
+			'		html = Nothing
+			'		bytes = Nothing
+			'		' Принудительно запускаем сборщик мусора
+			'		ForceCleanup()
+			'		'GC.Collect()
 			'	End Try
+
+
 
 		End Function
 
@@ -1948,55 +2078,9 @@ Namespace Kas
 				html = Nothing
 				bytes = Nothing
 				' Принудительно запускаем сборщик мусора
-				GC.Collect()
+				ForceCleanup()
 			End Try
 
-
-
-
-
-
-
-			'	Try
-			'		Dim debugFolder = GetDebugFolder()
-
-			'		' 1. Первый запрос
-			'		Dim response = Await Fetcher.HttpClient.GetAsync(reportUrl)
-			'		response.EnsureSuccessStatusCode()
-			'		Dim bytes = Await response.Content.ReadAsByteArrayAsync()
-			'		Dim html = Encoding.GetEncoding("windows-1251").GetString(bytes)
-
-			'		' 2. 🔑 ПРОВЕРКА НА РАЗЛОГИН (если пришла форма входа)
-			'		If html.Contains("anauth_panel") OrElse html.Contains("id_prog") Then
-			'			MW.InfoBLOK.AddItem("⚠ Сессия КАСАНТ неактивна. Выполняю автоматический вход...")
-			'			Dim loginOk = Await Fetcher.EnsureConnectedAsync()
-
-			'			If Not loginOk Then
-			'				MW.InfoBLOK.AddItem("❌ Не удалось войти в КАСАНТ. Проверьте логин/пароль в настройках.")
-			'				Return New List(Of InvestigationReportItem)()
-			'			End If
-
-			'			' 3. Повторяем запрос после успешного входа
-			'			MW.InfoBLOK.AddItem("✅ Вход выполнен. Повторяю загрузку отчёта...")
-			'			response = Await Fetcher.HttpClient.GetAsync(reportUrl)
-			'			response.EnsureSuccessStatusCode()
-			'			bytes = Await response.Content.ReadAsByteArrayAsync()
-			'			html = Encoding.GetEncoding("windows-1251").GetString(bytes)
-			'		End If
-
-			'		' 4. Сохраняем для отладки
-			'		Dim fileName = If(isPrevious, "depot_report_previous.html", "depot_report_current.html")
-			'		File.WriteAllText(System.IO.Path.Combine(debugFolder, fileName), html, Encoding.GetEncoding("windows-1251"))
-
-			'		' 5. Парсим с учётом флага фильтрации СЛД
-			'		Return ParseDepotReport(html, filterSLD)
-
-			'	Catch ex As Exception
-			'		Dim debugFolder = GetDebugFolder()
-			'		System.IO.File.WriteAllText(System.IO.Path.Combine(debugFolder, "depot_report_error.txt"),
-			'$"Ошибка: {ex.Message}{vbCrLf}{vbCrLf}{ex.StackTrace}")
-			'		Return New List(Of InvestigationReportItem)()
-			'	End Try
 
 		End Function
 
@@ -2014,6 +2098,114 @@ Namespace Kas
 
 			Return debugFolder
 		End Function
+
+		''' <summary>
+		''' Сохраняет данные о даче вспомогательного локомотива
+		''' Аналог JS функции helperLocomotion(id_viol, dor_kod)
+		''' </summary>
+		Public Async Function SaveHelperLocomotiveAsync(violId As String, dorKod As String,
+												trainNumber As String, orderInfo As String,
+												isFollowing As Boolean) As Task
+
+			Dim debugFolder = GetDebugFolder()
+			Dim logPath = System.IO.Path.Combine(debugFolder, "helper_loco_log.txt")
+
+			' Локальный логгер для этого файла
+			Dim LogWrite = Sub(msg As String)
+							   Try
+								   SyncLock Me
+									   System.IO.File.AppendAllText(logPath, $"[{DateTime.Now:HH:mm:ss.fff}] {msg}{vbCrLf}", Encoding.UTF8)
+								   End SyncLock
+							   Catch ex As Exception
+							   End Try
+						   End Sub
+
+			Dim baseUrl = $"{_baseUrl}/templates/helper_locomotion.jsp?id_viol={violId}&dor_kod={dorKod}"
+			LogWrite($"[START] Начало сохранения для отказа {violId} (Дорога: {dorKod})")
+
+			Try
+				' Генерация технических параметров (как в твоей рабочей процедуре)
+				Dim rndVal As String = New Random().NextDouble().ToString("F16")
+				Dim timestamp As String = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString()
+
+				' ШАГ 1: Инициализация/Отправка данных (POST)
+				' Используем тот же трюк с телом "=undefined&rndval=...", который работает в КАСАНТе
+				Using request As New HttpRequestMessage(HttpMethod.Post, baseUrl)
+					request.Content = New StringContent($"=undefined&rndval={timestamp}", Encoding.UTF8, "application/x-www-form-urlencoded")
+
+					' Параметры передаем в URL, так как тело занято под "мусор" для сервера
+					Dim finalUrl = $"{baseUrl}" &
+						   $"&train_helper_locomotion={Uri.EscapeDataString(trainNumber)}" &
+						   $"&prikaz_helper_locomotion={Uri.EscapeDataString(orderInfo)}" &
+						   $"&flg_helper_locomotion={If(isFollowing, "on", "")}"
+
+					request.RequestUri = New Uri(finalUrl)
+
+					request.Headers.Referrer = New Uri($"{_baseUrl}/journal.jsp?tab=1100532439")
+					request.Headers.TryAddWithoutValidation("X-Requested-With", "XMLHttpRequest")
+					request.Headers.TryAddWithoutValidation("Accept", "*/*")
+					request.Headers.TryAddWithoutValidation("Origin", _baseUrl)
+
+					LogWrite($"[POST] Отправка данных: Поезд='{trainNumber}', Приказ='{orderInfo}'")
+
+					' Используем ГЛОБАЛЬНЫЙ HttpClient из класса (как в Fetcher.HttpClient)
+					Dim response = Await _httpClient.SendAsync(request)
+
+					If Not response.IsSuccessStatusCode Then
+						Throw New Exception($"Ошибка сервера: HTTP {CInt(response.StatusCode)}")
+					End If
+
+					Dim respText = Await response.Content.ReadAsStringAsync()
+
+					' Проверяем на разлогин или ошибки
+					If respText.Contains("anauth_panel") OrElse respText.Contains("id_prog") Then
+						Throw New Exception("Сессия истекла. Требуется повторный вход.")
+					End If
+
+					If respText.Contains("Ошибка") OrElse respText.Contains("error") Then
+						Throw New Exception("Сервер вернул ошибку при сохранении данных.")
+					End If
+
+					LogWrite($"[SUCCESS] Данные успешно сохранены!")
+
+				End Using
+			Catch ex As Exception
+				LogWrite($"[ERROR] ОШИБКА: {ex.Message}")
+				Throw
+			End Try
+
+
+			'Dim url = $"{_baseUrl}/templates/helper_locomotion.jsp?id_viol={violId}&dor_kod={dorKod}"
+
+			'' Формируем тело запроса вручную, чтобы гарантировать windows-1251
+			'Dim body = $"train_helper_locomotion={Uri.EscapeDataString(trainNumber)}" &
+			'   $"&prikaz_helper_locomotion={Uri.EscapeDataString(orderInfo)}" &
+			'   $"&flg_helper_locomotion={If(isFollowing, "on", "")}"
+
+			'Using request As New HttpRequestMessage(HttpMethod.Post, url)
+			'	request.Content = New StringContent(body, Encoding.GetEncoding("windows-1251"), "application/x-www-form-urlencoded")
+			'	request.Headers.Referrer = New Uri($"{_baseUrl}/journal.jsp?tab=1100532439")
+			'	request.Headers.TryAddWithoutValidation("X-Requested-With", "XMLHttpRequest")
+			'	request.Headers.TryAddWithoutValidation("Accept", "*/*")
+
+			'	' Используем СУЩЕСТВУЮЩИЙ клиент класса (с куками!)
+			'	Dim response = Await _httpClient.SendAsync(request)
+
+			'	If Not response.IsSuccessStatusCode Then
+			'		Dim code As Integer = CInt(response.StatusCode)
+			'		Throw New Exception($"HTTP {code}: {response.ReasonPhrase}")
+			'	End If
+
+			'	Dim responseBody = Await response.Content.ReadAsStringAsync()
+
+			'	' Проверка на ошибки КАСАНТа
+			'	If responseBody.Contains("anauth_panel") OrElse responseBody.Contains("Ошибка") Then
+			'		Throw New Exception("Сессия истекла или сервер вернул ошибку.")
+			'	End If
+			'End Using
+		End Function
+
+
 	End Class
 End Namespace
 

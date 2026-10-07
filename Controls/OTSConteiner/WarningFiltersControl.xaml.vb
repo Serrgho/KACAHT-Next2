@@ -52,7 +52,7 @@ Namespace Kas
                 bordr.Visibility = Visibility.Collapsed
                 RaiseEvent FilterApplied(filtered)
             End If
-
+            filtered = Nothing
             e.Handled = True
         End Sub
 
@@ -76,7 +76,7 @@ Namespace Kas
                     items = source.Cast(Of Otkaz)()
                 End Try
             End If
-
+            source = Nothing
             Dim otkazType = GetType(Otkaz)
             Dim parts As New List(Of String)
 
@@ -147,7 +147,7 @@ Namespace Kas
                         End If
                 End Select
             Next
-
+            items = Nothing
             ' 3. Управление оранжевым бордером
             Dim isVisible = parts.Count > 0
             If isVisible Then
@@ -159,13 +159,7 @@ Namespace Kas
             End If
         End Sub
 
-        Public Sub ShowAllWarnings()
-            EmptyFieldsBorder.Visibility = Visibility.Visible
-            VidTyagiBorder.Visibility = Visibility.Visible
-            IsVioletsBorder.Visibility = Visibility.Visible
-            IsRedsMashBrdr.Visibility = Visibility.Visible
-            IsEmptyPCHBrdr.Visibility = Visibility.Visible
-        End Sub
+
 
     End Class
 End Namespace

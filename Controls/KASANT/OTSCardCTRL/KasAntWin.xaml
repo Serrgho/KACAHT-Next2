@@ -12,18 +12,19 @@
 	<Border Padding="10" Background="{StaticResource AppBackBrush}">
 		
 		<Grid >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-			<RowDefinition Height="Auto"/>
-				<RowDefinition  MaxHeight="400"/>
-				<RowDefinition  MaxHeight="800"/>
-        </Grid.RowDefinitions>
-		
-		<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="2">  
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition MaxHeight="600"/>
+				<RowDefinition MaxHeight="800"/>
+			</Grid.RowDefinitions>
+
+			<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="2">  
 			<Border BorderThickness="2" BorderBrush="{StaticResource ScrolBarBrush}" CornerRadius="4">
 					<StackPanel Orientation="Horizontal" Margin="2">
+						<!--<Button x:Name="btnHelperLoco" Content="🚂 Вспом. локомотив" Style="{StaticResource PopupStyleButton}" Height="30"	Margin="5 0" Padding="2" Click="btnHelperLoco_Click" ToolTip="Ввести данные о даче вспомогательного локомотива"/>-->
 						<Button x:Name="btnLoad" Content="🔄️" Style="{StaticResource PopupStyleButton}" Height="30" FontSize="20" Padding="0" Foreground="DarkGreen" FontWeight="Bold" ToolTip="Обновить" Margin="2" Click="btnLoad_Click"/>
 						<TextBlock  Text="Номер отказа:" VerticalAlignment="Center" Margin="10,0"/>
 						<TextBox x:Name="txtViolId" Width="150" VerticalContentAlignment="Center" FontSize="18" Background="{StaticResource AppBackBrush}"/>
@@ -76,7 +77,7 @@
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
 				<!-- Место отказа -->
-				<ColumnDefinition Width="480"/>
+				<ColumnDefinition Width="500"/>
 				<!-- Поезда: занимает остаток -->
 			</Grid.ColumnDefinitions>
 
@@ -95,8 +96,8 @@
 
 			<!-- Задержанные поезда -->
 				<!--GroupBox Grid.Column="1" Header="Задержанные поезда" Margin="2" Padding="5" Background="Transparent">-->
-				<Border Grid.Column="1" BorderBrush="{StaticResource SplitterBrush}" BorderThickness="0.5" Padding="2">
-					<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="auto" MaxHeight="300" >
+				<Border Grid.Column="1" BorderBrush="{StaticResource SplitterBrush}" BorderThickness="0.5" Padding="2" >
+					<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="auto" Margin="5">
 					<ScrollViewer.Resources>
 						<Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
 					</ScrollViewer.Resources>

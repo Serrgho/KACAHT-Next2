@@ -81,16 +81,26 @@
 
         ' Создание одной кнопки
         Private Sub CreateZakemButton(parentPanel As StackPanel, key As String, fullName As String)
-            Dim btn As New Button() With {
-                .Content = fullName,
-                .Tag = key,
-                .Height = 30,
-                .Margin = New Thickness(2)
-            }
 
-            ' Пытаемся применить стиль из ресурсов (если есть)
+            Dim btn As New Button() With {
+                   .Content = fullName,
+                   .Tag = key,
+                   .Height = 30,
+                   .Margin = New Thickness(2)
+               }
+
+            ' Применяем базовый стиль из ресурсов (если есть)
             Dim popupStyle = TryCast(FindResource("PopupStyleButton"), Style)
-            If popupStyle IsNot Nothing Then btn.Style = popupStyle
+            If popupStyle IsNot Nothing Then
+                btn.Style = popupStyle
+            End If
+
+            ' Устанавливаем цвет фона используя общую логику Otkaz
+            Dim brushKey As String = Otkaz.GetZakemBrushKey(key)
+            btn.Background = Otkaz.GetBrushFromResource(brushKey)
+
+            ' Опционально: можно сделать текст более контрастным, если фон темный
+            ' Но пока оставим стандартный черный или наследуемый
 
             ' Обработчик клика
             AddHandler btn.Click,
@@ -101,14 +111,42 @@
                 End Sub
 
             parentPanel.Children.Add(btn)
+
+
+
+            'Dim btn As New Button() With {
+            '    .Content = fullName,
+            '    .Tag = key,
+            '    .Height = 30,
+            '    .Margin = New Thickness(2)
+            '}
+
+            '' Пытаемся применить стиль из ресурсов (если есть)
+            'Dim popupStyle = TryCast(FindResource("PopupStyleButton"), Style)
+            'If popupStyle IsNot Nothing Then btn.Style = popupStyle
+
+            '' Обработчик клика
+            'AddHandler btn.Click,
+            '    Sub(sender As Object, e As RoutedEventArgs)
+            '        Dim clickedBtn = DirectCast(sender, Button)
+            '        HighlightButton(clickedBtn)
+            '        OkButton.IsEnabled = True
+            '    End Sub
+
+            'parentPanel.Children.Add(btn)
         End Sub
 
         ' Подсветка выбранной кнопки
         Private Sub HighlightButton(selectedBtn As Button)
+
+
             ClearButtonSelection()
+
             If selectedBtn IsNot Nothing Then
+                ' При выделении меняем фон на акцентный (LightBlue)
                 selectedBtn.Background = Brushes.LightBlue
                 selectedBtn.Foreground = Brushes.DarkBlue
+
                 selectedBtn.BringIntoView()
 
                 _selectedButton = selectedBtn
@@ -121,20 +159,57 @@
                 Else
                     PanelAlienSLD.Visibility = Visibility.Collapsed
                 End If
-
             End If
+
+
+
+            'ClearButtonSelection()
+            'If selectedBtn IsNot Nothing Then
+            '    selectedBtn.Background = Brushes.LightBlue
+            '    selectedBtn.Foreground = Brushes.DarkBlue
+            '    selectedBtn.BringIntoView()
+
+            '    _selectedButton = selectedBtn
+            '    _selectedKey = selectedBtn.Tag.ToString()
+
+            '    ' Показываем панель только если текст содержит "СЛД"
+            '    Dim txt = selectedBtn.Content?.ToString()
+            '    If txt IsNot Nothing AndAlso txt.Contains("СЛД") Then
+            '        PanelAlienSLD.Visibility = Visibility.Visible
+            '    Else
+            '        PanelAlienSLD.Visibility = Visibility.Collapsed
+            '    End If
+
+            'End If
         End Sub
 
         ' Сброс выделения всех кнопок
         Private Sub ClearButtonSelection()
+
             For Each btn As Button In RadioPanel.Children.OfType(Of Button)()
-                btn.ClearValue(Button.BackgroundProperty)
+                ' Восстанавливаем исходный цвет по ключу
+                Dim key As String = btn.Tag.ToString()
+                Dim brushKey As String = Otkaz.GetZakemBrushKey(key)
+                btn.Background = Otkaz.GetBrushFromResource(brushKey)
+
+                ' Сбрасываем цвет текста
                 btn.ClearValue(Button.ForegroundProperty)
             Next
+
             _selectedButton = Nothing
             _selectedKey = ""
             OkButton.IsEnabled = False
             PanelAlienSLD.Visibility = Visibility.Collapsed
+
+
+            'For Each btn As Button In RadioPanel.Children.OfType(Of Button)()
+            '    btn.ClearValue(Button.BackgroundProperty)
+            '    btn.ClearValue(Button.ForegroundProperty)
+            'Next
+            '_selectedButton = Nothing
+            '_selectedKey = ""
+            'OkButton.IsEnabled = False
+            'PanelAlienSLD.Visibility = Visibility.Collapsed
         End Sub
 
         ' --- СОБЫТИЯ ---

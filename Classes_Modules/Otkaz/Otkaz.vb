@@ -361,10 +361,14 @@ Namespace Kas
             Set
                 If _SerLokExact <> Value Then
                     _SerLokExact = Value
+                    If _SerLokExact = "" Then
+                        VidT = ""
+                    End If
                     OnPropertyChanged(NameOf(SerLokExact))
                     OnPropertyChanged(NameOf(SerLok))
                     OnPropertyChanged(NameOf(SerLokPripLokTXT))
                     OnPropertyChanged(NameOf(SerLokNumLokTXT))
+                    OnPropertyChanged(NameOf(VidT))
                 End If
             End Set
         End Property
@@ -478,6 +482,35 @@ Namespace Kas
             End Get
         End Property
 
+        <JsonIgnore>
+        Public ReadOnly Property Poosnik As Boolean
+            Get
+                If SerLokExact <> "" AndAlso NumLok <> "" Then
+                    If SerLokExact = "3ЭС5К" Then
+                        ' Извлекаем только числовую часть до слэша (если есть)
+                        Dim numPart As String = NumLok
+                        If numPart.Contains("/") Then
+                            numPart = numPart.Split("/"c)(0).Trim()
+                        End If
+
+                        ' Пытаемся преобразовать в число
+                        Dim numValue As Integer
+                        If Integer.TryParse(numPart, numValue) Then
+                            Return numValue >= 896
+                        Else
+                            ' Если не удалось преобразовать - возвращаем False
+                            Return False
+                        End If
+                    Else
+                        Return False
+                    End If
+                Else
+                    Return False
+                End If
+            End Get
+        End Property
+
+
         ''' <summary>
         ''' (59) машинист
         ''' </summary>
@@ -543,24 +576,60 @@ Namespace Kas
             End Get
         End Property
 
+        ' Допустимые приписки на Красноярской ж.д. (свои + приезжие)
+        Private Shared ReadOnly ALLOWED_PRIPISKI As String() = {
+    "ТЧЭ Боготол",
+    "ТЧЭ Красноярск",
+    "ТЧЭ Иланская",
+    "ТЧЭ Ачинск",
+    "ТЧЭ Абакан",
+    "ТЧЭ Тайга",
+    "ТЧЭ Тайшет",
+    "ТЧЭ Вихоревка",
+    "ТЧЭ Нижнеудинск"
+}
+
+
+        Private Shared Function HasText(s As String) As Boolean
+            Return Not String.IsNullOrWhiteSpace(s)
+        End Function
+
+        Private Shared Function Contains(s As String, subb As String) As Boolean
+            Return HasText(s) AndAlso s.IndexOf(subb, StringComparison.OrdinalIgnoreCase) >= 0
+        End Function
+
+        Private Shared Function IsAllowedPripiska(pripMash As String) As Boolean
+            If Not HasText(pripMash) Then Return False
+            Return ALLOWED_PRIPISKI.Any(Function(t) Contains(pripMash, t))
+        End Function
+
 
         Public ReadOnly Property MashPripTXT_IsRed As Boolean
             Get
-                'если маш указан, дорога не крас и не ГИД 
-                If (Not String.IsNullOrWhiteSpace(Mash)) AndAlso (Not MestoOTS_Dor.ToLower.Contains("крас") AndAlso (Not String.IsNullOrWhiteSpace(Istochnik) AndAlso Not Istochnik.ToLower.Contains("гид"))) Then
-                    Return True
-                    'если маш НЕ указан, дорога крас и ГИД или ручвв
-                ElseIf (String.IsNullOrWhiteSpace(Mash)) AndAlso (MestoOTS_Dor.ToLower.Contains("крас") AndAlso (Not String.IsNullOrWhiteSpace(Istochnik) AndAlso (Istochnik.ToLower.Contains("гид") Or Istochnik.ToLower.Contains("руч")))) Then
-                    Return True
-                    'если маш НЕ указан, дорога крас и ВСЖД
-                ElseIf (String.IsNullOrWhiteSpace(Mash)) AndAlso (MestoOTS_Dor.ToLower.Contains("крас") AndAlso (Not String.IsNullOrWhiteSpace(Istochnik) AndAlso (Not Istochnik.ToLower.Contains("гид") AndAlso (Not Istochnik.ToLower.Contains("руч"))))) Then
-                    Return True
-                    'если маш НЕ указан, дорога НЕ крас и ГИД 
-                ElseIf (String.IsNullOrWhiteSpace(Mash)) AndAlso (Not MestoOTS_Dor.ToLower.Contains("крас") AndAlso (Not String.IsNullOrWhiteSpace(Istochnik) AndAlso Istochnik.ToLower.Contains("гид"))) Then
-                    Return True
-                Else
-                    Return False
-                End If
+                Dim mashOk As Boolean = HasText(Mash)
+                Dim dorKras As Boolean = Contains(MestoOTS_Dor, "крас")
+                Dim isGid As Boolean = Contains(Istochnik, "гид")
+                Dim isRuch As Boolean = Contains(Istochnik, "руч")
+                Dim istoOk As Boolean = HasText(Istochnik)
+
+                ' 1. Машинист есть, дорога не Крас, источник не ГИД
+                If mashOk AndAlso Not dorKras AndAlso istoOk AndAlso Not isGid Then Return True
+
+                ' 2. Машинист есть, ГИД, приписка не наша  ← ваш кейс
+                If mashOk AndAlso istoOk AndAlso isGid AndAlso Not IsAllowedPripiska(PripMash) Then Return True
+
+                ' 3. Машиниста нет, дорога Крас, ГИД или ручвв
+                If Not mashOk AndAlso dorKras AndAlso istoOk AndAlso (isGid Or isRuch) Then Return True
+
+                ' 4. Машиниста нет, дорога Крас, источник ВСЖД (не ГИД и не руч)
+                If Not mashOk AndAlso dorKras AndAlso istoOk AndAlso Not isGid AndAlso Not isRuch Then Return True
+
+                ' 5. Машиниста нет, дорога не Крас, ГИД
+                If Not mashOk AndAlso Not dorKras AndAlso istoOk AndAlso isGid Then Return True
+
+                Return False
+
+
             End Get
         End Property
 
@@ -1540,6 +1609,57 @@ Namespace Kas
 
         End Property
 
+        ''' <summary>
+        ''' Возвращает ключ ресурса кисти (Brush) для заданного кода "За кем"
+        ''' </summary>
+        Friend Shared Function GetZakemBrushKey(code As String) As String
+            If String.IsNullOrEmpty(code) Then Return "AppBackBrush"
+
+            Dim raw = code.ToLower()
+
+            Select Case True
+                Case raw Like "слд*"
+                    Return "SLDBackBrush"
+                Case raw Like "*окорем*"
+                    Return "LocoRemBackBrush"
+                Case raw Like "*окостро*"
+                    Return "LocoStroyBackBrush"
+                Case raw Like "*ублика*"
+                    Return "DublicatBackBrush"
+                Case raw Like "*ехнол*"
+                    Return "TechnologyBackBrush"
+                Case raw = "тч"
+                    Return "TCHBackBrush"
+                Case raw Like "проч*", raw = "тч9"
+                    Return "ProchBackBrush"
+                Case Else
+                    ' Для ТР и остальных случаев, если нужно специфичное поведение
+                    ' Если код пустой, но KtoZakryl = ТР, это обрабатывается в свойстве экземпляра,
+                    ' но здесь мы работаем только с кодом. Можно добавить проверку на ТР явно:
+                    If raw Like "тр*" Then Return "TRBackBrush"
+
+                    Return "AppBackBrush"
+            End Select
+        End Function
+
+
+
+
+        ''' <summary>
+        ''' Получает Brush из ресурсов по ключу
+        ''' </summary>
+        Friend Shared Function GetBrushFromResource(key As String) As Brush
+            If String.IsNullOrEmpty(key) Then Return Nothing
+
+            Dim res = Application.Current.TryFindResource(key)
+            If res IsNot Nothing Then
+                Return TryCast(res, Brush)
+            End If
+
+            ' Фоллбек на дефолтную кисть приложения
+            Dim defaultRes = Application.Current.TryFindResource("AppBackBrush")
+            Return TryCast(defaultRes, Brush)
+        End Function
 
 
 
@@ -1649,14 +1769,16 @@ Namespace Kas
 
 
 
-        '''' <summary>
-        '''' Not "*ублика*" Not "*ехнолог*" Or <> "тч9"
-        '''' </summary>
-        <JsonIgnore> Public ReadOnly Property Uslovie4() As Boolean
+
+        ''' <summary>
+        ''' Not "*ублика*" Not "*ехнолог*" Or <> "тч9"
+        ''' </summary>
+        <JsonIgnore>
+        Public ReadOnly Property Uslovie4() As Boolean
             Get
                 'это короткая запись
                 Dim s As String = If(ZaKemCode, "").ToLower()
-                Return Not {"ублика", "ехнолог", "тч9"}.Any(Function(w) s.Contains(w))
+                Return Not {"ублика", "ехнолог", "п.5.15"}.Any(Function(w) s.Contains(w))
             End Get
         End Property
 
@@ -1971,6 +2093,7 @@ Namespace Kas
             ' ... можно добавить другие
         End Enum
         Friend Shared Function GetZakemByFilter(filter As ZakemFilter) As Dictionary(Of String, String)
+
             Dim keys As String() = Nothing
             Select Case filter
                 Case ZakemFilter.Full
@@ -1985,12 +2108,13 @@ Namespace Kas
                     Return New Dictionary(Of String, String)
             End Select
 
-            ' 2. Теперь keys видна здесь, и код сработает
-            ' Добавлена проверка Nothing на случай, если сработает Case Else (хотя там стоит Return)
-            If keys Is Nothing Then Return New Dictionary(Of String, String)
-
-            Return SafeName.Where(Function(kvp) keys.Contains(kvp.Key)).OrderBy(Function(kvp) kvp.Key).ToDictionary(Function(k) k.Key, Function(v) v.Value)
-
+            Dim result As New Dictionary(Of String, String)
+            For Each k In keys
+                If SafeName.ContainsKey(k) Then
+                    result.Add(k, SafeName(k))
+                End If
+            Next
+            Return result
         End Function
 
 
@@ -2270,22 +2394,6 @@ Namespace Kas
             Return If(asString, "--", 0)
 
         End Function
-
-
-        '        ''' <summary>
-        '        ''' Маппинг оборотных депо (ТДЭ) в эксплуатационные (ТЧЭ)
-        '        ''' Ключ — шаблон поиска (Like-паттерн), Значение — номер ТЧЭ
-        '        ''' </summary>
-        '        Private Shared ReadOnly TDE_TO_TCHE_MAP As New Dictionary(Of String, Integer) From {
-        '    {"*Мариинск*", 1},      ' ТДЭ Мариинск → ТЧЭ Боготол (ТЧЭ-1)
-        '    {"*Саянск*", 2},        ' ТДЭ Саянская → ТЧЭ Красноярск (ТЧЭ-2)
-        '    {"*Решот*", 3},         ' ТДЭ Решоты → ТЧЭ Иланская (ТЧЭ-3)
-        '    {"*Ужур*", 5},          ' ТДЭ Ужур → ТЧЭ Ачинск (ТЧЭ-5)
-        '    {"*Бискамж*", 7},       ' ТДЭ Бискамжа → ТЧЭ Абакан (ТЧЭ-7)
-        '    {"*Кошурник*", 7},      ' ТДЭ Кошурниково → ТЧЭ Абакан
-        '    {"*Междуреченск*", 7},  ' ТДЭ Междуреченск → ТЧЭ Абакан
-        '    {"*Аскиз*", 7}          ' ТДЭ Аскиз → ТЧЭ Абакан (из вашего примера с ЛокоРемЗавод)
-        '}
 
 
 

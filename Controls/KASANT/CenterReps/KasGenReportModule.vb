@@ -428,20 +428,59 @@ Namespace Kas
 
 
         Public Function FormPoezd(Nums As String) As String
-            ' 2. Убираем символ "№" и разбиваем строку на массив по запятым и пробелам
-            Dim parts As String() = Nums.Replace("№", "").Split({","c, " "c}, StringSplitOptions.RemoveEmptyEntries)
 
-            ' 3. Извлекаем только валидные числа (защита от случайного текста или пустых ячеек)
-            Dim numbers As New List(Of Integer)()
-            For Each part As String In parts
+            If String.IsNullOrWhiteSpace(Nums) Then Return ""
+
+            ' Используем HashSet для мгновенного удаления дублей без создания лишних массивов
+            Dim uniqueNumbers As New HashSet(Of Integer)()
+
+            ' Парсим вручную вместо Split - это в разы быстрее на больших строках
+            Dim i As Integer = 0
+            Dim len As Integer = Nums.Length
+
+            While i < len
+                ' Пропускаем всё кроме цифр
+                While i < len AndAlso Not Char.IsDigit(Nums(i))
+                    i += 1
+                End While
+
+                If i >= len Then Exit While
+
+                ' Собираем число
+                Dim numStart As Integer = i
+                While i < len AndAlso Char.IsDigit(Nums(i))
+                    i += 1
+                End While
+
+                Dim numStr As String = Nums.Substring(numStart, i - numStart)
                 Dim num As Integer
-                If Integer.TryParse(part.Trim(), num) Then
-                    numbers.Add(num)
+                If Integer.TryParse(numStr, num) Then
+                    uniqueNumbers.Add(num) ' HashSet автоматически игнорирует дубли
                 End If
-            Next
+            End While
 
-            ' 4. Удаляем дубликаты (Distinct), сортируем по возрастанию (OrderBy) и собираем в строку
-            Return String.Join(", ", numbers.OrderBy(Function(n) n))
+            If uniqueNumbers.Count = 0 Then Return ""
+
+            ' Сортируем и собираем результат
+            Dim sortedList As New List(Of Integer)(uniqueNumbers)
+            sortedList.Sort()
+
+            Return String.Join(", ", sortedList)
+
+            '' 2. Убираем символ "№" и разбиваем строку на массив по запятым и пробелам
+            'Dim parts As String() = Nums.Replace("№", "").Split({","c, " "c}, StringSplitOptions.RemoveEmptyEntries)
+
+            '' 3. Извлекаем только валидные числа (защита от случайного текста или пустых ячеек)
+            'Dim numbers As New List(Of Integer)()
+            'For Each part As String In parts
+            '    Dim num As Integer
+            '    If Integer.TryParse(part.Trim(), num) Then
+            '        numbers.Add(num)
+            '    End If
+            'Next
+
+            '' 4. Удаляем дубликаты (Distinct), сортируем по возрастанию (OrderBy) и собираем в строку
+            'Return String.Join(", ", numbers.OrderBy(Function(n) n))
         End Function
 
 

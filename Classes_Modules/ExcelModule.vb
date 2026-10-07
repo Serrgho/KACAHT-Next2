@@ -24,13 +24,13 @@ Namespace Kas
             Using package As New ExcelPackage(New FileInfo(filePath))
 
                 If package.Workbook Is Nothing OrElse package.Workbook.Worksheets.Count = 0 Then
-                    MW.InfoBLOK.AddItem("Файл не содержит листов")
+                    'MW.InfoBLOK.AddItem("Файл не содержит листов")
                     Return otkazy
                 End If
 
                 Dim worksheet = package.Workbook.Worksheets(0)
                 If worksheet Is Nothing Then
-                    MW.InfoBLOK.AddItem("Не удалось загрузить первый лист")
+                    'MW.InfoBLOK.AddItem("Не удалось загрузить первый лист")
                     Return otkazy
                 End If
 
@@ -53,12 +53,12 @@ Namespace Kas
                     End If
 
                 Catch ex As Exception
-                    MW.InfoBLOK.AddItem($"Ошибка при проверке файла: {ex.Message}")
+                    'MW.InfoBLOK.AddItem($"Ошибка при проверке файла: {ex.Message}")
                     FileIsOK = False
                 End Try
 
                 If Not FileIsOK Then
-                    MW.InfoBLOK.AddItem("Файл не содержит нужные данные")
+                    'MW.InfoBLOK.AddItem("Файл не содержит нужные данные")
                     Return otkazy
                 End If
 
@@ -66,7 +66,7 @@ Namespace Kas
                 ' → Только теперь можно читать данные:
                 Dim lastRow = worksheet.Dimension?.End.Row
                 If lastRow <= 4 Then
-                    MW.InfoBLOK.AddItem("Нет данных для импорта")
+                    'MW.InfoBLOK.AddItem("Нет данных для импорта")
                     Return otkazy
                 End If
 
@@ -153,7 +153,7 @@ Namespace Kas
 
                 Dim worksht2 = package.Workbook.Worksheets("Хрон п_час")
                 If worksht2 Is Nothing Then
-                    MW.InfoBLOK.AddItem("Лист 'Хрон п_час' не найден")
+                    'MW.InfoBLOK.AddItem("Лист 'Хрон п_час' не найден")
                 Else
                     Dim KS = worksht2.Dimension?.End.Row
 
@@ -175,14 +175,14 @@ Namespace Kas
                                         foundOtkaz.KorPCH += PCH
                                         foundOtkaz.KorDate = DTE
                                         foundOtkaz.KorPCHonDate = PCH
-                                        MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
+                                        ' MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
                                     Else
                                         foundOtkaz.KorDate = DTE
                                         foundOtkaz.KorPCHonDate = PCH
-                                        MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
+                                        'MW.InfoBLOK.AddItem($"Проставляем сумму корректировок по отказу {IDOTS} на {PCH}")
                                     End If
                                 Else
-                                    MW.InfoBLOK.AddItem($"---ВНИМАНИЕ!--- Отказ {IDOTS} из листа корректировок отсутствует в массиве импортированных отказов")
+                                    ' MW.InfoBLOK.AddItem($"---ВНИМАНИЕ!--- Отказ {IDOTS} из листа корректировок отсутствует в массиве импортированных отказов")
                                 End If
                             End With
                         Next

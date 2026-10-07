@@ -12,31 +12,79 @@ Namespace Kas
         ''' ИЗМЕНЯЕТ ИСХОДНЫЙ ТЕКСТ
         ''' </summary>
         Public Function RemoveDoubleTrains(raw As String) As String
+
             If String.IsNullOrEmpty(raw) Then Return raw
 
-            ' Ищем "поезда №" и извлекаем номера
+            ' Ищем "поезда №" и извлекаем часть с номерами
             Dim pattern = "поезда?\s*№\s*([\d,\s]+)"
             Dim match = Regex.Match(raw, pattern, RegexOptions.IgnoreCase)
 
-            If match.Success Then
-                Dim prefix = raw.Substring(0, match.Index)
-                Dim numbersPart = match.Groups(1).Value
+            If Not match.Success Then Return raw
 
-                ' Извлекаем все числа
-                Dim numbers = Regex.Matches(numbersPart, "\d+").Cast(Of Match)().
-                              Select(Function(m) Integer.Parse(m.Value)).
-                              Distinct().
-                              OrderBy(Function(n) n).
-                              ToList()
+            Dim prefix = raw.Substring(0, match.Index)
+            Dim numbersPart = match.Groups(1).Value
 
-                If numbers.Any() Then
-                    ' Восстанавливаем с сохранением формата "поезда №"
-                    Dim newSuffix = "поезда №" & String.Join(", ", numbers)
-                    Return prefix & newSuffix
+            ' Извлекаем все уникальные числа и сортируем
+            Dim allNumbers = Regex.Matches(numbersPart, "\d+").Cast(Of Match)().
+                             Select(Function(m) Integer.Parse(m.Value)).
+                             Distinct().
+                             OrderBy(Function(n) n).
+                             ToList()
+
+            If Not allNumbers.Any() Then Return raw
+
+            ' Разделяем на пассажирские/пригородные и грузовые
+            Dim passSuburban = New List(Of Integer)()
+            Dim freight = New List(Of Integer)()
+
+            For Each num In allNumbers
+                If IsPassengerOrSuburban(num) Then
+                    passSuburban.Add(num)
+                Else
+                    freight.Add(num)
                 End If
+            Next
+
+            ' Если грузовых больше 20, оставляем только первые 20 (по возрастанию)
+            If freight.Count > 20 Then
+                freight = freight.Take(20).ToList()
             End If
 
-            Return raw
+            ' Объединяем обратно и сортируем весь финальный список
+            Dim finalNumbers = passSuburban.Concat(freight).OrderBy(Function(n) n).ToList()
+
+            ' Восстанавливаем текст
+            Dim newSuffix = "поезда №" & String.Join(", ", finalNumbers)
+            Return prefix & newSuffix
+
+
+
+            'If String.IsNullOrEmpty(raw) Then Return raw
+
+            '' Ищем "поезда №" и извлекаем номера
+            'Dim pattern = "поезда?\s*№\s*([\d,\s]+)"
+            'Dim match = Regex.Match(raw, pattern, RegexOptions.IgnoreCase)
+
+            'If match.Success Then
+            '    Dim prefix = raw.Substring(0, match.Index)
+            '    Dim numbersPart = match.Groups(1).Value
+
+            '    ' Извлекаем все числа
+            '    Dim numbers = Regex.Matches(numbersPart, "\d+").Cast(Of Match)().
+            '                  Select(Function(m) Integer.Parse(m.Value)).
+            '                  Distinct().
+            '                  OrderBy(Function(n) n).
+            '                  ToList()
+
+            '    If numbers.Any() Then
+            '        ' Восстанавливаем с сохранением формата "поезда №"
+            '        Dim newSuffix = "поезда №" & String.Join(", ", numbers)
+            '        Return prefix & newSuffix
+            '    End If
+            '    numbers.Clear()
+            'End If
+
+            'Return raw
         End Function
 
         ''' <summary>
@@ -95,12 +143,7 @@ Namespace Kas
 
         End Function
 
-        ''' <summary>
-        ''' Проверяет, является ли номер поезда пассажирским или пригородным.
-        ''' </summary>
-        Public Function IsPassengerOrSuburban(number As Integer) As Boolean
-            Return number < 700 OrElse (number >= 6000 AndAlso number < 7000)
-        End Function
+
 
         ''' <summary>
         ''' Проверяет, есть ли в тексте пассажирские/пригородные поезда.
@@ -157,7 +200,7 @@ Namespace Kas
             Dim parsed = LocationParser.ParseLocationAndRoad(text)
             Dim place As String = parsed.Item1
             Dim road As String = parsed.Item2
-
+            parsed = Nothing
             ' Если парсинг не дал результата, выводим как есть
             If String.IsNullOrEmpty(place) Then
                 tb.Inlines.Add(New Run(text))
@@ -233,7 +276,7 @@ Namespace Kas
 
                             Dim number As Integer
                             If Integer.TryParse(numStr, number) Then
-                                If LocationParser.IsPassengerOrSuburban(number) Then
+                                If IsPassengerOrSuburban(number) Then
                                     run.Foreground = Brushes.Red
                                     run.FontWeight = FontWeights.Bold
                                 End If
@@ -252,6 +295,7 @@ Namespace Kas
                     tb.Inlines.Add(New Run(afterPlace))
                 End If
             End If
+            text = ""
 
             Return tb
 

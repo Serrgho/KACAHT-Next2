@@ -17,7 +17,7 @@
 
 		<Button Grid.Column="0"  x:Name="btnReSetPeriodJournal" Content="🔅Сброс" Style="{StaticResource PopupStyleButtonOrange}" Margin="2" Click="btnReSetPeriodJournal_Click"  />
 		<Button Grid.Column="1" x:Name="btnSetPeriodJournal" Foreground="DarkRed" Content="🛠️Указать" Style="{StaticResource PopupStyleButton}" Margin="2" Click="btnSetPeriodJournal_Click"  />
-		
+
 		<TextBlock Grid.Column="2" Text="{Binding MWFetcher.NachKon_TXT}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="DarkRed" Padding="2 0" Margin="10 0"/>
 		<!--Style="{StaticResource MyCombo}"-->
 		<ComboBox Grid.Column="3" x:Name="DorTBlock"
@@ -27,7 +27,7 @@
 				ItemsSource="{x:Static local:KasJournalParamControl0.RailwayCodes}" 
 				DisplayMemberPath="Name"	
 				SelectedValuePath="Code"	
-				SelectedValue="{Binding MWFetcher.DorOfOTS, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+				SelectedValue="{Binding Fetcher.DorOfOTS, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
 				MinWidth="180" VerticalAlignment="Bottom" Margin="2" />
 	</Grid>
 </UserControl>

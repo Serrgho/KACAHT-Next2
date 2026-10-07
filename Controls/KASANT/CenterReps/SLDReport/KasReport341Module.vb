@@ -91,20 +91,49 @@ Namespace Kas
             ' =================================================================
             Public Sub ForceCleanup()
                 Try
-                    LogWrite("🧹 Запуск принудительной очистки памяти...")
+                    LogWrite("🧹 Запуск принудительной очистки памяти (R341)...")
 
-                    ' 1. Запрашиваем сборку мусора
-                    GC.Collect()
-                    ' 2. Ждем завершения всех финализаторов (освобождение неуправляемых ресурсов)
+                    ' 1. Очищаем CookieContainer от старых токенов и сессий, 
+                    ' которые могут удерживать ссылки на большие объекты ответа
+                    _cookieContainer.PerDomainCapacity = 0
+                    _cookieContainer.MaxCookieSize = 0
+                    ' Сбрасываем лимиты обратно к нормальным значениям
+                    _cookieContainer.PerDomainCapacity = 20
+                    _cookieContainer.MaxCookieSize = 4096
+
+                    ' 2. Принудительная сборка мусора с фокусом на Large Object Heap
+                    ' Генерация 2 нужна для сбора больших объектов (>85кб), таких как HTML и Excel
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced)
                     GC.WaitForPendingFinalizers()
-                    ' 3. Повторная сборка (часто освобождает объекты, ставшие доступными после шага 2)
-                    GC.Collect()
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced)
 
                     Dim memMB As Long = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024
                     LogWrite($"✅ Память очищена. Текущее потребление: {memMB} МБ")
                 Catch ex As Exception
                     LogWrite($"⚠ Ошибка при очистке памяти: {ex.Message}")
                 End Try
+
+
+
+
+
+
+
+                'Try
+                '    LogWrite("🧹 Запуск принудительной очистки памяти...")
+
+                '    ' 1. Запрашиваем сборку мусора
+                '    GC.Collect()
+                '    ' 2. Ждем завершения всех финализаторов (освобождение неуправляемых ресурсов)
+                '    GC.WaitForPendingFinalizers()
+                '    ' 3. Повторная сборка (часто освобождает объекты, ставшие доступными после шага 2)
+                '    GC.Collect()
+
+                '    Dim memMB As Long = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024
+                '    LogWrite($"✅ Память очищена. Текущее потребление: {memMB} МБ")
+                'Catch ex As Exception
+                '    LogWrite($"⚠ Ошибка при очистке памяти: {ex.Message}")
+                'End Try
             End Sub
 
 
@@ -737,6 +766,8 @@ Namespace Kas
             ' =================================================================
             Public Async Function GetLocomotiveComplexTokenAsync(dateFrom As DateTime, dateTo As DateTime) As Task(Of String)
 
+
+
                 Try
                     LogWrite("🔍 Начало получения токена строки...")
 
@@ -747,82 +778,185 @@ Namespace Kas
                         Return Nothing
                     End If
 
-                    ' 2. Отправляем базовый токен на /api/View с presentation:"html"
+                    ' 2. Отправляем базовый токен на /api/View
                     Dim payload As New With {
-                    .reportName = "ReportCentral27553",
-                    .criptFilterInfo = baseToken,
-                    .presentation = "html",
-                    .reportLevel = "center"
+                        .reportName = "ReportCentral27553",
+                        .criptFilterInfo = baseToken,
+                        .presentation = "html",
+                        .reportLevel = "center"
                     }
-
                     Dim jsonBody = JsonSerializer.Serialize(payload)
 
-                    Dim request As New System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, $"{_baseUrl}/version/rest/api/View")
-                    request.Content = New StringContent(jsonBody, Encoding.UTF8, "application/json")
-                    request.Headers.Add("Accept", "application/json, text/plain, */*")
-                    request.Headers.Add("Origin", _baseUrl)
-                    request.Headers.Referrer = New Uri($"{_baseUrl}/index2560R.html")
+                    ' Освобождаем jsonBody сразу после создания контента
+                    Dim content = New StringContent(jsonBody, Encoding.UTF8, "application/json")
+                    jsonBody = Nothing
 
-                    LogWrite($"📄 POST /api/View (presentation: html)...")
-                    Dim response = Await _httpClient.SendAsync(request)
+                    Using request As New HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/version/rest/api/View")
+                        request.Content = content
+                        request.Headers.Add("Accept", "application/json, text/plain, */*")
+                        request.Headers.Add("Origin", _baseUrl)
+                        request.Headers.Referrer = New Uri($"{_baseUrl}/index2560R.html")
 
-                    If Not response.IsSuccessStatusCode Then
-                        LogWrite($"⚠ Ошибка /api/View: {response.StatusCode}")
-                        Return Nothing
-                    End If
+                        LogWrite($"📄 POST /api/View (presentation: html)...")
 
-                    Dim htmlBytes = Await response.Content.ReadAsByteArrayAsync()
-                    Dim html = Encoding.UTF8.GetString(htmlBytes)
+                        Dim html As String = Nothing
+                        Using response = Await _httpClient.SendAsync(request)
+                            If Not response.IsSuccessStatusCode Then
+                                LogWrite($"⚠ Ошибка /api/View: {response.StatusCode}")
+                                Return Nothing
+                            End If
 
-                    LogWrite($"📄 Получено HTML: {htmlBytes.Length} байт")
+                            Dim htmlBytes = Await response.Content.ReadAsByteArrayAsync()
+                            html = Encoding.UTF8.GetString(htmlBytes)
 
-                    ' Сохраняем HTML для отладки
-                    Dim htmlPath = Path.Combine(GetDebugFolder(), "r341_page2_debug.html")
-                    File.WriteAllText(htmlPath, html, Encoding.UTF8)
-                    LogWrite($"💾 HTML сохранён в r341_page2_debug.html")
+                            ' Сразу освобождаем байты
+                            htmlBytes = Nothing
+                        End Using
 
-                    ' 3. 🔑 Ищем в СОХРАНЁННОМ файле как в тексте (всё в одну строку!)
-                    Dim fileHtml = File.ReadAllText(htmlPath, Encoding.UTF8)
+                        LogWrite($"📄 Получено HTML: {html.Length} символов")
 
-                    ' Ищем фразу
-                    Dim searchText = "локомотивному комплексу"
-                    Dim locoIndex = fileHtml.IndexOf(searchText, StringComparison.OrdinalIgnoreCase)
+                        ' Сохраняем для отладки (асинхронно или просто пишем)
+                        Dim htmlPath = Path.Combine(GetDebugFolder(), "r341_page2_debug.html")
+                        File.WriteAllText(htmlPath, html, Encoding.UTF8)
 
-                    If locoIndex = -1 Then
-                        LogWrite($"⚠ Фраза '{searchText}' не найдена")
-                        Return Nothing
-                    End If
+                        ' 🔑 ВАЖНО: Ищем токены прямо в переменной html, 
+                        ' а НЕ читаем файл заново через File.ReadAllText!
+                        Dim searchText = "локомотивному комплексу"
+                        Dim locoIndex = html.IndexOf(searchText, StringComparison.OrdinalIgnoreCase)
 
-                    LogWrite($"✓ Фраза '{searchText}' найдена на позиции {locoIndex}")
+                        If locoIndex = -1 Then
+                            LogWrite($"⚠ Фраза '{searchText}' не найдена")
+                            html = Nothing ' Освобождаем перед выходом
+                            Return Nothing
+                        End If
 
-                    ' 4. Ищем ПЕРВЫЙ и ВТОРОЙ href ПОСЛЕ найденной фразы
-                    Dim hrefPattern As New Regex("inner/DetailReportInfo2755/([^""'/]+)/CENTER", RegexOptions.IgnoreCase)
-                    Dim matches = hrefPattern.Matches(fileHtml, locoIndex)
+                        Dim hrefPattern As New Regex("inner/DetailReportInfo2755/([^""'/]+)/CENTER", RegexOptions.IgnoreCase)
+                        Dim matches = hrefPattern.Matches(html, locoIndex)
 
-                    If matches.Count = 0 Then
-                        LogWrite("⚠ href не найдены после фразы")
-                        Return Nothing
-                    End If
+                        ' HTML больше не нужен — освобождаем немедленно
+                        html = Nothing
 
-                    ' Первый токен (прошлый год) - сохраняем на будущее
-                    Dim firstToken = matches(0).Groups(1).Value
-                    LogWrite($"📌 Токен ПРОШЛОГО ГОДА (индекс 0): {firstToken.Substring(0, Math.Min(40, firstToken.Length))}...")
+                        If matches.Count < 2 Then
+                            LogWrite($"⚠ Нужно минимум 2 href, найдено {matches.Count}")
+                            Return Nothing
+                        End If
 
-                    ' Второй токен (текущий год) - нужный
-                    If matches.Count < 2 Then
-                        LogWrite($"⚠ Нужно минимум 2 href, найдено {matches.Count}")
-                        Return Nothing
-                    End If
-
-                    Dim rowToken = matches(1).Groups(1).Value
-                    LogWrite($"🎯 Токен ТЕКУЩЕГО ГОДА (индекс 1): {rowToken.Substring(0, Math.Min(40, rowToken.Length))}...")
-
-                    Return rowToken
+                        Dim rowToken = matches(1).Groups(1).Value
+                        LogWrite($"🎯 Токен ТЕКУЩЕГО ГОДА найден")
+                        Return rowToken
+                    End Using
 
                 Catch ex As Exception
                     LogWrite($"💥 Ошибка в GetLocomotiveComplexTokenAsync: {ex.Message}{vbCrLf}{ex.StackTrace}")
                     Return Nothing
+                Finally
+                    ' Дополнительная страховка
+                    GC.Collect()
                 End Try
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                'Try
+                '    LogWrite("🔍 Начало получения токена строки...")
+
+                '    ' 1. Получаем базовый токен
+                '    Dim baseToken = Await GetBaseCriptFilterAsync(dateFrom, dateTo)
+                '    If String.IsNullOrWhiteSpace(baseToken) Then
+                '        LogWrite("❌ Не удалось получить базовый токен")
+                '        Return Nothing
+                '    End If
+
+                '    ' 2. Отправляем базовый токен на /api/View с presentation:"html"
+                '    Dim payload As New With {
+                '    .reportName = "ReportCentral27553",
+                '    .criptFilterInfo = baseToken,
+                '    .presentation = "html",
+                '    .reportLevel = "center"
+                '    }
+
+                '    Dim jsonBody = JsonSerializer.Serialize(payload)
+
+                '    Dim request As New System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, $"{_baseUrl}/version/rest/api/View")
+                '    request.Content = New StringContent(jsonBody, Encoding.UTF8, "application/json")
+                '    request.Headers.Add("Accept", "application/json, text/plain, */*")
+                '    request.Headers.Add("Origin", _baseUrl)
+                '    request.Headers.Referrer = New Uri($"{_baseUrl}/index2560R.html")
+
+                '    LogWrite($"📄 POST /api/View (presentation: html)...")
+                '    Dim response = Await _httpClient.SendAsync(request)
+
+                '    If Not response.IsSuccessStatusCode Then
+                '        LogWrite($"⚠ Ошибка /api/View: {response.StatusCode}")
+                '        Return Nothing
+                '    End If
+
+                '    Dim htmlBytes = Await response.Content.ReadAsByteArrayAsync()
+                '    Dim html = Encoding.UTF8.GetString(htmlBytes)
+
+                '    LogWrite($"📄 Получено HTML: {htmlBytes.Length} байт")
+
+                '    ' Сохраняем HTML для отладки
+                '    Dim htmlPath = Path.Combine(GetDebugFolder(), "r341_page2_debug.html")
+                '    File.WriteAllText(htmlPath, html, Encoding.UTF8)
+                '    LogWrite($"💾 HTML сохранён в r341_page2_debug.html")
+
+                '    ' 3. 🔑 Ищем в СОХРАНЁННОМ файле как в тексте (всё в одну строку!)
+                '    Dim fileHtml = File.ReadAllText(htmlPath, Encoding.UTF8)
+
+                '    ' Ищем фразу
+                '    Dim searchText = "локомотивному комплексу"
+                '    Dim locoIndex = fileHtml.IndexOf(searchText, StringComparison.OrdinalIgnoreCase)
+
+                '    If locoIndex = -1 Then
+                '        LogWrite($"⚠ Фраза '{searchText}' не найдена")
+                '        Return Nothing
+                '    End If
+
+                '    LogWrite($"✓ Фраза '{searchText}' найдена на позиции {locoIndex}")
+
+                '    ' 4. Ищем ПЕРВЫЙ и ВТОРОЙ href ПОСЛЕ найденной фразы
+                '    Dim hrefPattern As New Regex("inner/DetailReportInfo2755/([^""'/]+)/CENTER", RegexOptions.IgnoreCase)
+                '    Dim matches = hrefPattern.Matches(fileHtml, locoIndex)
+
+                '    If matches.Count = 0 Then
+                '        LogWrite("⚠ href не найдены после фразы")
+                '        Return Nothing
+                '    End If
+
+                '    ' Первый токен (прошлый год) - сохраняем на будущее
+                '    Dim firstToken = matches(0).Groups(1).Value
+                '    LogWrite($"📌 Токен ПРОШЛОГО ГОДА (индекс 0): {firstToken.Substring(0, Math.Min(40, firstToken.Length))}...")
+
+                '    ' Второй токен (текущий год) - нужный
+                '    If matches.Count < 2 Then
+                '        LogWrite($"⚠ Нужно минимум 2 href, найдено {matches.Count}")
+                '        Return Nothing
+                '    End If
+
+                '    Dim rowToken = matches(1).Groups(1).Value
+                '    LogWrite($"🎯 Токен ТЕКУЩЕГО ГОДА (индекс 1): {rowToken.Substring(0, Math.Min(40, rowToken.Length))}...")
+
+                '    Return rowToken
+
+                'Catch ex As Exception
+                '    LogWrite($"💥 Ошибка в GetLocomotiveComplexTokenAsync: {ex.Message}{vbCrLf}{ex.StackTrace}")
+                '    Return Nothing
+                'End Try
             End Function
 
 
@@ -896,7 +1030,7 @@ Namespace Kas
                         excelBytes = Nothing
                     End If
                     ' Вызываем сборку мусора, так как мы только что освободили большой массив
-                    GC.Collect()
+                    ForceCleanup()
                 End Try
 
 

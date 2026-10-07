@@ -193,7 +193,12 @@ Namespace Kas
 
 
 
-
+        ''' <summary>
+        ''' Проверяет, является ли номер поезда пассажирским или пригородным.
+        ''' </summary>
+        Public Function IsPassengerOrSuburban(number As Integer) As Boolean
+            Return number < 700 OrElse (number >= 6000 AndAlso number < 7000)
+        End Function
 
 
         Private ReadOnly HoursRegex As New Regex("(\d+)\s*ч", RegexOptions.Compiled)
@@ -231,9 +236,9 @@ Namespace Kas
         ' ✅ Новый метод: сам берет даты из Fetcher
         <Extension()>
         Public Function IsInPeriod(d As Date) As Boolean
-            Dim nachDateTime = Fetcher.NachDat.Date.AddHours(Fetcher.NachTim)
-            Dim konDateTime = Fetcher.KonDat.Date.AddHours(Fetcher.KonTim).AddMinutes(Fetcher.KonMinut)
-            Return d >= nachDateTime AndAlso d <= konDateTime
+            'Dim nachDateTime = Fetcher.NachDat.Date.AddHours(Fetcher.NachTim)
+            'Dim konDateTime = Fetcher.KonDat.Date.AddHours(Fetcher.KonTim).AddMinutes(Fetcher.KonMinut)
+            Return d >= Fetcher.NachDatTim AndAlso d <= Fetcher.KonDatTim
             'Return d >= Fetcher.NachDat AndAlso d <= Fetcher.KonDat
         End Function
 
@@ -241,7 +246,7 @@ Namespace Kas
         <Extension()>
         Public Function IsInPeriod(d As Date?) As Boolean
             If Not d.HasValue Then Return False
-            Return d.Value >= Fetcher.NachDat AndAlso d.Value <= Fetcher.KonDat
+            Return d.Value >= Fetcher.NachDatTim AndAlso d.Value <= Fetcher.KonDatTim
         End Function
 
         <Extension()>

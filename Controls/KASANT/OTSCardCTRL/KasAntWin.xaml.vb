@@ -52,7 +52,7 @@ Namespace Kas
             InitializeComponent()
 
             ' ← ← ← НАСТРОЙКА ТАЙМЕРА
-            _statusClearTimer.Interval = TimeSpan.FromSeconds(7)
+            _statusClearTimer.Interval = TimeSpan.FromSeconds(3)
             AddHandler _statusClearTimer.Tick, AddressOf OnStatusTimerTick
             LoadSettings()
             InitializeDepotComboBox()
@@ -167,6 +167,7 @@ Namespace Kas
                     MessageBox.Show($"Ошибка: {ex.Message}")
                 Finally
                     btnLoad.IsEnabled = True
+                    Fetcher.ForceCleanup()
                 End Try
             End If
             e.Handled = True
@@ -221,6 +222,7 @@ Namespace Kas
             Finally
                 _isLoading = False
                 btnLoad.IsEnabled = True
+                Fetcher.ForceCleanup()
             End Try
         End Sub
 
@@ -235,10 +237,6 @@ Namespace Kas
                 pnlTrainInfo.Children.Clear()   ' Задержанные поезда
                 HistSP.Children.Clear()         ' История
                 DocsSP.Children.Clear()         ' Документы
-
-
-                ' Выводим отладочную информацию
-                'SetStatus($"Получено: Место='{data.Location}', Поездов={data.DelayedTrains.Count}", Brushes.Blue)
 
 
                 ' ================= МЕСТО ОТКАЗА =================
@@ -325,6 +323,30 @@ Namespace Kas
                     HeaderSPan.Children.Add(DangLabel)
                 End If
 
+                ' ================= ПРИЗНАК "ВСПОМОГАТЕЛЬНЫЙ ЛОКОМОТИВ" =================
+                If data.HasHelperLoco Then
+                    Dim helperLabel As New TextBlock With {
+                .Text = $"🚂 {data.HelperLocoInfo}",
+                .TextWrapping = TextWrapping.Wrap,
+                .FontSize = 14,
+                .FontWeight = FontWeights.Bold,
+                .Foreground = Brushes.DarkOrange,
+                .Margin = New Thickness(0, 5, 0, 0),
+                .Cursor = Cursors.Hand,
+                .ToolTip = "Дача вспомогательного локомотива"
+            }
+
+                    ' Добавляем возможность копирования по клику
+                    AddHandler helperLabel.MouseLeftButtonUp, Sub(s, e)
+                                                                  Clipboard.SetText(data.HelperLocoInfo)
+                                                                  SetStatus(data.HelperLocoInfo, Brushes.Green)
+                                                              End Sub
+
+                    HeaderSPan.Children.Add(helperLabel)
+                End If
+
+
+
                 ' ================= ФАКТИЧЕСКОЕ ВРЕМЯ НАЧАЛА =================
                 If Not String.IsNullOrWhiteSpace(data.FactStartTime) Then
                     Dim timeText = $" {data.FactStartTime} - {data.FactEndTime}"
@@ -350,15 +372,7 @@ Namespace Kas
                         .Cursor = Cursors.Hand
                         .Tag = data.PCHasy
                     End With
-                    'Dim pchLabel As New TextBlock With {
-                    '    .Text = $"Потери поездо-часов: {data.PCHasy}",
-                    '    .Foreground = Brushes.Red,
-                    '    .FontSize = 14,
-                    '    .FontWeight = FontWeights.Bold,
-                    '    .Cursor = Cursors.Hand,
-                    '    .Tag = data.PCHasy,
-                    '    .Margin = New Thickness(5, 2, 0, 2)
-                    '}
+
                     ' ← ← ← ВОТ ОБРАБОТЧИК НАЖАТИЯ
                     AddHandler pchLabel.PreviewMouseLeftButtonUp, Sub(s, e)
                                                                       Dim Cha As Single = ParsePCHasyToDecimal(data.PCHasy)
@@ -394,34 +408,13 @@ Namespace Kas
                 ' ================= ОБОРУДОВАНИЕ =================
                 If Not String.IsNullOrWhiteSpace(data.Oborud) Then
 
-                    'Dim equipRtb = CreateLabel(data.Oborud, 14, FontWeights.SemiBold, , Brushes.Green, "Оборудование: ")
-
-                    '' Включаем обработку кликов, даже если клик попал на текст
-                    'equipRtb.IsHitTestVisible = True
-                    'equipRtb.Cursor = If(data.IsKasantHierarchy, Cursors.Hand, Cursors.Arrow)
-
                     If data.IsKasantHierarchy Then
                         If PointedOtkaz IsNot Nothing AndAlso data.ViolId = PointedOtkaz.Id Then
                             ApplyKasantLevels(PointedOtkaz, data.Oborud)
                             SetStatus("✓ КАСАНТ-оборудование применено", Brushes.DarkBlue)
                         End If
-                        '' Обработчик только если парсинг прошёл через <b>-ветку
-                        'AddHandler equipRtb.MouseLeftButtonDown, Sub(s, e)
-                        '                                             e.Handled = True
-                        '                                             If PointedOtkaz IsNot Nothing AndAlso data.ViolId = PointedOtkaz.Id Then
-                        '                                                 ApplyKasantLevels(PointedOtkaz, data.Oborud)
-                        '                                             End If
-                        '                                         End Sub
-                        'equipRtb.ToolTip = "Кликните, чтобы применить уровни КАСАНТ"
                     End If
 
-                    ''' Опционально: визуальный отклик при наведении (учитывая ваши предпочтения #11, #17)
-                    ''If data.IsKasantHierarchy Then
-                    ''    AddHandler equipRtb.MouseEnter, Sub(s, e) equipRtb.Background = New SolidColorBrush(Colors.LightYellow)
-                    ''    AddHandler equipRtb.MouseLeave, Sub(s, e) equipRtb.Background = Brushes.Transparent
-                    ''End If
-
-                    'MestoSP.Children.Add(equipRtb)
                     MestoSP.Children.Add(CreateLabel(data.Oborud, 14, FontWeights.SemiBold,, Brushes.Green, "Оборудование: "))
                 End If
 
@@ -437,6 +430,71 @@ Namespace Kas
                     'MestoSP.Children.Add(CreateLabel("Виновная организация:", 14, FontWeights.Bold, Brushes.Red))
                     MestoSP.Children.Add(CreateLabel(data.ThirdPartyOrg, 14, FontWeights.Normal,, Brushes.Red, "Виновная организация: "))
                 End If
+
+
+
+
+
+                ' ================= ИНФОРМАЦИОННОЕ ТАБЛО СТОРОННЕЙ ОРГАНИЗАЦИИ =================
+                If data.AlienGuiltyParams IsNot Nothing AndAlso data.AlienGuiltyParams.Count > 0 Then
+
+                    ' Заголовок
+                    Dim svcHeader As New TextBlock With {
+        .Text = "Информация о сторонней организации:",
+        .FontSize = 14,
+        .FontWeight = FontWeights.Bold,
+        .Foreground = Brushes.DarkBlue,
+        .Margin = New Thickness(0, 8, 0, 4)
+    }
+                    MestoSP.Children.Add(svcHeader)
+
+                    ' Рамка
+                    Dim border As New Border With {
+        .BorderBrush = CType(FindResource("SplitterBrush"), Brush),
+        .BorderThickness = New Thickness(0.5),
+        .CornerRadius = New CornerRadius(4),
+        .Padding = New Thickness(12, 6, 12, 6),
+        .Background = Brushes.Transparent,
+        .Margin = New Thickness(2, 0, 0, 8)
+    }
+
+                    Dim stack As New StackPanel With {.Orientation = Orientation.Vertical}
+
+                    For Each param In data.AlienGuiltyParams
+
+                        ' Цвет для ЕАСАПР
+                        Dim valColor As Brush = Brushes.Black
+                        Dim keyLower = param.Key.ToLower()
+                        Dim valLower = param.Value.ToLower()
+
+                        If keyLower.Contains("рекламационной работы") OrElse keyLower.Contains("признак проведения") Then
+                            If valLower.Contains("не получен") OrElse valLower.Contains("нет") Then
+                                valColor = Brushes.Red
+                            ElseIf valLower.Contains("да") OrElse valLower.Contains("успешно") Then
+                                valColor = Brushes.DarkGreen
+                            End If
+                        End If
+
+                        ' === СТРОКА ЧЕРЕЗ USERCONTROL ===
+                        Dim rowCard As New InfoRowCard()
+                        rowCard.SetData(param.Key, param.Value, valColor)
+                        stack.Children.Add(rowCard)
+
+                        ' Разделитель
+                        Dim sep As New Border With {
+            .BorderBrush = New SolidColorBrush(Color.FromArgb(35, 0, 0, 0)),
+            .BorderThickness = New Thickness(0, 0, 0, 1),
+            .Margin = New Thickness(0, 2, 0, 2)
+        }
+                        stack.Children.Add(sep)
+                    Next
+
+                    border.Child = stack
+                    MestoSP.Children.Add(border)
+                End If
+                ' ================================================================================
+
+
 
                 ' ================= ХАРАКТЕР ОТКАЗА =================
                 If Not String.IsNullOrWhiteSpace(data.CharacterText) Then
@@ -627,23 +685,7 @@ Namespace Kas
 
 
 
-        'Private Function EncryptPassword(password As String) As String
-        '    If String.IsNullOrWhiteSpace(password) Then Return ""
-        '    Dim bytes = Encoding.UTF8.GetBytes(password)
-        '    Dim reversed = bytes.Reverse().ToArray()
-        '    Return Convert.ToBase64String(reversed)
-        'End Function
 
-        'Private Function DecryptPassword(encrypted As String) As String
-        '    If String.IsNullOrWhiteSpace(encrypted) Then Return ""
-        '    Try
-        '        Dim bytes = Convert.FromBase64String(encrypted)
-        '        Dim reversed = bytes.Reverse().ToArray()
-        '        Return Encoding.UTF8.GetString(reversed)
-        '    Catch
-        '        Return ""
-        '    End Try
-        'End Function
 
         ' Конвертирует строку вида "1ч 56м" в десятичные часы (1.93)
         Private Function ParsePCHasyToDecimal(text As String) As Single
@@ -668,33 +710,7 @@ Namespace Kas
             Return Math.Round(hours + (minutes / 60), 2)
         End Function
 
-        '''' <summary>
-        '''' Заменяет визуально похожие латинские буквы на кириллические
-        '''' </summary>
-        'Public Function FixCyrillicLatinity(text As String) As String
-        '    If String.IsNullOrWhiteSpace(text) Then Return text
 
-        '    ' Карта замены: латинская → кириллическая
-        '    Dim charMap As New Dictionary(Of Char, Char) From {
-        '        {"A"c, "А"c}, {"B"c, "В"c}, {"C"c, "С"c}, {"E"c, "Е"c},
-        '        {"H"c, "Н"c}, {"K"c, "К"c}, {"M"c, "М"c}, {"O"c, "О"c},
-        '        {"P"c, "Р"c}, {"T"c, "Т"c}, {"X"c, "Х"c}, {"Y"c, "У"c},
-        '        {"a"c, "а"c}, {"c"c, "с"c}, {"e"c, "е"c}, {"o"c, "о"c},
-        '        {"p"c, "р"c}, {"x"c, "х"c}, {"y"c, "у"c}
-        '    }
-
-        '    Dim result As New System.Text.StringBuilder(text.Length)
-
-        '    For Each ch As Char In text
-        '        If charMap.ContainsKey(ch) Then
-        '            result.Append(charMap(ch))  ' Заменяем
-        '        Else
-        '            result.Append(ch)            ' Оставляем как есть
-        '        End If
-        '    Next
-
-        '    Return result.ToString()
-        'End Function
 
         ''' <summary>
         ''' Универсальная процедура присвоения свойства через Expression (с IntelliSense!)
@@ -845,7 +861,8 @@ Namespace Kas
                 Await Fetcher.HttpClient.PostAsync(urlStatus, contentStatus2)
 
                 ' === УСПЕХ ===
-                ShowMSG(Me, $"Отказ №{violId} успешно передан в {depotName}!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information)
+
+                'ShowMSG(Me, $"Отказ №{violId} успешно передан в {depotName}!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information)
 
                 ' Опционально: можно вызвать btnLoad_Click(sender, e), чтобы обновить карточку и увидеть изменения
 
@@ -853,11 +870,45 @@ Namespace Kas
                 ShowMSG(Me, $"Ошибка при назначении: {ex.Message}", "Ошибка КАСАНТ", MessageBoxButton.OK, MessageBoxImage.Error)
             Finally
                 ' === UI: ГАРАНТИРОВАННЫЙ ВОЗВРАТ В ИСХОДНОЕ СОСТОЯНИЕ ===
+
                 btnDelegate.Content = originalText
                 btnDelegate.IsEnabled = True
                 Me.Cursor = Cursors.Arrow
+                Fetcher.ForceCleanup()
+                PrepAndLoad()
+                SetStatus($"Отказ №{violId} успешно передан в {depotName}", Brushes.Red)
             End Try
         End Sub
+
+        Private Sub KasAntWin_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
+            ' Ограничиваем максимальную высоту окна: высота экрана минус 100px
+            Dim screenHeight = SystemParameters.WorkArea.Height
+            Me.MaxHeight = screenHeight - 100
+
+            ' Если текущая высота больше — уменьшаем
+            If Me.Height > Me.MaxHeight Then
+                Me.Height = Me.MaxHeight
+            End If
+        End Sub
+
+        'Private Sub btnHelperLoco_Click(sender As Object, e As RoutedEventArgs)
+        '    If String.IsNullOrWhiteSpace(txtViolId.Text) Then
+        '        SetStatus("⚠ Сначала укажите номер отказа", Brushes.Red)
+        '        Return
+        '    End If
+
+        '    Dim dlg As New HelperLocomotiveWindow With {
+        '        .Owner = Me,
+        '        .ViolId = txtViolId.Text,
+        '        .DorKod = txtDorKod.Text
+        '    }
+
+        '    If dlg.ShowDialog() = True Then
+        '        SetStatus($"✓ Данные о вспом. локомотиве для отказа {txtViolId.Text} сохранены", Brushes.Green)
+        '        ' Опционально: обновить историю или статус в карточке
+        '        PrepAndLoad()
+        '    End If
+        'End Sub
     End Class
 
 End Namespace

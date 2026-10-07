@@ -104,13 +104,15 @@ Namespace Kas
             InfoBLOK.ScrollToEnd()
         End Sub
 
-        ' 1. Свойство-обёртка, которое отдаёт глобальный Fetcher из модуля
+
+        ' Свойство-обёртка, которое отдаёт глобальный Fetcher из модуля
+        ' для KasJournalParamControl0 и KasJournalParamControl
+        ' привязка свойств в ХАМЛ
         Public ReadOnly Property MWFetcher As KasantFetcher
             Get
-                Return Fetcher ' Или просто Fetcher, если Namespace импортирован
+                Return Fetcher
             End Get
         End Property
-
 
         Sub New()
 
@@ -128,7 +130,7 @@ Namespace Kas
 
             AddHandler MW.SerLokContent.SeriesSelected, Sub(sender, series)
                                                             SerLokPopup.IsOpen = False
-
+                                                            TRowsContainer.WarningFilters.CheckForEmptyFields()
                                                         End Sub
             AddHandler MW.SerLokContent.Cancelled, Sub(sender, e)
                                                        SerLokPopup.IsOpen = False
@@ -136,7 +138,7 @@ Namespace Kas
 
             AddHandler MW.IstochContent.IstochSelected, Sub(sender, series)
                                                             IstochPopup.IsOpen = False
-
+                                                            MW.TRowsContainer.WarningFilters.CheckForEmptyFields()
                                                         End Sub
             AddHandler MW.IstochContent.IstochCancelled, Sub(sender, series)
                                                              IstochPopup.IsOpen = False
@@ -209,12 +211,43 @@ Namespace Kas
 
             AddHandler OTSControlModule.PointedOtkazChanged, AddressOf OnPointedOtkazChanged
 
+            '' Подписываемся на событие клика по контролу памяти
+            'AddHandler MemMonitor.HistoryRequested, AddressOf MemMonitor_HistoryRequested
             ' Передаем общий клиент в индикатор
             ConnIndicator.Initialize()
             CentralConnectionIndicator.Initialize()
 
+            '' Создаем папку для логов если её нет
+            'Dim logsFolder As String = IO.Path.Combine(My.Settings.SetsFolder, "Logs")
+            'If Not IO.Directory.Exists(logsFolder) Then
+            '    IO.Directory.CreateDirectory(logsFolder)
+            'End If
 
+            '' Устанавливаем путь к файлу истории памяти
+            'Dim historyFilePath As String = IO.Path.Combine(logsFolder, "memory_history.json")
+            'MemMonitor.HistoryFilePath = historyFilePath
         End Sub
+
+
+        'Private Sub MemMonitor_HistoryRequested(sender As Object, e As EventArgs)
+
+        '    Dim logsFolder As String = IO.Path.Combine(My.Settings.SetsFolder, "Logs")
+        '    Dim historyFilePath As String = IO.Path.Combine(logsFolder, "memory_history.json")
+
+        '    If IO.File.Exists(historyFilePath) Then
+        '        Dim historyWindow As New MemoryHistoryWindow(historyFilePath)
+        '        historyWindow.Owner = Me
+        '        historyWindow.ShowDialog()
+        '    Else
+        '        ShowMSG(MW, "История памяти еще не собрана. Подождите немного.",
+        '               "Нет данных",
+        '               MessageBoxButton.OK,
+        '               MessageBoxImage.Information)
+        '    End If
+
+        'End Sub
+
+
 
         Private Sub MainWindow_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
             'Module1.AnimIconDispose()
@@ -454,6 +487,8 @@ Namespace Kas
         Public Sub PeredachaPopContent_Canceled()
             PeredachaPopup.IsOpen = False
         End Sub
+
+
 
 #End Region
 

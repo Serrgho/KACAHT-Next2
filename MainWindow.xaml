@@ -68,21 +68,49 @@
 			<Grid Grid.Column="0">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="auto"/>
-
+					
 					<RowDefinition Height="*"/>
 					<RowDefinition Height="auto"/>
 				</Grid.RowDefinitions>
 
-				<StackPanel Grid.Row="0" Margin="2">
-					<local:KasConnectionIndicator x:Name="ConnIndicator"/>
-					<local:KasCentralConnectionIndicator x:Name="CentralConnectionIndicator"/>
-					<local:KasAuthControl x:Name="AuthCtrl" Margin="2" />
-					<local:UstanowkiCTL x:Name="Ustanovki" Margin="2"/>
-					<local:KasJournalParamControl x:Name="JourParam" Margin="2"/>
-					<local:MainDataCTL x:Name="expDataWork" Margin="2" />
-					<local:PoyasnilkaCTL x:Name="expPoyasnilka" Margin="2"/>
-					<local:ExperimentalButtonsCTL x:Name="expExperimental" Margin="2"/>
-				</StackPanel>
+				<!-- Строка 0: Верхняя часть с индикаторами и памятью -->
+				<Grid Grid.Row="0" Margin="2">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+
+					<!-- Подстрока 0: Индикаторы слева + Память справа -->
+					<Grid Grid.Row="0">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<StackPanel Grid.Column="0">
+							<local:KasConnectionIndicator x:Name="ConnIndicator"/>
+							<local:KasCentralConnectionIndicator x:Name="CentralConnectionIndicator"/>
+						</StackPanel>
+
+						<StackPanel Grid.Column="1" 
+                        HorizontalAlignment="Right" 
+                        VerticalAlignment="Top">
+							<local:MemoryMonitorControl x:Name="MemMonitor"
+                                            Margin="5,2,2,2"/>
+						</StackPanel>
+					</Grid>
+
+					<!-- Подстрока 1: Остальные контролы -->
+					<StackPanel Grid.Row="1">
+						<local:KasAuthControl x:Name="AuthCtrl" Margin="2" />
+						<local:UstanowkiCTL x:Name="Ustanovki" Margin="2"/>
+						<local:KasJournalParamControl x:Name="JourParam" Margin="2"/>
+						<local:MainDataCTL x:Name="expDataWork" Margin="2" />
+						<local:PoyasnilkaCTL x:Name="expPoyasnilka" Margin="2"/>
+						<local:ExperimentalButtonsCTL x:Name="expExperimental" Margin="2"/>
+					</StackPanel>
+				</Grid>
+
 
 
 				<local:YarlykContainerControl  Grid.Row="1" Grid.Column="0" x:Name="YarlykContainer" />
@@ -90,8 +118,9 @@
 
 
 				<local:InfoLBoxControl  Grid.Row="3" x:Name="InfoBLOK" MaxHeight="300" Margin="2 2 7 2"/>
+				
 			</Grid>
-
+			
 
 			<!--Разделитель колонок, надо чтобы родителем была общая колонка (0), поэтому Row тут не нужен-->
 			<GridSplitter x:Name="MainWinSplitter" VerticalAlignment="Stretch" Width="5" Background="{StaticResource SplitterBrush}" Cursor="SizeWE"/>

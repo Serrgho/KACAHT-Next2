@@ -71,6 +71,7 @@ Namespace Kas
             Catch ex As Exception
                 ShowMSG(MW, $"Ошибка при обработке файла:{vbCrLf}{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error)
             Finally
+                Fetcher.ForceCleanup()
                 BtnAddJRNLFile.IsEnabled = True
             End Try
         End Sub

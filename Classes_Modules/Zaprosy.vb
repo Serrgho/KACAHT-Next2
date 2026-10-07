@@ -82,21 +82,6 @@ Namespace Kas
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         'Если период не установлен в параметрах, IsWithinPeriod всегда возвращает True, и фильтры работают как обычно. Если период установлен, фильтрация выполняется по периоду из параметров (My.Settings).
         Private Function IsWithinPeriod(dateToCheck As Date?) As Boolean
             If dateToCheck.HasValue Then

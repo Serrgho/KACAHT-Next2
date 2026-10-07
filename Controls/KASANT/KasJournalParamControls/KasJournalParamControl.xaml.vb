@@ -91,37 +91,38 @@ Namespace Kas
                 btnLoadOnlineJournal.Content = originalText
                 btnLoadOnlineJournal.IsEnabled = True
                 Me.Cursor = System.Windows.Input.Cursors.Arrow
+                Fetcher.ForceCleanup()
             End Try
 
 
         End Sub
 
-        Private Async Sub btnLoadOnlineSLDJournal_Click(sender As Object, e As RoutedEventArgs)
+        'Private Async Sub btnLoadOnlineSLDJournal_Click(sender As Object, e As RoutedEventArgs)
 
-            ' 1. Сохраняем исходный текст и меняем UI на состояние "Загрузка"
-            Dim originalText As String = btnLoadOnlineSLDJournal.Content.ToString()
-            btnLoadOnlineSLDJournal.Content = "⏳ Загрузка..."
+        '    ' 1. Сохраняем исходный текст и меняем UI на состояние "Загрузка"
+        '    Dim originalText As String = btnLoadOnlineSLDJournal.Content.ToString()
+        '    btnLoadOnlineSLDJournal.Content = "⏳ Загрузка..."
 
-            Me.Cursor = System.Windows.Input.Cursors.Wait
-            btnLoadOnlineSLDJournal.IsEnabled = False
+        '    Me.Cursor = System.Windows.Input.Cursors.Wait
+        '    btnLoadOnlineSLDJournal.IsEnabled = False
 
-            Try
-                ' 2. Выполняем основную логику
-                Dim r341 As New Kas.Report341Fetcher()
-                Await r341.ShowDepotReportAsync()
+        '    Try
+        '        ' 2. Выполняем основную логику
+        '        Dim r341 As New Kas.Report341Fetcher()
+        '        Await r341.ShowDepotReportAsync()
 
-            Catch ex As Exception
-                ' 3. Обрабатываем ошибку, чтобы программа не упала, а пользователь понял, что случилось
-                ShowMSG(MW, $"Ошибка при формировании отчета СЛД: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error)
+        '    Catch ex As Exception
+        '        ' 3. Обрабатываем ошибку, чтобы программа не упала, а пользователь понял, что случилось
+        '        ShowMSG(MW, $"Ошибка при формировании отчета СЛД: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error)
 
-            Finally
-                ' 4. ГАРАНТИРОВАННО возвращаем кнопку в исходное состояние
-                btnLoadOnlineSLDJournal.Content = originalText
-                btnLoadOnlineSLDJournal.IsEnabled = True
-                Me.Cursor = System.Windows.Input.Cursors.Arrow
-            End Try
+        '    Finally
+        '        ' 4. ГАРАНТИРОВАННО возвращаем кнопку в исходное состояние
+        '        btnLoadOnlineSLDJournal.Content = originalText
+        '        btnLoadOnlineSLDJournal.IsEnabled = True
+        '        Me.Cursor = System.Windows.Input.Cursors.Arrow
+        '    End Try
 
-        End Sub
+        'End Sub
 
         Private Sub BtnTest_WithPeriod2_Click(sender As Object, e As RoutedEventArgs)
             ' === СЦЕНАРИЙ: День < 15 (Есть 4 столбца данных) ===
@@ -210,6 +211,7 @@ Namespace Kas
                 btnLoadOverdueJournal.Content = originalText
                 btnLoadOverdueJournal.IsEnabled = True
                 'Me.Cursor = System.Windows.Input.Cursors.Arrow
+                Fetcher.ForceCleanup()
             End Try
 
         End Sub
@@ -238,6 +240,7 @@ Namespace Kas
             Finally
                 btnLoadDangerousJournal.Content = originalText
                 btnLoadDangerousJournal.IsEnabled = True
+                Fetcher.ForceCleanup()
             End Try
         End Sub
 
@@ -307,6 +310,7 @@ Namespace Kas
             Finally
                 btnLoadInvestigationReport.Content = originalText
                 btnLoadInvestigationReport.IsEnabled = True
+                Fetcher.ForceCleanup()
             End Try
         End Sub
 

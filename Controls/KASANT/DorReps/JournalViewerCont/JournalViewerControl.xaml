@@ -153,25 +153,14 @@
 						<DataTemplate>
 							<!-- 🔑 Ключ к стилям: растягиваем контент и задаем правильные отступы -->
 							<ContentControl Content="{Binding MestoOTS_TXT, Converter={StaticResource PlaceFormatterConverter}}"
-            HorizontalAlignment="Stretch"
-            HorizontalContentAlignment="Stretch"
-            VerticalContentAlignment="Center"
-            Padding="4,2" />
+											HorizontalAlignment="Stretch"
+											HorizontalContentAlignment="Stretch"
+											VerticalContentAlignment="Center"
+											Padding="4,2" />
 						</DataTemplate>
 					</DataGridTemplateColumn.CellTemplate>
 				</DataGridTemplateColumn>
-				<!--<DataGridTemplateColumn Header="Место отказа" MinWidth="60" Width="1.3*" CellStyle="{StaticResource BaseCellStyle}">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							--><!-- ContentControl корректно отображает UIElement, возвращённый конвертером --><!--
-							<ContentControl Content="{Binding Location, Converter={StaticResource PlaceFormatterConverter}}"
-											HorizontalContentAlignment="Stretch"
-											VerticalContentAlignment="Center"
-											Padding="0"/>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>-->
-				
+								
 				<DataGridTextColumn Header="Тех. средство" Binding="{Binding Equipment}" MinWidth="60" Width="1.7*" CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource CellWrapStyle}"/>
 				
 				 <DataGridTextColumn Header="Поезда" Binding="{Binding TrainCount}" Width="Auto" CellStyle="{StaticResource BaseCellStyle}" ElementStyle="{StaticResource CellWrapStyle}"/>

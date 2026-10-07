@@ -1,0 +1,74 @@
+﻿<!--<UserControl x:Class="Kas.MemoryMonitorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             mc:Ignorable="d" 
+             d:DesignHeight="50" d:DesignWidth="180">
+
+	<Border BorderBrush="Gray" 
+            BorderThickness="1" 
+            CornerRadius="3" 
+            Padding="5,3"
+            Margin="3 0">
+        <TextBlock x:Name="TxtMemory" 
+                       Text="Mem: 0 MB ▶" 
+                       FontWeight="Normal" 
+                       FontSize="11"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,2"/>
+		
+	</Border>
+</UserControl>-->
+<UserControl x:Class="Kas.MemoryMonitorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+             mc:Ignorable="d" 
+             d:DesignHeight="50" d:DesignWidth="260">
+
+	<Border BorderBrush="Gray" 
+            BorderThickness="1" 
+            CornerRadius="3" 
+            Padding="5,3"
+            Margin="3 0">
+		<StackPanel Orientation="Vertical">
+
+			<!-- Строка 1: WS + тренд -->
+			<TextBlock x:Name="TxtMemory" 
+                       Text="Mem: 0 MB ▶" 
+                       FontWeight="Normal" 
+                       FontSize="12"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       ToolTip="Working Set (как в Диспетчере задач). Клик — GC + замер."
+                       Cursor="Hand"
+                       MouseLeftButtonDown="TxtMemory_MouseLeftButtonDown"/>
+
+			<!-- Строка 2: GC / Priv -->
+			<TextBlock x:Name="TxtManaged" 
+                       Text="GC: 0 · Priv: 0" 
+                       FontSize="12"
+                       Foreground="Gray"
+                       HorizontalAlignment="Center"
+                       ToolTip="GC — managed heap (GC.GetTotalMemory). Priv — PrivateBytes процесса."
+                       Cursor="Hand"
+                       MouseLeftButtonDown="TxtManaged_MouseLeftButtonDown"/>
+
+			<!-- Строка 3: Min/Max/кол-во замеров -->
+			<TextBlock x:Name="TxtPeak" 
+                       Text="Min: 0 / Max: 0 (0 зам.)" 
+                       FontSize="12"
+                       Foreground="Gray"
+                       HorizontalAlignment="Center"
+                       ToolTip="Min/Max за сессию. Клик — сброс и открыть лог." 
+                       Cursor="Hand"
+                       MouseLeftButtonDown="TxtPeak_MouseLeftButtonDown"/>
+
+		</StackPanel>
+	</Border>
+</UserControl>
