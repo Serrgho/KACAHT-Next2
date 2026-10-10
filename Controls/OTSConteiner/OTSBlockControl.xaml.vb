@@ -361,7 +361,7 @@ Namespace Kas
 
             Dim result As New List(Of String) From {"[Все]"}
             If emptyCount > 0 Then
-                result.Add($"[ПУСТЫЕ] [{emptyCount}]")
+                result.Add($"[ПУСТЫЕ] ({emptyCount})")
             End If
             result.AddRange(nonEmptyGroups.OrderBy(Function(s) s))
             Return result
@@ -1244,7 +1244,7 @@ Namespace Kas
                     IdListPopup.IsOpen = True
                     InformLB.AddItem($"Номера скопированы в буфер обмена") '{vbCrLf}{ids}")
                     InformLB.AddItem(InformLB.EndOfMSG)
-                    InformLB.ScrollToEnd()
+
                     Clipboard.SetText(ids)
                 Else
                     ShowMSG(MW, "Список отказов не содержит объектов нужного типа")
@@ -1293,6 +1293,7 @@ Namespace Kas
             KrasREG0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             IsStation0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             Poosnik0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
+            HasPass0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             MestoOTS0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             MyKlasLev10LevelIndicator?.UpdateIsFiltered(_level0FilterState)
             MyKlasLev20LevelIndicator?.UpdateIsFiltered(_level0FilterState)
@@ -1306,7 +1307,7 @@ Namespace Kas
             Dlit0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
 
             ' Добавь другие индикаторы
-            ' ------------------------------- Poosnik
+            ' ------------------------------- HasPass
 
             ' 🔥 Уведомляем внешний мир об изменении фильтров
             RaiseEvent FiltersChanged(Me, EventArgs.Empty)
@@ -1345,6 +1346,8 @@ Namespace Kas
                     IsStation0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
                 Case "Poosnik"
                     Poosnik0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
+                Case "HasPass"
+                    HasPass0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
                 Case "MyKlasLev1"
                     MyKlasLev10LevelIndicator?.UpdateIsFiltered(_level0FilterState)
                 Case "MyKlasLev2"
@@ -1369,7 +1372,7 @@ Namespace Kas
                     PCh0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
                 Case "Dlit"
                     Dlit0LevelIndicator?.UpdateIsFiltered(_level0FilterState)
-                    ' Добавь другие случаи Poosnik
+                    ' Добавь другие случаи HasPass
             End Select
             e.Handled = True
             ' Перестраиваем уровень 0 и текущий вид
@@ -1505,7 +1508,7 @@ Namespace Kas
 
                 If Msg <> "" Then
                     MW.InfoBLOK.AddItem(Msg)
-                    MW.InfoBLOK.ScrollToEnd()
+
                     Exit Sub
                 End If
 

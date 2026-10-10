@@ -169,7 +169,7 @@ Namespace Kas
             If PeriodBC.Nach Is Nothing Or PeriodBC.Kon Is Nothing Then
                 Tx = ($"Период не установлен")
                 MW.InfoBLOK.AddItem(Tx)
-                MW.InfoBLOK.ScrollToEnd()
+
                 MyCalendar1.ParPop.IsOpen = False
                 Exit Sub
             End If
@@ -193,7 +193,7 @@ Namespace Kas
                         'YarCon.UpdateYarlykInfo()
                         InitFirst()
                         MW.InfoBLOK.AddItem(Tx)
-                        MW.InfoBLOK.ScrollToEnd()
+
                     End With
                 ElseIf Parr Is MW.expPoyasnilka.SelectOldPeriod Then
                     With My.Settings
@@ -204,7 +204,7 @@ Namespace Kas
                         Tx = ($"В My.Settings установлен ПРОШЛЫЙ период{vbCrLf}с { .nachOLDPeriod:dd.MM.yyyy HH:mm}{vbCrLf}по { .konOLDPeriod:dd.MM.yyyy HH:mm}")
                         InitFirst()
                         MW.InfoBLOK.AddItem(Tx)
-                        MW.InfoBLOK.ScrollToEnd()
+
                     End With
 
                     'сюда для других вызывающих кнопок
@@ -221,7 +221,7 @@ Namespace Kas
                     ' Логируем (опционально)
                     Tx = $"Период для КАСАНТ обновлен: {Fetcher.NachKon_TXT} {Fetcher.NachTim}-{Fetcher.KonTim}"
                     MW.InfoBLOK.AddItem(Tx)
-                    MW.InfoBLOK.ScrollToEnd()
+
 
                     ' =========================================================================
 

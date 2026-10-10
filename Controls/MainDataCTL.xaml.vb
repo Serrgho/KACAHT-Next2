@@ -235,7 +235,7 @@ Namespace Kas
                 End If
 
                 MW.InfoBLOK.AddItem($"✅ Сохранено {otkazList.Count} записей{vbCrLf}Период: {periodInfo}{vbCrLf}Файл: {fileName}")
-                MW.InfoBLOK.ScrollToEnd()
+
                 otkazList = Nothing
                 currentSource = Nothing
             Catch ex As Exception
@@ -343,7 +343,7 @@ Namespace Kas
                 ' Подготовка текста для сообщения
                 MW.InfoBLOK.AddItem($"✅ Добавлено {newOtkazList.Count} записей к файлу: {Path.GetFileName(EndPat)}")
                 MW.InfoBLOK.AddItem($"   Итого записей в файле: {combinedList.Count}")
-                MW.InfoBLOK.ScrollToEnd()
+
 
 
             Catch ex As Exception
@@ -566,6 +566,17 @@ Namespace Kas
 
         End Sub
 
+
+
+
+
+
+
+
+
+
+
+
         ''' <summary>
         ''' Устанавливает путь к текущему файлу и обновляет подсказку кнопки.
         ''' </summary>
@@ -573,27 +584,100 @@ Namespace Kas
         Private Sub UpdateCurrentFileAndTooltip(path As String)
             _currentFilePath = path
 
-            ' Сохраняем в настройки
             My.Settings.LastUsedFile = path
-            My.Settings.Save() ' Не забываем сохранить, иначе потеряется при закрытии
+            My.Settings.Save()
 
-            ' Обновляем ToolTip кнопки напрямую
-            Dim fileNameOnly As String = ""
+            ' Только доступность кнопки. ToolTip выставит MouseEnter.
+            ResetToOTSList.IsEnabled =
+                Not String.IsNullOrEmpty(path) AndAlso System.IO.File.Exists(path)
 
-            If Not String.IsNullOrEmpty(path) AndAlso System.IO.File.Exists(path) Then
-                fileNameOnly = System.IO.Path.GetFileName(path)
-                ResetToOTSList.ToolTip = $"{fileNameOnly}"
 
-                ' Опционально: включаем кнопку, если она была заблокирована
-                ResetToOTSList.IsEnabled = True
-            Else
-                ResetToOTSList.ToolTip = ""
-                ResetToOTSList.IsEnabled = False ' Блокируем кнопку, если файла нет
-            End If
+            '_currentFilePath = path
+
+            '' Сохраняем в настройки
+            'My.Settings.LastUsedFile = path
+            'My.Settings.Save() ' Не забываем сохранить, иначе потеряется при закрытии
+
+            '' Обновляем ToolTip кнопки напрямую
+            'Dim fileNameOnly As String = ""
+
+
+            'With ResetToOTSList
+
+            '    If Not String.IsNullOrEmpty(path) AndAlso System.IO.File.Exists(path) Then
+            '        fileNameOnly = System.IO.Path.GetFileName(path)
+            '        .ToolTip = $"{fileNameOnly}"
+
+            '        ' Опционально: включаем кнопку, если она была заблокирована
+            '        .IsEnabled = True
+            '    Else
+            '        .ToolTip = ""
+            '        .IsEnabled = False ' Блокируем кнопку, если файла нет
+            '    End If
+            'End With
+
         End Sub
 
+        Private Sub ResetToOTSList_MouseEnter(sender As Object, e As MouseEventArgs)
 
 
+            If _fileToolTip Is Nothing Then
+                _fileToolTip = New ToolTip()
+                ResetToOTSList.ToolTip = _fileToolTip
+                ToolTipService.SetInitialShowDelay(ResetToOTSList, 0)
+                ToolTipService.SetBetweenShowDelay(ResetToOTSList, 0)
+                ' Можно задать один раз в конструкторе или Loaded
+                ToolTipService.SetPlacement(ResetToOTSList, Primitives.PlacementMode.Top)
+            End If
+
+            If Not String.IsNullOrEmpty(_currentFilePath) AndAlso
+               System.IO.File.Exists(_currentFilePath) Then
+                _fileToolTip.Content = System.IO.Path.GetFileName(_currentFilePath)
+            Else
+                ' Нет файла — закрываем и не даём открыться
+                _fileToolTip.Content = Nothing
+                _fileToolTip.IsOpen = False
+            End If
+
+            'ToolTipService.SetInitialShowDelay(ResetToOTSList, 0)
+            'ToolTipService.SetBetweenShowDelay(ResetToOTSList, 0)
+
+            'If Not String.IsNullOrEmpty(_currentFilePath) AndAlso
+            '   System.IO.File.Exists(_currentFilePath) Then
+            '    ResetToOTSList.ToolTip = System.IO.Path.GetFileName(_currentFilePath)
+            'Else
+            '    ResetToOTSList.ToolTip = Nothing
+            'End If
+        End Sub
+
+        Private Sub ResetToOTSList_MouseLeave(sender As Object, e As MouseEventArgs)
+
+            If _fileToolTip IsNot Nothing Then
+                _fileToolTip.IsOpen = False   ' ← мгновенное закрытие, без «хвоста»
+                ' КЛЮЧЕВОЕ: отвязываем ToolTip от кнопки, чтобы WPF не помнил его область
+                ResetToOTSList.ToolTip = Nothing
+                _fileToolTip = Nothing
+            End If
+
+            ' ResetToOTSList.ToolTip = Nothing
+
+
+        End Sub
+
+        Private _fileToolTip As ToolTip
+
+        Private Sub MainDataCTL_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
+            ' Создаём один раз
+            _fileToolTip = New ToolTip
+            ResetToOTSList.ToolTip = _fileToolTip
+            ' Задержку задаём через ToolTipService на самой кнопке
+            ToolTipService.SetInitialShowDelay(ResetToOTSList, 0)
+            ToolTipService.SetBetweenShowDelay(ResetToOTSList, 0)
+            ' Можно задать один раз в конструкторе или Loaded
+            ToolTipService.SetPlacement(ResetToOTSList, Primitives.PlacementMode.Top)
+            ' Восстанавливаем путь из настроек
+            UpdateCurrentFileAndTooltip(My.Settings.LastUsedFile)
+        End Sub
 
 
 
@@ -650,36 +734,147 @@ Namespace Kas
         End Sub
 
 
+        Private IsFiltering As Boolean = False
+
+        Private Async Sub FilterUnsigned_Click(sender As Object, e As RoutedEventArgs)
 
 
+            ' Если процесс уже идет — выходим
+            If IsFiltering Then Return
+
+            IsFiltering = True
+            Dim originalText As String = FilterUnsigned.Content.ToString()
+
+            Try
+                FilterUnsigned.Content = "Поиск..."
+                FilterUnsigned.IsEnabled = False
+
+                ' Запускаем процедуру
+                Await ApplyUnsignedProtocolFilter()
+
+            Finally
+                ' Возвращаем состояние кнопки СРАЗУ, не дожидаясь окончания внутренней логики
+                FilterUnsigned.Content = originalText
+                FilterUnsigned.IsEnabled = True
+                IsFiltering = False
+            End Try
 
 
+            '' Сохраняем оригинальный текст и блокируем кнопку
+            'Dim originalText As String = FilterUnsigned.Content.ToString()
+            'FilterUnsigned.Content = "Поиск..."
+            'FilterUnsigned.IsEnabled = False
 
+            'Try
+            '    ' Запускаем основную логику
+            '    Await Task.Run(Sub() ApplyUnsignedProtocolFilter())
 
+            '    ' Примечание: Так как ApplyUnsignedProtocolFilter уже содержит Await и работает с UI,
+            '    ' можно вызвать её и напрямую: ApplyUnsignedProtocolFilter()
+            '    ' Но использование Task.Run здесь гарантирует, что мы не заблокируем поток UI 
+            '    ' в момент синхронных вычислений (LINQ фильтрация до первого Await).
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-        Private Sub FilterWithTimeOTSList_Click(sender As Object, e As RoutedEventArgs)
-
-            Dim ExclusivePeriod As Func(Of Otkaz, Boolean) = (Function(o) o.Nach.IsInRangeWithTime AndAlso Not (o.KtoZakryl.ToLower.Contains("трп")))
-
-            'MW.expPoyasnilka.btnDailyPoyasnShow.Visibility = Visibility.Visible
-            OTSList = OTSList.Where(ExclusivePeriod).OrderBy(Function(o) o.Nach).ToList
-            ResetPeriodSUB()
-            InitFirst()
-            'YarCon.UpdateYarlykInfo()
+            'Finally
+            '    ' Всегда возвращаем кнопке исходное состояние
+            '    FilterUnsigned.Content = originalText
+            '    FilterUnsigned.IsEnabled = True
+            'End Try
         End Sub
+
+
+        ''' <summary>
+        ''' Фильтрует основной список отказов, оставляя только те, у которых НЕ подписан электронный протокол.
+        ''' Выполняет предварительную проверку свойств и запрос к КАСАНТ.
+        ''' </summary>
+        Public Async Function ApplyUnsignedProtocolFilter() As Task
+
+            ' 1. Предварительная фильтрация "на берегу" по свойствам объекта
+            Dim candidates As List(Of Otkaz) = OTSList.Where(Function(o)
+                                                                 Return o.Zakryt > Date.MinValue AndAlso
+                                                                        o.KtoZakryl?.Contains("ТЧЭ") = True AndAlso
+                                                                        o.KomplexAsInt > 0
+                                                             End Function).ToList()
+
+            If candidates.Count = 0 Then
+                MW.Dispatcher.Invoke(Sub() MW.InfoBLOK.AddItem("Нет кандидатов для проверки (закрытые в ТЧЭ отказы).", Expan:=True))
+                Return
+            End If
+
+            Try
+                ' 2. Получаем список ID, где протокол НЕ подписан
+                Dim unsignedIds As List(Of String) = Await Fetcher.FilterUnsignedProtocolsAsync(candidates.Select(Function(o) o.Id).ToList(), 88)
+
+                ' 3. Если список пуст — значит ВСЕ проверенные отказы уже подписаны
+                If unsignedIds Is Nothing OrElse unsignedIds.Count = 0 Then
+                    MW.Dispatcher.Invoke(Sub() MW.InfoBLOK.AddItem("Все проверенные отказы имеют подписанный электронный протокол.", Expan:=True))
+                    Return
+                End If
+
+                ' 4. Формируем итоговый список объектов Otkaz через HashSet для скорости
+                Dim idSet As New HashSet(Of String)(unsignedIds)
+                Dim filteredOtkazList As List(Of Otkaz) = OTSList.Where(Function(o) idSet.Contains(o.Id)).OrderBy(Function(o) o.Nach).ToList()
+
+                ' 5. Применяем результат к интерфейсу (все UI-операции через Dispatcher)
+                MW.Dispatcher.Invoke(Sub()
+                                         AddOTSToContainer(filteredOtkazList)
+                                         MW.TRowsContainer.UpdateTotal()
+                                         MW.InfoBLOK.AddItem($"Найдено {filteredOtkazList.Count} отказов без подписанного протокола.", Expan:=True)
+                                     End Sub)
+
+            Catch ex As Exception
+                ' ТОЛЬКО ЛОГ, никаких окон!
+                MW.Dispatcher.Invoke(Sub() MW.InfoBLOK.AddItem($"Ошибка при проверке протоколов: {ex.Message}", Expan:=True))
+            End Try
+
+
+
+
+
+
+
+
+
+
+
+
+            '' 1. Предварительная фильтрация "на берегу" по свойствам объекта (быстро, без веба)
+            'Dim candidates As List(Of Otkaz) = OTSList.Where(Function(o)
+            '                                                     Return o.Zakryt > Date.MinValue AndAlso
+            '                                                            o.KtoZakryl?.Contains("ТЧЭ") = True AndAlso
+            '                                                            o.KomplexAsInt > 0
+            '                                                 End Function).ToList()
+
+            'If candidates.Count = 0 Then
+            '    'MessageBox.Show("Нет кандидатов для проверки (закрытые ТЧЭ с комплексом > 0).")
+            '    Return
+            'End If
+
+            'Try
+            '    ' 2. Получаем список ID, где протокол НЕ подписан
+            '    Dim unsignedIds As List(Of String) = Await Fetcher.FilterUnsignedProtocolsAsync(candidates.Select(Function(o) o.Id).ToList(), 88)
+
+            '    ' 3. Если список пуст — выходим, ничего не меняем в UI
+            '    If unsignedIds Is Nothing OrElse unsignedIds.Count = 0 Then
+            '        Return
+            '    End If
+
+            '    ' 4. Формируем итоговый список объектов Otkaz через HashSet для скорости
+            '    Dim idSet As New HashSet(Of String)(unsignedIds)
+            '    Dim filteredOtkazList As List(Of Otkaz) = OTSList.Where(Function(o) idSet.Contains(o.Id)).OrderBy(Function(o) o.Nach).ToList()
+
+            '    ' 5. Применяем результат к интерфейсу
+            '    AddOTSToContainer(filteredOtkazList)
+            '    MW.TRowsContainer.UpdateTotal()
+
+            'Catch ex As Exception
+            '    ' ИСПОЛЬЗУЕМ BeginInvoke ДЛЯ АСИНХРОННОГО ВЫЗОВА БЕЗ БЛОКИРОВКИ ОЧЕРЕДИ
+            '    MW.Dispatcher.Invoke(Sub()
+            '                             MW.InfoBLOK.AddItem($"Ошибка при проверке протоколов: {ex.Message}")
+            '                         End Sub)
+            'End Try
+
+        End Function
+
 
 
     End Class

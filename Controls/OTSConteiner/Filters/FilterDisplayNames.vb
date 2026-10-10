@@ -25,6 +25,7 @@
         {"DaysOnRassled", "Дней в расследовании"},
         {"IsStation", "Станция/Перегон"},
         {"Poosnik", "Локомотив с поосным регулированием"},
+        {"HasPass", "Есть пассажирские / пригородные"},
         {"MyKlasLev1", "Оборудование Ур.1"},
         {"MyKlasLev2", "Оборудование Ур.2"},
         {"MyKlasLev3", "Оборудование Ур.3"},
@@ -35,7 +36,7 @@
         {"SerLokNumLokTXT", "Серия и номер локомотива"},
         {"KrasREG", "Регион отказа"}
             }
-    'Poosnik
+    'HasPass
     ' Метод для получения отображаемого имени по propertyName
     Public Function GetDisplayName(propName As String) As String
         If _displayNameMap.ContainsKey(propName) Then

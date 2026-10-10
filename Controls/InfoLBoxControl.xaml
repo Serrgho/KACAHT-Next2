@@ -7,7 +7,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-	<Expander x:Name="expAuth" 
+	<Expander x:Name="expLog" 
 		  Header="Показать лог" 
 		  Background="{StaticResource ScrolBarBrush}"
 		  Foreground="DarkBlue"
@@ -65,13 +65,17 @@
 						<Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
 						<!--Шаблон для List(Of String)-->
 						<DataTemplate DataType="{x:Type sys:String}">
+							<Border BorderThickness="0.5" 
+									BorderBrush="{StaticResource SplitterBrush}">
 							<TextBlock Text="{Binding}"
 										TextWrapping="Wrap"		
 										TextAlignment="Left"  	   
 										HorizontalAlignment="Left" 		 
 										FontFamily="Segoe UI Emoji, Segoe UI, Tahoma"
-										Margin="4,2"
+										Padding="2"
 										MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportWidth, FallbackValue=400}" />
+							</Border>
+							
 						</DataTemplate>	
 						<!--Шаблон для Otkaz-->	
 						<DataTemplate DataType="{x:Type local:Otkaz}"> 

@@ -289,7 +289,7 @@ Namespace Kas
 
             Dim result As New List(Of String) From {"[Все]"}
             If emptyCount > 0 Then
-                result.Add($"[ПУСТЫЕ] [{emptyCount}]")
+                result.Add($"[ПУСТЫЕ] ({emptyCount})")
             End If
             result.AddRange(nonEmptyGroups.OrderBy(Function(s) s))
             Return result

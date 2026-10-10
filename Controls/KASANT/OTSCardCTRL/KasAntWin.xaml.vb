@@ -386,7 +386,7 @@ Namespace Kas
                                                                       End If
 
                                                                       MW.InfoBLOK.AddItem(F)
-                                                                      MW.InfoBLOK.ScrollToEnd()
+
                                                                   End Sub
                     MestoSP.Children.Add(pchLabel)
                 End If

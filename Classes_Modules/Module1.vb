@@ -456,7 +456,7 @@ Namespace Kas
                     Tx += "отказ закрыт или передан на другую дорогу"
                 End If
                 MW.InfoBLOK.AddItem($"{Tx}{vbCrLf}")
-                MW.InfoBLOK.ScrollToEnd()
+
                 Exit Sub
             End If
 
@@ -599,7 +599,7 @@ Namespace Kas
                 'elapsedTime = Stopwatch.Elapsed
             Else
                 MW.InfoBLOK.AddItem($"Запрос не указан")
-                MW.InfoBLOK.ScrollToEnd()
+
                 Return ' ⚠️ ВАЖНО: выходим, если запроса нет, чтобы не выполнять лишнюю работу
             End If
 
@@ -678,14 +678,14 @@ Namespace Kas
             MW.DContrPop.PeriodBC.Nach = Nothing
             MW.DContrPop.PeriodBC.Kon = Nothing
 
-            MW.InfoBLOK.AddItem($"ПЕРИОД Сброшен:{vbCrLf}My.Settings.NachPeriod = Date.MinValue{vbCrLf}My.Settings.KonPeriod = Date.MinValue{vbCrLf}My.Settings.nachOLDPeriod = Date.MinValue{vbCrLf}My.Settings.konOLDPeriod = Date.MinValue{vbCrLf}DContrPop.PeriodBC.Nach = Nothing{vbCrLf}DContrPop.PeriodBC.Kon = Nothing")
+            'MW.InfoBLOK.AddItem($"ПЕРИОД Сброшен:{vbCrLf}My.Settings.NachPeriod = Date.MinValue{vbCrLf}My.Settings.KonPeriod = Date.MinValue{vbCrLf}My.Settings.nachOLDPeriod = Date.MinValue{vbCrLf}My.Settings.konOLDPeriod = Date.MinValue{vbCrLf}DContrPop.PeriodBC.Nach = Nothing{vbCrLf}DContrPop.PeriodBC.Kon = Nothing")
 
             ' 3. Обновляем UI
 
             InitFirst()                  ' ← ваша глобальная инициализация
             'YarCon.UpdateYarlykInfo()   ' ← обновление ярлыков
 
-            MW.InfoBLOK.ScrollToEnd()
+            'MW.InfoBLOK.ScrollToEnd()
 
 
         End Sub
@@ -704,7 +704,7 @@ Namespace Kas
                 Else
                     MW.InfoBLOK.AddItem($"Период{vbCrLf}начало - { .NachPeriod:dd.MM.yy HH:mm}{vbCrLf}окончание - { .KonPeriod:dd.MM.yy HH:mm}")
                 End If
-                MW.InfoBLOK.ScrollToEnd()
+
             End With
 
         End Sub

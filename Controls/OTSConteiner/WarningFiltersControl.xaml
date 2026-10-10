@@ -42,7 +42,7 @@
 	<WrapPanel Orientation="Horizontal">
 
 		<Border x:Name="EmptyFieldsBorder" Background="DarkOrange" Style="{StaticResource WarningBorderStyle}" d:Visibility="Visible">
-			
+		
 			<StackPanel Style="{StaticResource WarningStackStyle}">
 				<TextBlock Style="{StaticResource WarningIconStyle}"/>
 				<TextBlock x:Name="EmptyFieldsLabel" Text="Незаполненные поля" Style="{StaticResource WarningTextStyle}"/>

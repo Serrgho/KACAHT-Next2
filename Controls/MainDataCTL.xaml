@@ -60,11 +60,12 @@
 			<Button x:Name="LoadData" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="LoadData_Click">📁 Импорт ОТС из Excel</Button>
 			<Button x:Name="LoadDataFromJSON" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="LoadDataFromJSON_Click">📁 Импорт ОТС из JSON</Button>
 			<Button x:Name="BtnAddFromJRNL"  Style="{StaticResource PopupStyleButtonGreen}"  Click="BtnAddFromJRNL_Click" Content="🌐Синхр. список ОТС"/>
-            <Button x:Name="AppendDataToJSON" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="AppendDataToJSON_Click">📝Добавить ОТС к файлу JSON</Button>
+            <Button x:Name="AppendDataToJSON" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="AppendDataToJSON_Click">📝 Добавить ОТС к файлу JSON</Button>
 
-			<Button x:Name="SaveDataToJSON" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="SaveDataToJSON_Click">📝Сохранить данные в JSON</Button>
-			<Button x:Name="ResetToOTSList" Style="{StaticResource PopupStyleButtonOrange}" Click="ResetToOTSList_Click">🔙 Последний загруженный файл</Button>
-			<Button x:Name="FilterWithTimeOTSList" Style="{StaticResource PopupStyleButton}" Click="FilterWithTimeOTSList_Click">🌪️ Отфильтровать с учетом времени</Button>
+			<Button x:Name="SaveDataToJSON" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="SaveDataToJSON_Click">📝 Сохранить данные в JSON</Button>
+			<Button x:Name="ResetToOTSList" Style="{StaticResource PopupStyleButtonOrange}" Click="ResetToOTSList_Click"  MouseEnter="ResetToOTSList_MouseEnter"
+        MouseLeave="ResetToOTSList_MouseLeave">🔙 Последний загруженный файл</Button>
+			<Button x:Name="FilterUnsigned" Style="{StaticResource PopupStyleButtonBlue}" Click="FilterUnsigned_Click">⚠️ Не подписанные эл. протоколы</Button>
 			<Button x:Name="BtnShowInExplorer" Style="{StaticResource PopupStyleButton}" Click="BtnShowInExplorer_Click">📁 Показать папку с данными</Button>
         </WrapPanel>
 

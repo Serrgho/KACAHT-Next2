@@ -87,7 +87,7 @@ Namespace Kas
             Clipboard.SetText(dataContext.Id)
             Dim F As String = $"** Номер отказа {dataContext.Id} скопирован **"
             MW.InfoBLOK.AddItem(F)
-            MW.InfoBLOK.ScrollToEnd()
+
             If e.ClickCount = 2 Then
                 ' Если окно не создано ИЛИ оно было закрыто ( IsLoaded = False )
                 If Not IsNothing(KasAntWND) OrElse KasAntWND?.IsLoaded Then

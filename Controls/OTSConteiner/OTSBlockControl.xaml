@@ -123,7 +123,7 @@
 							<TextBlock x:Name="ClearFilters" Text="❌" Style="{StaticResource TBSTYLE}" Foreground="DarkRed" />
 						</Border>
 
-						<Border Width="60" x:Name="PCh0LevelBorder"
+						<Border Width="45" x:Name="PCh0LevelBorder"
                                 Style="{StaticResource FiltrTBlock}"
                                 PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
                                 PreviewMouseRightButtonUp="OnLevel0FilterMouseRightDown"
@@ -132,7 +132,7 @@
                                 Tag="PCh">
 							<Grid>
 								<!-- Оберни в Grid, чтобы можно было наложить элементы -->
-								<TextBlock Text="Поездо-Часы" Style="{StaticResource TBSTYLE}"/>
+								<TextBlock Text="П/Час" Style="{StaticResource TBSTYLE}"/>
 								<local:Level0FilterIndicator x:Name="PCh0LevelIndicator"
                                                              PropertyName="PCh"
                                                              HorizontalAlignment="Right"
@@ -249,6 +249,23 @@
 															 Margin="0,-2,-2,0"/>
 							</Grid>
 						</Border>
+						<Border Width="67"  x:Name="HasPass0LevelBorder"
+								Style="{StaticResource FiltrTBlock}"
+								PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
+								PreviewMouseRightButtonUp="OnLevel0FilterMouseRightDown"
+								local:FilterProperties.FieldType="Boolean"
+								local:FilterProperties.FilterLevel="Level0"
+								Tag="HasPass">
+							<Grid>
+								<!-- Оберни в Grid, чтобы можно было наложить элементы -->
+								<TextBlock Text="Есть пасс Да/Нет" Style="{StaticResource TBSTYLE}"/>
+								<local:Level0FilterIndicator x:Name="HasPass0LevelIndicator"
+									 PropertyName="HasPass"
+									 HorizontalAlignment="Right"
+									 VerticalAlignment="Top"
+									 Margin="0,-2,-2,0"/>
+							</Grid>
+						</Border>
 
 
 
@@ -347,10 +364,6 @@
 							</Grid>
 						</Border>
 
-
-
-
-
 						<Border Width="70" x:Name="PripLok0LevelBorder" Style="{StaticResource FiltrTBlock}"
 								PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
 								PreviewMouseRightButtonUp="OnLevel0FilterMouseRightDown"
@@ -388,19 +401,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 						<Border Width="80" x:Name="PripMash0LevelBorder"
 								Style="{StaticResource FiltrTBlock}"
 								PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
@@ -419,7 +419,7 @@
 							</Grid>
 						</Border>
 
-						<Border Width="55" x:Name="Plan0LevelBorder"
+						<Border Width="45" x:Name="Plan0LevelBorder"
 								Style="{StaticResource FiltrTBlock}"
 								PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
 								PreviewMouseRightButtonUp="OnLevel0FilterMouseRightDown"
@@ -440,7 +440,7 @@
 
 
 
-						<Border Width="55"  x:Name="KomplexAsInt0LevelBorder"
+						<Border Width="50"  x:Name="KomplexAsInt0LevelBorder"
 								Style="{StaticResource FiltrTBlock}"
 								PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
 								PreviewMouseRightButtonUp="OnLevel0FilterMouseRightDown"
@@ -460,7 +460,7 @@
 
 
 
-						<Border Width="70" x:Name="MyKlasLev10LevelBorder"
+						<Border Width="55" x:Name="MyKlasLev10LevelBorder"
 								Style="{StaticResource FiltrTBlock}"
 								PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
 								PreviewMouseRightButtonUp="OnLevel0FilterMouseRightDown"
@@ -479,7 +479,7 @@
 						</Border>
 
 
-						<Border Width="70" x:Name="MyKlasLev20LevelBorder"
+						<Border Width="55" x:Name="MyKlasLev20LevelBorder"
                                 Style="{StaticResource FiltrTBlock}"
 								PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
 								PreviewMouseRightButtonUp="OnLevel0FilterMouseRightDown"
@@ -499,7 +499,7 @@
 
 
 
-						<Border Width="70" x:Name="MyKlasLev30LevelBorder"
+						<Border Width="55" x:Name="MyKlasLev30LevelBorder"
                                 Style="{StaticResource FiltrTBlock}"
                                 PreviewMouseLeftButtonUp="OnLevel0FilterMouseDown"
                                 PreviewMouseRightButtonUp="OnLevel0FilterMouseRightDown"

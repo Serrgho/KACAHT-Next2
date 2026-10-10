@@ -101,7 +101,7 @@ Namespace Kas
                 InfoBLOK.AddItem($"--- Все записи содержат '{searchTerm}'")
             End If
 
-            InfoBLOK.ScrollToEnd()
+
         End Sub
 
 
@@ -200,7 +200,7 @@ Namespace Kas
             PointedYarlyk = YarCon.AllOTSYAR
             InitFirst()
             InfoBLOK.AddItem("===================")
-            InfoBLOK.ScrollToEnd()
+
             ChangeFilters()
             ' Регистрируем кодировки (включая 1251)
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)

@@ -15,7 +15,7 @@ Namespace Kas
             InformLB = Me
 
             ' --- НАСТРОЙКА ТАЙМЕРА ---
-            _clearTimer.Interval = TimeSpan.FromSeconds(300) ' Интервал 20 секунд
+            _clearTimer.Interval = TimeSpan.FromSeconds(40) ' Интервал 20 секунд
             AddHandler _clearTimer.Tick, AddressOf ClearTimer_Tick
 
             ' -------------------------
@@ -45,20 +45,24 @@ Namespace Kas
             ClearItems()
         End Sub
 
-        Sub AddItem(item As Object, Optional ToEnd As Boolean = False)
-            InfoLB.Items.Add(item)
+        Sub AddItem(item As Object, Optional Expan As Boolean = False)
 
-            If ToEnd Then
-                InfoLB.ScrollIntoView(InfoLB.Items(InfoLB.Items.Count - 1))
-            End If
+            InfoLB.Items.Insert(0, item)
+            'If ToEnd Then
+            '    InfoLB.ScrollIntoView(InfoLB.Items(InfoLB.Items.Count - 1))
+            'End If
             _clearTimer.Stop()
             _clearTimer.Start()
+            If Expan Then
+                expLog.IsExpanded = True
+            End If
         End Sub
 
         Sub ClearItems()
             InfoLB.ItemsSource = Nothing
             InfoLB.Items.Clear()
             _clearTimer.Stop()
+            expLog.IsExpanded = False
         End Sub
 
         Public Sub ScrollToEnd()

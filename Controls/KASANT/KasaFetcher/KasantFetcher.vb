@@ -255,24 +255,7 @@ Namespace Kas
 				' Игнорируем ошибки очистки
 			End Try
 
-			'Try
-			'	' Логируем текущее состояние памяти до очистки
-			'	Dim memBefore As Long = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024
 
-			'	' 1. Запрашиваем сборку мусора
-			'	GC.Collect()
-			'	' 2. Ждем завершения всех финализаторов
-			'	GC.WaitForPendingFinalizers()
-			'	' 3. Повторная сборка для освобождения объектов, ставших доступными после шага 2
-			'	GC.Collect()
-
-			'	Dim memAfter As Long = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024
-			'	' Можно раскомментировать логирование, если нужно видеть эффект в файле
-			'	' System.IO.File.AppendAllText(System.IO.Path.Combine(GetDebugFolder(), "memory_log.txt"), 
-			'	'     $"[Cleanup] Before: {memBefore} MB -> After: {memAfter} MB{vbCrLf}", Encoding.UTF8)
-			'Catch ex As Exception
-			'	' Игнорируем ошибки очистки, чтобы не ломать основной поток
-			'End Try
 		End Sub
 
 		Public Async Function IsLoggedInAsync() As Task(Of Boolean)
@@ -952,68 +935,6 @@ Namespace Kas
 
 			Return sb.ToString().Trim()
 		End Function
-
-
-
-
-
-
-
-
-
-
-		'' ================= 9. ВИНОВНАЯ ОРГАНИЗАЦИЯ =================
-		'Public Sub ParseVinovnikOrganization(doc As HtmlDocument, result As OtsData)
-		'	' 1. Сначала пробуем стандартный поиск (сервисная/сторонняя организация)
-		'	Dim alienTable = doc.DocumentNode.SelectSingleNode("//table[@id='alien_guilty_table']")
-		'	If alienTable IsNot Nothing Then
-		'		Dim orgRow = alienTable.SelectSingleNode(".//tr[td[contains(., 'Наименование предприятия') or contains(., 'Наименования сервисной')]]")
-		'		If orgRow IsNot Nothing Then
-		'			Dim cells = orgRow.SelectNodes(".//td")
-		'			If cells IsNot Nothing AndAlso cells.Count >= 2 Then
-		'				Dim rawText = CleanText(cells(1).InnerText)
-		'				result.ThirdPartyOrg = CleanThirdPartyOrg(rawText)
-		'				log.AppendLine($"✓ Отнесен на (сервис): {result.ThirdPartyOrg}")
-		'				Exit Sub ' Нашли сервисную, выходим
-		'			End If
-		'		End If
-		'	End If
-
-
-
-
-
-
-		'' 2. Если сервисную не нашли, проверяем на "эксплуатационный" характер
-		'' Ищем текст в документе
-		'' 2. Если сервисную не нашли, проверяем на "эксплуатационный" характер
-		'Dim isExploitation = doc.DocumentNode.InnerHtml.Contains("Характер причины отказа</b>: эксплуатационный")
-
-		'	If isExploitation Then
-		'		Dim respTable = doc.DocumentNode.SelectSingleNode("//table[@id='responsible_table']")
-		'		If respTable IsNot Nothing Then
-		'			' Ищем строку, в которой НЕТ атрибута background (заголовки обычно с ним) 
-		'			' и которая содержит данные (больше 4 ячеек)
-		'			Dim dataRow = respTable.SelectSingleNode(".//tr[not(td[@style[contains(., 'background')]]) and count(td) >= 4]")
-
-		'			' Если XPath выше не сработал, берем просто последнюю строку таблицы
-		'			If dataRow Is Nothing Then
-		'				dataRow = respTable.SelectNodes(".//tr").LastOrDefault()
-		'			End If
-
-		'			If dataRow IsNot Nothing Then
-		'				Dim cells = dataRow.SelectNodes("td")
-		'				If cells IsNot Nothing AndAlso cells.Count >= 4 Then
-		'					' Индекс 3 — это 4-я колонка "Подразделение"
-		'					result.ThirdPartyOrg = CleanText(cells(3).InnerText)
-		'					log.AppendLine($"✓ Отнесен на (эксплуатация): {result.ThirdPartyOrg}")
-		'				End If
-		'			End If
-		'		End If
-		'	End If
-
-
-		'End Sub
 
 
 		' ================= 7. ПОСЛЕДСТВИЯ (СОБЫТИЯ, КОРПОРАТИВ И Т.Д.) =================
@@ -2175,35 +2096,178 @@ Namespace Kas
 			End Try
 
 
-			'Dim url = $"{_baseUrl}/templates/helper_locomotion.jsp?id_viol={violId}&dor_kod={dorKod}"
 
-			'' Формируем тело запроса вручную, чтобы гарантировать windows-1251
-			'Dim body = $"train_helper_locomotion={Uri.EscapeDataString(trainNumber)}" &
-			'   $"&prikaz_helper_locomotion={Uri.EscapeDataString(orderInfo)}" &
-			'   $"&flg_helper_locomotion={If(isFollowing, "on", "")}"
-
-			'Using request As New HttpRequestMessage(HttpMethod.Post, url)
-			'	request.Content = New StringContent(body, Encoding.GetEncoding("windows-1251"), "application/x-www-form-urlencoded")
-			'	request.Headers.Referrer = New Uri($"{_baseUrl}/journal.jsp?tab=1100532439")
-			'	request.Headers.TryAddWithoutValidation("X-Requested-With", "XMLHttpRequest")
-			'	request.Headers.TryAddWithoutValidation("Accept", "*/*")
-
-			'	' Используем СУЩЕСТВУЮЩИЙ клиент класса (с куками!)
-			'	Dim response = Await _httpClient.SendAsync(request)
-
-			'	If Not response.IsSuccessStatusCode Then
-			'		Dim code As Integer = CInt(response.StatusCode)
-			'		Throw New Exception($"HTTP {code}: {response.ReasonPhrase}")
-			'	End If
-
-			'	Dim responseBody = Await response.Content.ReadAsStringAsync()
-
-			'	' Проверка на ошибки КАСАНТа
-			'	If responseBody.Contains("anauth_panel") OrElse responseBody.Contains("Ошибка") Then
-			'		Throw New Exception("Сессия истекла или сервер вернул ошибку.")
-			'	End If
-			'End Using
 		End Function
+
+		' =================================================================
+		' ПАРСИНГ ИСТОРИИ ОТКАЗА (ОТДЕЛЬНЫЕ ПРОЦЕДУРЫ)
+		' =================================================================
+
+		''' <summary>
+		''' Ищет и возвращает ТОЛЬКО ПОСЛЕДНЮЮ запись из истории отказа в HTML-документе.
+		''' Не сохраняет промежуточные данные в память.
+		''' </summary>
+		''' <param name="doc">Загруженный HtmlDocument страницы карточки отказа</param>
+		''' <returns>Последняя запись истории или Nothing, если история пуста</returns>
+		Public Function GetLastHistoryRecord(doc As HtmlDocument) As HistoryRecord
+			' Ищем таблицу истории по заголовку "Когда" внутри блока "История"
+			Dim historyTable As HtmlNode = doc.DocumentNode.SelectSingleNode("//b[contains(text(), 'История')]/ancestor::div[@style][1]//table[.//b[contains(text(), 'Когда')]]")
+
+			If historyTable Is Nothing Then Return Nothing
+
+			Dim historyRows As HtmlNodeCollection = historyTable.SelectNodes(".//tr")
+			If historyRows Is Nothing OrElse historyRows.Count = 0 Then Return Nothing
+
+			' Слова-заголовки для фильтрации мусора
+			Dim headerWords As String() = {"Когда", "Кем", "АСУ", "ЧТО", "КОМУ", "Откуда", "Куда", "Действие"}
+
+			' Идем с конца таблицы к началу, чтобы сразу найти последнюю запись
+			For i As Integer = historyRows.Count - 1 To 0 Step -1
+				Dim row As HtmlNode = historyRows(i)
+				Dim cells As HtmlNodeCollection = row.SelectNodes(".//td")
+
+				' Пропускаем строки без достаточного количества ячеек
+				If cells Is Nothing OrElse cells.Count < 2 Then Continue For
+
+				Dim dateText As String = CleanText(If(cells(1) IsNot Nothing, cells(1).InnerText, ""))
+
+				' ФИЛЬТР 1: Пропускаем заголовки
+				Dim isHeaderRow As Boolean = False
+				For Each word As String In headerWords
+					If dateText.IndexOf(word, StringComparison.OrdinalIgnoreCase) >= 0 Then
+						isHeaderRow = True
+						Exit For
+					End If
+				Next
+
+				If isHeaderRow Then Continue For
+
+				' ФИЛЬТР 2: Проверяем наличие цифр (признак даты/времени)
+				If Not System.Text.RegularExpressions.Regex.IsMatch(dateText, "\d{2}") Then Continue For
+
+				' Если дошли сюда — это последняя валидная запись. Создаем объект и выходим.
+				Dim record As New HistoryRecord()
+
+				record.DateTime = dateText
+
+				If cells.Count > 2 AndAlso cells(2) IsNot Nothing Then
+					record.ActionType = CleanText(cells(2).InnerText)
+				Else
+					record.ActionType = ""
+				End If
+
+				If cells.Count > 3 AndAlso cells(3) IsNot Nothing Then
+					record.From = CleanText(cells(3).InnerText)
+				Else
+					record.From = ""
+				End If
+
+				If cells.Count > 4 AndAlso cells(4) IsNot Nothing Then
+					record.ToDest = CleanText(cells(4).InnerText)
+				Else
+					record.ToDest = ""
+				End If
+
+				If cells.Count > 5 AndAlso cells(5) IsNot Nothing Then
+					record.ByWhom = CleanText(cells(5).InnerText)
+				Else
+					record.ByWhom = ""
+				End If
+
+				If cells.Count > 6 AndAlso cells(6) IsNot Nothing Then
+					record.Comment = CleanText(cells(6).InnerText)
+				Else
+					record.Comment = ""
+				End If
+
+				Return record
+			Next
+
+			Return Nothing
+		End Function
+
+		''' <summary>
+		''' Проверяет список ID отказов на наличие подписанного протокола в истории КАСАНТ.
+		''' Возвращает ID тех отказов, где протокол НЕ подписан или история отсутствует.
+		''' </summary>
+		''' <param name="violIds">Список ID отказов (ViolId), прошедших предварительную фильтрацию</param>
+		''' <param name="dorKod">Код дороги (например, 88)</param>
+		Public Async Function FilterUnsignedProtocolsAsync(
+			violIds As List(Of String),
+			dorKod As Integer) As Task(Of List(Of String))
+
+			' 1. ПРОВЕРКА СЕССИИ ОДИН РАЗ ПЕРЕД ЦИКЛОМ
+			If Not Await IsLoggedInAsync() Then
+				Dim loginOk = Await EnsureConnectedAsync()
+				If Not loginOk Then
+					Throw New Exception("Не удалось подключиться к КАСАНТ. Проверьте настройки.")
+				End If
+			End If
+
+
+
+			Dim resultIds As New List(Of String)()
+			Dim debugFolder As String = GetDebugFolder()
+
+			For Each violId As String In violIds
+				Try
+					' Формируем URL
+					Dim url As String = $"{_baseUrl}/full_card.jsp?viol={violId}&dor_kod={dorKod:00}&tab=140142325"
+
+					' Делаем запрос
+					Dim response As HttpResponseMessage = Await _httpClient.GetAsync(url)
+
+					' Если сервер вернул ошибку - это повод остановить всю операцию, а не пропускать отказ
+					If Not response.IsSuccessStatusCode Then
+						Throw New Exception($"Сервер вернул ошибку {CInt(response.StatusCode)} при запросе отказа {violId}")
+					End If
+
+					Dim bytes As Byte() = Await response.Content.ReadAsByteArrayAsync()
+					Dim html As String = Encoding.GetEncoding("windows-1251").GetString(bytes)
+
+					' Проверка на вылет сессии ВНУТРИ цикла (на случай, если она протухла в процессе)
+					If html.Contains("anauth_panel") OrElse html.Contains("id_prog") Then
+						Throw New Exception("Сессия КАСАНТ завершена во время проверки.")
+					End If
+
+
+					' Парсим HTML
+					Dim doc As New HtmlDocument()
+					doc.LoadHtml(html)
+
+					' Получаем ТОЛЬКО последнюю строку истории
+					Dim lastRec As HistoryRecord = GetLastHistoryRecord(doc)
+
+					Dim isSigned As Boolean = False
+
+					If lastRec IsNot Nothing Then
+						' Ищем заветную фразу в комментарии
+						If lastRec.Comment.ToLower().Contains("подписание электронного протокола") Then
+							isSigned = True
+						End If
+					End If
+
+					' Если НЕ подписано — добавляем ID в список
+					If Not isSigned Then
+						resultIds.Add(violId)
+					End If
+
+				Catch ex As Exception
+					' ЛОГИРУЕМ ОШИБКУ В ПОЛЬЗОВАТЕЛЬСКИЙ ИНТЕРФЕЙС
+					Try
+						System.IO.File.WriteAllText(System.IO.Path.Combine(debugFolder, $"error_check_{violId}.txt"), ex.ToString())
+					Catch
+					End Try
+
+					MW.Dispatcher.Invoke(Sub()
+											 MW.InfoBLOK.AddItem($"Ошибка проверки отказа {violId}: {ex.Message}", Expan:=True)
+										 End Sub)
+				End Try
+			Next
+
+			Return resultIds
+		End Function
+
 
 
 	End Class

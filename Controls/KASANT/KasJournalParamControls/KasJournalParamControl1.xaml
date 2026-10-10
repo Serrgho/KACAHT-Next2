@@ -50,10 +50,15 @@
 				<TextBox x:Name="NHTBlock" Text="{Binding MWFetcher.NachTim,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" MinWidth="20" Foreground="DarkRed" BorderThickness="1" BorderBrush="{StaticResource SplitterBrush}" />
 				<TextBlock Text="до" Margin="5 2 2 2" VerticalAlignment="Center" FontSize="15" Foreground="Black"/>
 				<TextBox x:Name="KHTBlock" Text="{Binding MWFetcher.KonTim,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" MinWidth="20" Foreground="DarkRed" BorderThickness="1" BorderBrush="{StaticResource SplitterBrush}"/>
-
+				
 			</StackPanel>
 		</Border>
-
+		<Button Grid.Column="1" Grid.Row="1"
+				x:Name="FilterWithTimeOTSList"
+				Style="{StaticResource PopupStyleButton}"
+				Click="FilterWithTimeOTSList_Click">
+				🌪️ Фильтр с учетом времени
+		</Button>
 
 
 	</Grid>
