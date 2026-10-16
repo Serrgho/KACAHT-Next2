@@ -245,12 +245,12 @@ Namespace Kas
                                                    Dim originalValues = selected.Select(Function(item)
                                                                                             Dim str = item?.ToString()
                                                                                             If String.IsNullOrEmpty(str) Then Return str
-                                                                                            If str.Contains(" [") AndAlso str.EndsWith("]") Then
+                                                                                            If str.Contains(" (") AndAlso str.EndsWith(")") Then
                                                                                                 If isBoolean Then
                                                                                                     If str.StartsWith("Да ") Then Return "True"
                                                                                                     If str.StartsWith("Нет ") Then Return "False"
                                                                                                 End If
-                                                                                                Return str.Substring(0, str.IndexOf(" ["))
+                                                                                                Return str.Substring(0, str.IndexOf(" ("))
                                                                                             ElseIf str.Contains(" (") AndAlso str.EndsWith(")") Then
                                                                                                 Return str.Substring(0, str.IndexOf(" ("))
                                                                                             End If
@@ -273,163 +273,163 @@ Namespace Kas
         End Sub
 
 
-        '--- ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ (аналогично OTSBlockControl, можно вынести в общий модуль, если используются в обоих) ---
-        ' Получает список строк "Значение [Количество]" из источника для строкового свойства
-        Private Function GetTextualValuesForProperty(currentSource As IEnumerable(Of Otkaz), propName As String) As List(Of String)
+        '    '--- ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ (аналогично OTSBlockControl, можно вынести в общий модуль, если используются в обоих) ---
+        '    ' Получает список строк "Значение [Количество]" из источника для строкового свойства
+        '    Private Function GetTextualValuesForProperty(currentSource As IEnumerable(Of Otkaz), propName As String) As List(Of String)
 
-            Dim selector = OtkazFilterConfig.GetDisplaySelector(propName)
-            If selector Is Nothing Then Return {"[Все]"}.ToList()
+        '        Dim selector = OtkazFilterConfig.GetDisplaySelector(propName)
+        '        If selector Is Nothing Then Return {"[Все]"}.ToList()
 
-            Dim allValues = currentSource.Select(selector).ToList()
-            Dim emptyCount = allValues.Where(Function(v) String.IsNullOrWhiteSpace(CStr(v))).Count
-            Dim nonEmptyGroups = allValues.
-    Where(Function(v) Not String.IsNullOrWhiteSpace(CStr(v))).
-                GroupBy(Function(v) v).
-                Select(Function(g) $"{g.Key} ({g.Count()})")
+        '        Dim allValues = currentSource.Select(selector).ToList()
+        '        Dim emptyCount = allValues.Where(Function(v) String.IsNullOrWhiteSpace(CStr(v))).Count
+        '        Dim nonEmptyGroups = allValues.
+        'Where(Function(v) Not String.IsNullOrWhiteSpace(CStr(v))).
+        '            GroupBy(Function(v) v).
+        '            Select(Function(g) $"{g.Key} ({g.Count()})")
 
-            Dim result As New List(Of String) From {"[Все]"}
-            If emptyCount > 0 Then
-                result.Add($"[ПУСТЫЕ] ({emptyCount})")
-            End If
-            result.AddRange(nonEmptyGroups.OrderBy(Function(s) s))
-            Return result
+        '        Dim result As New List(Of String) From {"[Все]"}
+        '        If emptyCount > 0 Then
+        '            result.Add($"[ПУСТЫЕ] ({emptyCount})")
+        '        End If
+        '        result.AddRange(nonEmptyGroups.OrderBy(Function(s) s))
+        '        Return result
 
-        End Function
+        '    End Function
 
         ' Получает список строк "Да [N]", "Нет [N]" из источника для булевого свойства
-        Private Function GetBooleanValuesForProperty(currentSource As IEnumerable(Of Otkaz), propName As String) As List(Of String)
-            Dim getter As Func(Of Otkaz, Boolean) = OtkazFilterConfig.GetBooleanGetter(propName)
-            If getter Is Nothing Then Return New List(Of String)
+        'Private Function GetBooleanValuesForProperty(currentSource As IEnumerable(Of Otkaz), propName As String) As List(Of String)
+        '    Dim getter As Func(Of Otkaz, Boolean) = OtkazFilterConfig.GetBooleanGetter(propName)
+        '    If getter Is Nothing Then Return New List(Of String)
 
-            Dim grouped = currentSource.GroupBy(Function(o) getter(o))
-            Dim values = New List(Of String)
-            For Each g In grouped
-                Dim displayText As String = If(g.Key, "Да", "Нет")
-                values.Add($"{displayText} [{g.Count()}]")
-            Next
-            values.Sort() ' Сортировка: "Да [N]" и "Нет [N]" в алфавитном порядке
+        '    Dim grouped = currentSource.GroupBy(Function(o) getter(o))
+        '    Dim values = New List(Of String)
+        '    For Each g In grouped
+        '        Dim displayText As String = If(g.Key, "Да", "Нет")
+        '        values.Add($"{displayText} [{g.Count()}]")
+        '    Next
+        '    values.Sort() ' Сортировка: "Да [N]" и "Нет [N]" в алфавитном порядке
 
-            If values.Count > 0 Then
-                values.Insert(0, "[Все]")
-            Else
-                values.Add("[Все]") ' Если других значений нет, просто добавим "[Все]"
-            End If
-            Return values
-        End Function
+        '    If values.Count > 0 Then
+        '        values.Insert(0, "[Все]")
+        '    Else
+        '        values.Add("[Все]") ' Если других значений нет, просто добавим "[Все]"
+        '    End If
+        '    Return values
+        'End Function
 
-        ' Сортирует список строк "Значение [Количество]" в зависимости от флага isSortByCount
-        Private Function SortValuesByToggle(values As List(Of String), propName As String, isSortByCount As Boolean) As List(Of String)
-            ' Убираем "[Все]" из сортировки, если он есть
-            Dim allItem As String = Nothing
-            If values.Count > 0 AndAlso values(0) = "[Все]" Then
-                allItem = values(0)
-                values.RemoveAt(0)
-            End If
+        '' Сортирует список строк "Значение [Количество]" в зависимости от флага isSortByCount
+        'Private Function SortValuesByToggle(values As List(Of String), propName As String, isSortByCount As Boolean) As List(Of String)
+        '    ' Убираем "[Все]" из сортировки, если он есть
+        '    Dim allItem As String = Nothing
+        '    If values.Count > 0 AndAlso values(0) = "[Все]" Then
+        '        allItem = values(0)
+        '        values.RemoveAt(0)
+        '    End If
 
-            If isSortByCount Then ' Сортировка по количеству (убыванию, затем по имени)
-                values = values.OrderByDescending(Function(s)
-                                                      Dim startIdx = s.IndexOf(" (")
-                                                      Dim endIdx = s.IndexOf(")")
-                                                      If startIdx >= 0 AndAlso endIdx > startIdx Then
-                                                          Dim countStr = s.Substring(startIdx + 2, endIdx - startIdx - 2)
-                                                          Dim countValue As Integer
-                                                          If Integer.TryParse(countStr, countValue) Then
-                                                              Return countValue
-                                                          Else
-                                                              Return 0
-                                                          End If
-                                                      Else
-                                                          Return 0
-                                                      End If
-                                                  End Function).
-            ThenBy(Function(s) s).
-            ToList()
-            Else ' Сортировка по имени (алфавиту)
-                values = values.OrderBy(Function(s) s).ToList()
+        '    If isSortByCount Then ' Сортировка по количеству (убыванию, затем по имени)
+        '        values = values.OrderByDescending(Function(s)
+        '                                              Dim startIdx = s.IndexOf(" (")
+        '                                              Dim endIdx = s.IndexOf(")")
+        '                                              If startIdx >= 0 AndAlso endIdx > startIdx Then
+        '                                                  Dim countStr = s.Substring(startIdx + 2, endIdx - startIdx - 2)
+        '                                                  Dim countValue As Integer
+        '                                                  If Integer.TryParse(countStr, countValue) Then
+        '                                                      Return countValue
+        '                                                  Else
+        '                                                      Return 0
+        '                                                  End If
+        '                                              Else
+        '                                                  Return 0
+        '                                              End If
+        '                                          End Function).
+        '    ThenBy(Function(s) s).
+        '    ToList()
+        '    Else ' Сортировка по имени (алфавиту)
+        '        values = values.OrderBy(Function(s) s).ToList()
 
-                ' Специфическая сортировка для ZaKem
-                If propName = "ZaKem" OrElse propName = "Zakem_TXT" Then
-                    values = values.OrderBy(Function(s) If(s.StartsWith(OtkazFilterConfig.UNASSIGNED_MARKER), 0, 1)).ThenBy(Function(s) s).ToList()
-                ElseIf {"DaysOnRassled", "KomplexAsInt", "Kat"}.Contains(propName) Then
-                    ' Для числовых - сортировка по числовому значению до "["
-                    values = values.OrderBy(Function(s) Val(If(s.Contains("("), s.Substring(0, s.IndexOf("(")), s))).ToList()
-                End If
-            End If
+        '        ' Специфическая сортировка для ZaKem
+        '        If propName = "ZaKem" OrElse propName = "Zakem_TXT" Then
+        '            values = values.OrderBy(Function(s) If(s.StartsWith(OtkazFilterConfig.UNASSIGNED_MARKER), 0, 1)).ThenBy(Function(s) s).ToList()
+        '        ElseIf {"DaysOnRassled", "KomplexAsInt", "Kat"}.Contains(propName) Then
+        '            ' Для числовых - сортировка по числовому значению до "["
+        '            values = values.OrderBy(Function(s) Val(If(s.Contains("("), s.Substring(0, s.IndexOf("(")), s))).ToList()
+        '        End If
+        '    End If
 
-            ' Возвращаем "[Все]" в начало списка
-            If allItem IsNot Nothing Then
-                values.Insert(0, allItem)
-            End If
+        '    ' Возвращаем "[Все]" в начало списка
+        '    If allItem IsNot Nothing Then
+        '        values.Insert(0, allItem)
+        '    End If
 
-            Return values
-        End Function
+        '    Return values
+        'End Function
 
-        ' Восстанавливает выделение в ListBox на основе сохранённого состояния фильтра
-        Private Sub RestoreSelection(popupCtrl As FilterPopup, savedFilterValues As List(Of Object), isBooleanField As Boolean, allValues As List(Of String))
-            SafeClearSelection(popupCtrl.FilterListBox)
+        '' Восстанавливает выделение в ListBox на основе сохранённого состояния фильтра
+        'Private Sub RestoreSelection(popupCtrl As FilterPopup, savedFilterValues As List(Of Object), isBooleanField As Boolean, allValues As List(Of String))
+        '    SafeClearSelection(popupCtrl.FilterListBox)
 
-            If isBooleanField Then
-                For Each item In savedFilterValues
-                    Dim itemStr = item?.ToString()
-                    If Not String.IsNullOrEmpty(itemStr) Then
-                        Dim match = allValues.FirstOrDefault(Function(v) (itemStr.Equals("True", StringComparison.OrdinalIgnoreCase) AndAlso v.StartsWith("Да [")) OrElse
-        (itemStr.Equals("False", StringComparison.OrdinalIgnoreCase) AndAlso v.StartsWith("Нет [")))
-                        If match IsNot Nothing Then
-                            SafeAddToSelection(popupCtrl.FilterListBox, match)
-                        End If
-                    End If
-                Next
-            Else ' строковое поле
-                For Each item In savedFilterValues
-                    Dim originalItem = item?.ToString()
-                    Dim match = allValues.FirstOrDefault(Function(v) v.StartsWith(originalItem & " ("))
-                    If match IsNot Nothing Then
-                        SafeAddToSelection(popupCtrl.FilterListBox, match)
-                    End If
-                Next
-            End If
-        End Sub
+        '    If isBooleanField Then
+        '        For Each item In savedFilterValues
+        '            Dim itemStr = item?.ToString()
+        '            If Not String.IsNullOrEmpty(itemStr) Then
+        '                Dim match = allValues.FirstOrDefault(Function(v) (itemStr.Equals("True", StringComparison.OrdinalIgnoreCase) AndAlso v.StartsWith("Да [")) OrElse
+        '(itemStr.Equals("False", StringComparison.OrdinalIgnoreCase) AndAlso v.StartsWith("Нет [")))
+        '                If match IsNot Nothing Then
+        '                    SafeAddToSelection(popupCtrl.FilterListBox, match)
+        '                End If
+        '            End If
+        '        Next
+        '    Else ' строковое поле
+        '        For Each item In savedFilterValues
+        '            Dim originalItem = item?.ToString()
+        '            Dim match = allValues.FirstOrDefault(Function(v) v.StartsWith(originalItem & " ("))
+        '            If match IsNot Nothing Then
+        '                SafeAddToSelection(popupCtrl.FilterListBox, match)
+        '            End If
+        '        Next
+        '    End If
+        'End Sub
 
-        ' --- ВСПОМОГАТЕЛЬНЫЙ МЕТОД: Обработчик нажатия OK в фильтре ---
-        Private Sub OnPopupOkClicked(sender As Object, e As RoutedEventArgs, popupCtrl As FilterPopup, popup As Popup, propName As String, isBooleanField As Boolean)
-            Dim selected = SafeGetSelectedItems(popupCtrl.FilterListBox)
-            Dim originalValues = selected.Select(Function(item)
-                                                     Dim str = item?.ToString()
-                                                     If (str?.Contains(" (") AndAlso str.EndsWith(")")) OrElse (str?.Contains(" [") AndAlso str.EndsWith("]")) Then
-                                                         If isBooleanField Then
-                                                             If str.StartsWith("Да ") Then
-                                                                 Return "True"
-                                                             ElseIf str.StartsWith("Нет ") Then
-                                                                 Return "False"
-                                                             Else
-                                                                 Return str.Substring(0, str.IndexOf(" ["))
-                                                             End If
-                                                         Else
-                                                             ' Получаем индексы, если не найдено - используем максимальное значение
-                                                             Dim index1 As Integer = str.IndexOf(" (")
-                                                             Dim index2 As Integer = str.IndexOf(" [")
-                                                             Dim endIndex As Integer = Math.Min(If(index1 >= 0, index1, Integer.MaxValue), If(index2 >= 0, index2, Integer.MaxValue)
-)
-                                                             ' Если найден хотя бы один разделитель
-                                                             If endIndex <> Integer.MaxValue Then
-                                                                 Return str.Substring(0, endIndex)
-                                                             End If
+        '        ' --- ВСПОМОГАТЕЛЬНЫЙ МЕТОД: Обработчик нажатия OK в фильтре ---
+        '        Private Sub OnPopupOkClicked(sender As Object, e As RoutedEventArgs, popupCtrl As FilterPopup, popup As Popup, propName As String, isBooleanField As Boolean)
+        '            Dim selected = SafeGetSelectedItems(popupCtrl.FilterListBox)
+        '            Dim originalValues = selected.Select(Function(item)
+        '                                                     Dim str = item?.ToString()
+        '                                                     If (str?.Contains(" (") AndAlso str.EndsWith(")")) OrElse (str?.Contains(" [") AndAlso str.EndsWith("]")) Then
+        '                                                         If isBooleanField Then
+        '                                                             If str.StartsWith("Да ") Then
+        '                                                                 Return "True"
+        '                                                             ElseIf str.StartsWith("Нет ") Then
+        '                                                                 Return "False"
+        '                                                             Else
+        '                                                                 Return str.Substring(0, str.IndexOf(" ["))
+        '                                                             End If
+        '                                                         Else
+        '                                                             ' Получаем индексы, если не найдено - используем максимальное значение
+        '                                                             Dim index1 As Integer = str.IndexOf(" (")
+        '                                                             Dim index2 As Integer = str.IndexOf(" [")
+        '                                                             Dim endIndex As Integer = Math.Min(If(index1 >= 0, index1, Integer.MaxValue), If(index2 >= 0, index2, Integer.MaxValue)
+        ')
+        '                                                             ' Если найден хотя бы один разделитель
+        '                                                             If endIndex <> Integer.MaxValue Then
+        '                                                                 Return str.Substring(0, endIndex)
+        '                                                             End If
 
-                                                             ' Если разделители не найдены
-                                                             Return str
-                                                             'Return str.Substring(0, str.IndexOf(" ("))
-                                                         End If
-                                                     Else
-                                                         Return str
-                                                     End If
-                                                 End Function).ToList()
+        '                                                             ' Если разделители не найдены
+        '                                                             Return str
+        '                                                             'Return str.Substring(0, str.IndexOf(" ("))
+        '                                                         End If
+        '                                                     Else
+        '                                                         Return str
+        '                                                     End If
+        '                                                 End Function).ToList()
 
-            _filterState.SetFilter(propName, originalValues)
-            ' ВАЖНО: Вызываем событие FiltersChanged у THed, которое OTSBlockControl (или MainWindow) будет слушать
-            RaiseEvent FiltersChanged(Me, EventArgs.Empty)
-            popup.IsOpen = False
-            UpdateIndicatorForProperty(propName)
-        End Sub
+        '            _filterState.SetFilter(propName, originalValues)
+        '            ' ВАЖНО: Вызываем событие FiltersChanged у THed, которое OTSBlockControl (или MainWindow) будет слушать
+        '            RaiseEvent FiltersChanged(Me, EventArgs.Empty)
+        '            popup.IsOpen = False
+        '            UpdateIndicatorForProperty(propName)
+        '        End Sub
 
 
         ' Вспомогательный метод: безопасно очищает выделение
@@ -441,27 +441,27 @@ Namespace Kas
             End If
         End Sub
 
-        ' Вспомогательный метод: безопасно добавляет элемент в выделение
-        Private Sub SafeAddToSelection(listBox As ListBox, item As Object)
-            If listBox.SelectionMode = SelectionMode.Multiple Then
-                listBox.SelectedItems.Add(item)
-            Else
-                listBox.SelectedItem = item
-            End If
-        End Sub
+        '' Вспомогательный метод: безопасно добавляет элемент в выделение
+        'Private Sub SafeAddToSelection(listBox As ListBox, item As Object)
+        '    If listBox.SelectionMode = SelectionMode.Multiple Then
+        '        listBox.SelectedItems.Add(item)
+        '    Else
+        '        listBox.SelectedItem = item
+        '    End If
+        'End Sub
 
-        ' Вспомогательный метод: безопасно получает список выделенных
-        Private Function SafeGetSelectedItems(listBox As ListBox) As List(Of Object)
-            If listBox.SelectionMode = SelectionMode.Multiple Then
-                Return listBox.SelectedItems.Cast(Of Object)().ToList()
-            Else
-                If listBox.SelectedItem IsNot Nothing Then
-                    Return New List(Of Object) From {listBox.SelectedItem}
-                Else
-                    Return New List(Of Object)
-                End If
-            End If
-        End Function
+        '' Вспомогательный метод: безопасно получает список выделенных
+        'Private Function SafeGetSelectedItems(listBox As ListBox) As List(Of Object)
+        '    If listBox.SelectionMode = SelectionMode.Multiple Then
+        '        Return listBox.SelectedItems.Cast(Of Object)().ToList()
+        '    Else
+        '        If listBox.SelectedItem IsNot Nothing Then
+        '            Return New List(Of Object) From {listBox.SelectedItem}
+        '        Else
+        '            Return New List(Of Object)
+        '        End If
+        '    End If
+        'End Function
 
 
         Private Sub ShowDateFilterPopupNew(sender As Object, propName As String)

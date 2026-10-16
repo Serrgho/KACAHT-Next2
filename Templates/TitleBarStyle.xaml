@@ -2,30 +2,30 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:KACAHT_Next2.Kas">
 
-    <FontFamily x:Key="LCDFont">pack://application:,,,/Fonts/#LCD5x8H</FontFamily>
-    <!--<local:DateConverter x:Key = "DateConverter" />-->
+    <!--<FontFamily x:Key="LCDFont">pack://application:,,,/Fonts/#LCD5x8H</FontFamily>
+    --><!--<local:DateConverter x:Key = "DateConverter" />-->
 
     <!-- Стиль для текстБлоков -->
-    <!--Равномерный по-вертикали только 25 размер шрифта-->
+    <!--Равномерный по-вертикали только 25 размер шрифта--><!--
     <Style x:Key="CustomTextStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource LCDFont}"/>
         <Setter Property="FontSize" Value="17"/>
         <Setter Property="Foreground" Value="GreenYellow"/>
-    </Style>
+    </Style>-->
 
-    <!-- Стиль для верхней панели -->
+    <!-- Стиль для верхней панели --><!--
     <Style x:Key="HeaderStyle" TargetType="Border">
         <Setter Property="Height" Value="30"/>
         <Setter Property="Background" Value="{DynamicResource AppBorderBrush}"/>
         <Setter Property="CornerRadius" Value="8 8 0 0"/>
-        <!--#FF333333-->
+        --><!--#FF333333--><!--
         <Setter Property="VerticalAlignment" Value="Top"/>
         
     </Style>
 
-    <!-- Стили для кнопок заголовка -->
+    --><!-- Стили для кнопок заголовка -->
     
-    <!-- Базовый Стиль для кнопок Заголовка -->
+    <!-- Базовый Стиль для кнопок Заголовка --><!--
     <Style x:Key="HeaderButtonStyle" TargetType="Button">
         <Setter Property="Width" Value="30"/>
         <Setter Property="Height" Value="30"/>
@@ -46,7 +46,7 @@
         </Setter>
     </Style>
 
-    <!-- Стиль для кнопки Закрыть -->
+    --><!-- Стиль для кнопки Закрыть --><!--
     <Style x:Key="CloseButtonStyle" TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
         <Setter Property="Template">
             <Setter.Value>
@@ -61,32 +61,32 @@
             </Setter.Value>
         </Setter>
         <Style.Triggers>
-            <!-- Изменение фона при наведении -->
+            --><!-- Изменение фона при наведении --><!--
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#FFCC0000"/>
             </Trigger>
         </Style.Triggers>
     </Style>
 
-    <!-- Стиль для кнопки Развернуть -->
+    --><!-- Стиль для кнопки Развернуть --><!--
     <Style x:Key="MaxButtonStyle" TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
         <Style.Triggers>
-            <!-- Изменение фона при наведении -->
+            --><!-- Изменение фона при наведении --><!--
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#CCA91D"/>
             </Trigger>
         </Style.Triggers>
     </Style>
 
-    <!-- Стиль для кнопки Свернуть -->
+    --><!-- Стиль для кнопки Свернуть --><!--
     <Style x:Key="MinButtonStyle" TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
         <Style.Triggers>
-            <!-- Изменение фона при наведении -->
+            --><!-- Изменение фона при наведении --><!--
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#3DA030"/>
             </Trigger>
         </Style.Triggers>
-    </Style>
+    </Style>-->
    
 
 </ResourceDictionary>

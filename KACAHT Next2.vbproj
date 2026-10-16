@@ -38,11 +38,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Fonts\exocet.otf" />
+    <None Remove="Fonts\exocet.ttf" />
     <None Remove="Icons\deflt.png" />
     <None Remove="Icons\doc.png" />
     <None Remove="Icons\excel.png" />
     <None Remove="Icons\image-files.png" />
     <None Remove="Icons\img.png" />
+    <None Remove="Icons\JSOn-File.png" />
     <None Remove="Icons\pdf.png" />
     <None Remove="Icons\word.png" />
     <None Remove="Window\MainWin\Gears.png" />
@@ -58,12 +61,19 @@
     <Page Remove="Controls\Tables\TableCellControl.xaml" />
     <Page Remove="Controls\Tables\TableContainerControl.xaml" />
     <Page Remove="Templates\PopUpsControlsResources.xaml" />
+    <Page Remove="Templates\TitleBarStyle.xaml" />
     <Page Remove="WindowElements\IsSavedWin.xaml" />
     <Page Remove="WindowElements\PeriodWindow.xaml" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Fonts\exocet.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Icons\deflt.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\JSOn-File.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Icons\pdf.png">
@@ -174,6 +184,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="Emoji.Wpf" Version="0.3.4" />
     <PackageReference Include="EPPlus" Version="8.6.3" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="itext" Version="9.7.0" />

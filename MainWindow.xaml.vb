@@ -4,6 +4,7 @@ Imports System.Data
 Imports System.Globalization
 Imports System.IO
 Imports System.Reflection
+Imports System.Runtime.InteropServices
 Imports System.Text
 Imports System.Threading.Tasks
 Imports System.Windows.Controls.Primitives
@@ -72,8 +73,9 @@ Namespace Kas
         ''' </summary>
         Public Sub ShowOtkazyList(list As IEnumerable(Of Otkaz))
             If list Is Nothing OrElse Not list.Any() Then Return
-
-            ResignOTSList(list.ToList)
+            AddOTSToContainer(list.ToList)
+            MW.TRowsContainer.UpdateTotal()
+            'ResignOTSList(list.ToList)
 
         End Sub
 
@@ -118,6 +120,10 @@ Namespace Kas
 
             ' Этот вызов является обязательным для конструктора.
             InitializeComponent()
+            Dim fonts = System.Windows.Media.Fonts.GetFontFamilies(New Uri("pack://application:,,,/Fonts/"), "./exocet.ttf")
+            For Each font In fonts
+                System.Diagnostics.Debug.WriteLine($"РЕАЛЬНОЕ ИМЯ ШРИФТА: {font.Source}")
+            Next
             'задается здесь - для маинвиндов конкретно цвета
             AppTBar.MainBorder.Background = CType(FindResource("HeaderBackBrush"), Brush)
             AppTBar.BorderLineColor = CType(FindResource("HeaderBorderBrush"), Brush)
@@ -250,7 +256,7 @@ Namespace Kas
 
 
         Private Sub MainWindow_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
-            'Module1.AnimIconDispose()
+
         End Sub
 
         Sub RestoreSizes()

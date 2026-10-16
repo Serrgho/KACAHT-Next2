@@ -361,6 +361,7 @@ Namespace Kas
 
             If GetJSONList() Then
                 ResetPeriodSUB()
+
             End If
 
         End Sub
@@ -419,7 +420,7 @@ Namespace Kas
 
                 ' Присваиваем результат
                 OTSList = loadedList
-
+                AddOTSToContainer(OTSList)
                 ' Обновляем настройки и тултип
                 UpdateCurrentFileAndTooltip(selectedFilePath)
 
@@ -592,29 +593,6 @@ Namespace Kas
                 Not String.IsNullOrEmpty(path) AndAlso System.IO.File.Exists(path)
 
 
-            '_currentFilePath = path
-
-            '' Сохраняем в настройки
-            'My.Settings.LastUsedFile = path
-            'My.Settings.Save() ' Не забываем сохранить, иначе потеряется при закрытии
-
-            '' Обновляем ToolTip кнопки напрямую
-            'Dim fileNameOnly As String = ""
-
-
-            'With ResetToOTSList
-
-            '    If Not String.IsNullOrEmpty(path) AndAlso System.IO.File.Exists(path) Then
-            '        fileNameOnly = System.IO.Path.GetFileName(path)
-            '        .ToolTip = $"{fileNameOnly}"
-
-            '        ' Опционально: включаем кнопку, если она была заблокирована
-            '        .IsEnabled = True
-            '    Else
-            '        .ToolTip = ""
-            '        .IsEnabled = False ' Блокируем кнопку, если файла нет
-            '    End If
-            'End With
 
         End Sub
 
@@ -792,7 +770,7 @@ Namespace Kas
             Dim candidates As List(Of Otkaz) = OTSList.Where(Function(o)
                                                                  Return o.Zakryt > Date.MinValue AndAlso
                                                                         o.KtoZakryl?.Contains("ТЧЭ") = True AndAlso
-                                                                        o.KomplexAsInt > 0
+                                                                        o.KomplexAsInt > 0 AndAlso Not o.ZaKem.ToLower.Contains("прочи")
                                                              End Function).ToList()
 
             If candidates.Count = 0 Then

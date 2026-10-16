@@ -58,13 +58,13 @@ Namespace Kas
         End Sub
 
         Private Sub InitializeRoadsCombo()
-            For Each road As String In RemontPlacesModule.AllRoads
+            For Each road As String In RemontPlacesModule.AllRoads.OrderBy(Function(r) r).ToList()
                 CmbRoad.Items.Add(New ComboBoxItem With {.Content = road})
             Next
         End Sub
 
         Private Sub InitializeFactoriesList()
-            For Each factory As String In RemontPlacesModule.AllFactories
+            For Each factory As String In RemontPlacesModule.AllFactories.OrderBy(Function(r) r).ToList()
                 CmbFactories.Items.Add(factory)
             Next
         End Sub
@@ -216,7 +216,7 @@ Namespace Kas
             Dim roadName As String = CStr(cmbItem.Content)
 
             If RemontPlacesModule.RoadToSLD.ContainsKey(roadName) Then
-                For Each sld As String In RemontPlacesModule.RoadToSLD(roadName)
+                For Each sld As String In RemontPlacesModule.RoadToSLD(roadName).OrderBy(Function(x) x)
                     CmbSLD.Items.Add(sld)
                 Next
             End If

@@ -192,12 +192,12 @@ Namespace Kas
                                 Dim originalValues = selected.Select(Function(item)
                                                                          Dim str = item?.ToString()
                                                                          If String.IsNullOrEmpty(str) Then Return str
-                                                                         If str.Contains(" [") AndAlso str.EndsWith("]") Then
+                                                                         If str.Contains(" (") AndAlso str.EndsWith(")") Then
                                                                              If capturedIsBoolean Then
                                                                                  If str.StartsWith("Да ") Then Return "True"
                                                                                  If str.StartsWith("Нет ") Then Return "False"
                                                                              End If
-                                                                             Return str.Substring(0, str.IndexOf(" ["))
+                                                                             Return str.Substring(0, str.IndexOf(" ("))
                                                                          ElseIf str.Contains(" (") AndAlso str.EndsWith(")") Then
                                                                              Return str.Substring(0, str.IndexOf(" ("))
                                                                          End If
@@ -307,7 +307,7 @@ Namespace Kas
                                                              ElseIf str.StartsWith("Нет ") Then
                                                                  Return "False"
                                                              Else
-                                                                 Return str.Substring(0, str.IndexOf(" ["))
+                                                                 Return str.Substring(0, str.IndexOf(" ("))
                                                              End If
                                                          Else
 

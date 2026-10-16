@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+			 xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
               Background="Transparent"
              TextOptions.TextFormattingMode="Display"
              TextOptions.TextRenderingMode="ClearType"
@@ -49,20 +50,20 @@
 			<ColumnDefinition Width="Auto"/>
 		</Grid.ColumnDefinitions>
 
-		<TextBlock x:Name="BtnCopy" 
+		<emoji:TextBlock x:Name="BtnCopy" 
                    Grid.Column="0"
                    ToolTip="Копировать"
 				   FontSize="17"
-                   Style="{StaticResource Coppy}"
+                   Style="{StaticResource EmoBaseStyle}"
                    Text="📋"
                    MouseUp="BtnCopy_MouseUp"/>
 
-		<TextBlock x:Name="BtnClear" 
+		<emoji:TextBlock x:Name="BtnClear" 
                    Grid.Column="1"
                    ToolTip="Очистить"
 				   FontSize="17"
-                   Style="{StaticResource Clearr}"
-                   Text="✕"
+                   Style="{StaticResource EmoBaseStyle}"
+                   Text="❌"
                    MouseUp="BtnClear_MouseUp"/>
 
 		<TextBox x:Name="PART_TextBox"

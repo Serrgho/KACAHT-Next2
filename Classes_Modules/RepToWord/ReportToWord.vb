@@ -1,14 +1,15 @@
-﻿Imports System.Reflection.Metadata
-Imports KACAHT_Next2.Kas
-Imports Microsoft.Office.Interop
-'Imports Microsoft.Office.Interop.Excel
-Imports Microsoft.Office.Interop.Word
-Imports OfficeOpenXml.Drawing
-Imports Windows.UI.Text
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.Drawing.Drawing2D
 Imports System.Drawing.Imaging
 Imports System.IO
+Imports System.Reflection.Metadata
+Imports System.Runtime.InteropServices
+Imports iText.Layout.Element
+Imports KACAHT_Next2.Kas
+Imports Microsoft.Office.Interop
+Imports Microsoft.Office.Interop.Word
+Imports OfficeOpenXml.Drawing
+Imports Windows.UI.Text
 Module ReportToWord
 
     Private WApp As New Word.Application()
@@ -55,36 +56,45 @@ Module ReportToWord
                             nachOldPeriod As Date, konOldPeriod As Date)
         Try
             SetExportPeriods(nachPeriod, konPeriod, nachOldPeriod, konOldPeriod)
-            SetWord()
 
-            ' === По комплексам (по категориям, по сериям, по оборудованию) ===
-            PoYasnilka_2(NY, NY1)
+            Dim allParas As New List(Of WordPara)
 
-            AddTextBlock($"{Chr(12)}")
+            ' === Пояснительная ===
+            allParas.AddRange(PoYasnilka_2(NY, NY1))
+            allParas.Add(New WordPara() With {.PageBreakBefore = True})
+            ' === По оборудованию по комплексам ===
 
-            ' === Экспорт по оборудованию по комплексам ===
-            AddTextBlock($"Распределение отказов технических средств по оборудованию{Chr(11)}за период с {nachPeriod:d MMMM yyyy} г. по {konPeriod:d MMMM yyyy} г.{Chr(11)}в сравнении с периодом от {nachOldPeriod:d MMMM yyyy} г. по {konOldPeriod:d MMMM yyyy} г.", isBold:=True, isCenter:=True)
+            allParas.Add(New WordPara(
+            $"Распределение отказов технических средств по оборудованию{Chr(11)}" &
+            $"за период с {nachPeriod:d MMMM yyyy} г. по {konPeriod:d MMMM yyyy} г.{Chr(11)}" &
+            $"в сравнении с периодом от {nachOldPeriod:d MMMM yyyy} г. по {konOldPeriod:d MMMM yyyy} г.",
+            boldOnly:=True, align:=Word.WdParagraphAlignment.wdAlignParagraphCenter))
 
-            OborudPoKomplexText(NY, NY1)
+            allParas.AddRange(OborudPoKomplexText(NY, NY1))
 
-            ' === Экспорт по локомотивам по комплексам ===
-            AddTextBlock($"Распределение отказов технических средств по сериям локомотивов{Chr(11)}за период с {nachPeriod:d MMMM yyyy} г. по {konPeriod:d MMMM yyyy} г.{Chr(11)}в сравнении с периодом от {nachOldPeriod:d MMMM yyyy} г. по {konOldPeriod:d MMMM yyyy} г.",
-                     isBold:=True, isCenter:=True)
-            LokPoKomplexText(NY, NY1)
+            ' === По локомотивам по комплексам ===
+            allParas.Add(New WordPara(
+            $"Распределение отказов технических средств по сериям локомотивов{Chr(11)}" &
+            $"за период с {nachPeriod:d MMMM yyyy} г. по {konPeriod:d MMMM yyyy} г.{Chr(11)}" &
+            $"в сравнении с периодом от {nachOldPeriod:d MMMM yyyy} г. по {konOldPeriod:d MMMM yyyy} г.",
+            boldOnly:=True, align:=Word.WdParagraphAlignment.wdAlignParagraphCenter))
 
-            AddTextBlock($"{Chr(12)}")
+            allParas.AddRange(LokPoKomplexText(NY, NY1))
+            allParas.Add(New WordPara() With {.PageBreakBefore = True})
+            ' === По оборудованию по сериям локомотивов ===
+            allParas.AddRange(OborudPoSerLokText(NY, NY1))
 
-            OborudPoSerLokText(NY, NY1)
-
-            WApp.Visible = True
-            WApp.Activate()
+            ' === Одна вставка в Word ===
+            InsertParagraphsToWord(allParas)
 
         Catch ex As Exception
             MessageBox.Show($"Ошибка при экспорте: {ex.Message}" & vbCrLf & ex.StackTrace,
                         "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error)
-            If WApp IsNot Nothing Then WApp.Quit(False)
         End Try
     End Sub
+
+
+
 
 
 
@@ -159,24 +169,6 @@ Module ReportToWord
         range.Paragraphs(1).Borders.Enable = False
     End Sub
 
-    Private Sub RemoveExtraEmptyLinesAtEnd()
-        While WDoc.Paragraphs.Count > 1 AndAlso String.IsNullOrWhiteSpace(WDoc.Paragraphs.Last.Range.Text)
-            WDoc.Paragraphs.Last.Range.Delete()
-        End While
-    End Sub
-
-    Private Sub ApplyBoxBorderToRange(ByVal startRange As Word.Range, ByVal endRange As Word.Range)
-        endRange.MoveEnd(WdUnits.wdParagraph, 1)
-        Dim fullRange = startRange.Parent.Range(startRange.Start, endRange.End)
-        With fullRange.Borders
-            .OutsideLineStyle = WdLineStyle.wdLineStyleSingle
-            .OutsideLineWidth = WdLineWidth.wdLineWidth025pt
-            .DistanceFromTop = 6
-            .DistanceFromBottom = 6
-            .DistanceFromLeft = 6
-            .DistanceFromRight = 6
-        End With
-    End Sub
 
     ' ===================== ФОРМАТЫ =====================
 
@@ -190,15 +182,18 @@ Module ReportToWord
     End Function
 
     Private Function Rost(delta As Integer) As String
-        Return If(delta > 0, $"рост количества ОТС на {delta} {EndOfSluch_TXT(delta)}",
-                  If(delta < 0, $"снижение количества ОТС на {Math.Abs(delta)} {EndOfSluch_TXT(Math.Abs(delta))}", "количество ОТС на уровне прошлого года."))
+        Return If(delta > 0, $"Рост количества ОТС на {delta} {EndOfSluch_TXT(delta)}.",
+                  If(delta < 0, $"Снижение количества ОТС на {Math.Abs(delta)} {EndOfSluch_TXT(Math.Abs(delta))}.",
+                     "Количество ОТС на уровне прошлого года."))
+        'Return If(delta > 0, $"рост количества ОТС на {delta} {EndOfSluch_TXT(delta)}",
+        '          If(delta < 0, $"снижение количества ОТС на {Math.Abs(delta)} {EndOfSluch_TXT(Math.Abs(delta))}", "количество ОТС на уровне прошлого года."))
     End Function
 
     Private Function Rost(delta As Single) As String
         Dim h = Math.Abs(Math.Round(delta, 2))
-        Return If(delta > 0, $"рост потерь на {h}ч.",
-                  If(delta < 0, $"снижение потерь на {h}ч.",
-                     "потери поездо-часов на уровне прошлого года."))
+        Return If(delta > 0, $"Рост потерь на {h}ч.",
+                  If(delta < 0, $"Снижение потерь на {h}ч.",
+                     "Потери поездо-часов на уровне прошлого года."))
     End Function
 
     ' ===================== АГРЕГАЦИЯ =====================
@@ -295,42 +290,64 @@ Module ReportToWord
                      $"{NY1.Count(Function(o) o.Kat = 3)} {y1}")
     End Sub
 
+    Private Function FromDrDor(OldYE As String, NY As IEnumerable(Of Otkaz), NY1 As IEnumerable(Of Otkaz)) As List(Of WordPara)
 
-    Private Sub FromDrDor(OldYE As String, NY As IEnumerable(Of Otkaz), NY1 As IEnumerable(Of Otkaz))
+        Dim paras As New List(Of WordPara)
+
         Dim ths = NY.Where(Function(o) Not String.IsNullOrEmpty(o.Istochnik) AndAlso
-                                     o.Istochnik <> "ГИД УРАЛ" AndAlso
-                                     o.Istochnik <> "РУЧНОЙ ВВОД")
+                                 o.Istochnik <> "ГИД УРАЛ" AndAlso
+                                 o.Istochnik <> "РУЧНОЙ ВВОД")
         Dim thsErmak = ths.Where(Function(o) o.SerLok.Contains("ЭС5К"))
 
         Dim old = NY1.Where(Function(o) Not String.IsNullOrEmpty(o.Istochnik) AndAlso
-                                      o.Istochnik <> "ГИД УРАЛ" AndAlso
-                                      o.Istochnik <> "РУЧНОЙ ВВОД")
+                                  o.Istochnik <> "ГИД УРАЛ" AndAlso
+                                  o.Istochnik <> "РУЧНОЙ ВВОД")
         Dim oldErmak = old.Where(Function(o) o.SerLok.Contains("ЭС5К"))
 
         Dim a = ths.Count : Dim b = CSng(Math.Round(ths.Sum(Function(o) o.PCh), 2))
         Dim a1 = old.Count : Dim b1 = CSng(Math.Round(old.Sum(Function(o) o.PCh), 2))
         Dim ermak = $"{thsErmak.Count()} ОТС на {CSng(Math.Round(thsErmak.Sum(Function(o) o.PCh), 2))}ч."
         Dim ermak1 = $"{oldErmak.Count()} ОТС на {CSng(Math.Round(oldErmak.Sum(Function(o) o.PCh), 2))}ч."
-        AddTextBlock($"{vbTab}С других дорог ", isBold:=True, addNewLine:=False)
-        Dim str = $"для завершения расследования по ответственности сервисных и сторонних организаций, расположенных на территории Красноярской ж.д. поступило {a} ОТС на {b} ч. против {a1} ОТС на {b1} ч. {OldYE} {Rost(a - a1)}, {Rost(CSng(b - b1))}."
-        AddTextBlock(str)
-        str = $"Из них с локомотивами серии 2(3)ЭС5К "
-        AddTextBlock(str, isBold:=True, addNewLine:=False)
-        str = $"допущено {ermak} против {ermak1} {OldYE}, {Rost(thsErmak.Count() - oldErmak.Count())}, {Rost(CSng(thsErmak.Sum(Function(o) o.PCh) - oldErmak.Sum(Function(o) o.PCh)))}"
-        AddTextBlock(str)
-    End Sub
 
-    Private Sub WriKORR()
+        paras.Add(New WordPara(
+        $"С других дорог ",
+        $"для завершения расследования по ответственности сервисных и сторонних организаций, " &
+        $"расположенных на территории Красноярской ж.д. поступило {a} ОТС на {b} ч. против {a1} ОТС на {b1} ч. " &
+        $"{OldYE}. {Rost(a - a1)} {Rost(CSng(b - b1))}") With {.FirstLineIndent = 35})
 
-        'Dim nachDateTime = Fetcher.NachDat.Date.AddHours(Fetcher.NachTim)
-        'Dim konDateTime = Fetcher.KonDat.Date.AddHours(Fetcher.KonTim).AddMinutes(Fetcher.KonMinut)
+        paras.Add(New WordPara(
+        "Из них с локомотивами серии 2(3)ЭС5К ",
+        $"допущено {ermak} против {ermak1} {OldYE}, {Rost(thsErmak.Count() - oldErmak.Count())} " &
+        $"{Rost(CSng(thsErmak.Sum(Function(o) o.PCh) - oldErmak.Sum(Function(o) o.PCh)))}"))
+
+        Return paras
+
+    End Function
+
+
+
+    Private Function WriKORR() As List(Of WordPara)
+
+        Dim paras As New List(Of WordPara)
+
         Dim kat3Cnt = OTSList.Where(Function(o) o.Nach >= Fetcher.NachDatTim AndAlso o.Nach <= Fetcher.KonDatTim).
-        Where(Function(o) o.Kat = 3 AndAlso o.MestoOTS_Dor.Contains("раснояр") AndAlso o.IsStation AndAlso o.ZaKem <> "тр" AndAlso o.Uslovie4).
-        Count
+                          Where(Function(o) o.Kat = 3 AndAlso o.MestoOTS_Dor.Contains("раснояр") AndAlso
+                                          o.IsStation AndAlso o.ZaKem <> "тр" AndAlso o.Uslovie4).
+                          Count
+        If kat3Cnt > 0 Then
+            paras.Add(New WordPara(
+         $"Проведенная работа: ",
+         $"произведена корректировка в 3 категорию по {kat3Cnt} ОТС. Корректировка потерь поездо-часов от отказов {GetSumKor_TXT()}") With {.FirstLineIndent = 35})
+        Else
+            paras.Add(New WordPara(
+       $"Проведенная работа: ",
+       $"Корректировка потерь поездо-часов от отказов {GetSumKor_TXT()}") With {.FirstLineIndent = 35})
+        End If
 
-        AddTextBlock($"{vbTab}Проведенная работа: ", isBold:=True, addNewLine:=False)
-        AddTextBlock($"произведена корректировка в 3 категорию по {kat3Cnt} отказам. Корректировка потерь поездо-часов от отказов {GetSumKor_TXT()}")
-    End Sub
+
+        Return paras
+
+    End Function
 
 
     Function GetSumKor_TXT(Optional ForWord As Boolean = True) As String
@@ -369,31 +386,25 @@ Module ReportToWord
         Return Rez
     End Function
 
+    Private Function PoYasnilka_2(NY As List(Of Otkaz), NY1 As List(Of Otkaz)) As List(Of WordPara)
 
-    Private Sub PoYasnilka_2(NY As List(Of Otkaz), NY1 As List(Of Otkaz))
+        Dim paras As New List(Of WordPara)
 
-
-        'AddTextBlock(PeriodTitle("Отказы технических средств отнесенные на Красноярский локомотивный комплекс"), isBold:=True, isCenter:=True)
-
-        '        AddTextBlock($"{vbTab}За период {PeriodShort()} на Красноярский локомотивный комплекс отнесено {a} ОТС всех категорий на {b}ч. против {a1} ОТС на {b1}ч. {y1}, {Rost(a - a1)}, {Rost(CSng(b - b1))} Из них:")
-
-
-        Dim y1 = "за предыдущий период" 'My.Settings.nachOLDPeriod.Year
+        Dim y1 = "за предыдущий период"
         Dim a = NY.Count : Dim b = CSng(Math.Round(NY.Sum(Function(o) o.PCh), 2))
         Dim a1 = NY1.Count : Dim b1 = CSng(Math.Round(NY1.Sum(Function(o) o.PCh), 2))
 
-        AddTextBlock(PeriodTitle("Отказы технических средств отнесенные на Красноярский локомотивный комплекс"), isBold:=True, isCenter:=True)
+        paras.Add(New WordPara(PeriodTitle("Отказы технических средств отнесенные на Красноярский локомотивный комплекс"),
+                           boldOnly:=True,
+                           align:=Word.WdParagraphAlignment.wdAlignParagraphCenter))
+        paras.Add(New WordPara())
 
-        'AddTextBlock($"Отказы технических средств отнесенные на Красноярский локомотивный комплекс{Chr(11)}за период с {nachPeriod:d MMMM yyyy} г. по {konPeriod:d MMMM yyyy} г.{Chr(11)}в сравнении с периодом от {nachOldPeriod:d MMMM yyyy} г. по {konOldPeriod:d MMMM yyyy} г.", isBold:=True, isCenter:=True)
+        paras.Add(New WordPara(
+        $"За период {PeriodShort()} на Красноярский локомотивный комплекс отнесено " &
+        $"{a} ОТС всех категорий на {b}ч. против {a1} ОТС на {b1}ч. {y1}. " &
+        $"{Rost(a - a1)} {Rost(CSng(b - b1))} Из них:") With {.FirstLineIndent = 35})
 
-
-        AddTextBlock("")
-
-        AddTextBlock($"{vbTab}За период {PeriodShort()} на Красноярский локомотивный комплекс отнесено {a} ОТС всех категорий на {b}ч. против {a1} ОТС на {b1}ч. {y1}, {Rost(a - a1)}, {Rost(CSng(b - b1))} Из них:")
-        'AddTextBlock($"{vbTab}За период с {nachPeriod:d MMMM} по {konPeriod:d MMMM} на Красноярский локомотивный комплекс отнесено {a} ОТС всех категорий на {b}ч. против {a1} ОТС на {b1}ч. {y1}, {Rost(a - a1)}, {Rost(CSng(b - b1))} Из них:")
-
-
-
+        ' === Разбивка по заказчикам ===
         Dim T = NY.Where(Function(o) o.ZaKem = "" OrElse o.ZaKem.ToLower = "тчэ" OrElse o.ZaKem = "!")
         Dim Tras = T.Where(Function(o) o.ZaKem = "" OrElse o.ZaKem = "!")
         Dim TR = NY.Where(Function(o) o.ZaKem = "тр")
@@ -406,74 +417,95 @@ Module ReportToWord
         Dim SLD1 = NY1.Where(Function(o) o.ZaKemCode Like "слд*")
         Dim ZAV1 = NY1.Where(Function(o) o.ZaKemCode Like "*око*" OrElse o.ZaKemCode Like "*рочи*")
 
-        Dim str = $"{vbTab}На дирекцию тяги отнесено {Kat123TXT(T)}"
+        Dim str = $"На дирекцию тяги отнесено {Kat123TXT(T)}"
         If Tras.Any Then str += $" из них в расследовании {Kat123TXT(Tras)}"
         str += $" ({y1} - {Kat123TXT(T1)}"
         If Tras1.Any Then str += $" из них в расследовании {Kat123TXT(Tras1)}"
         str += $"), на ТР отнесено {Kat123TXT(TR)} ({y1} - {Kat123TXT(TR1)}), " &
-               $"на СЛД отнесено {Kat123TXT(SLD)} ({y1} - {Kat123TXT(SLD1)}), " &
-               $"на заводы и прочие предприятия - {Kat123TXT(ZAV)} ({y1} - {Kat123TXT(ZAV1)})."
-        AddTextBlock(str)
-        AddTextBlock("")
-        AddTextBlock($"{vbTab}За рассматриваемый период отнесенные на локомотивный комплекс отказы технических средств распределились ", addNewLine:=False)
-        AddTextBlock($"по категориям ", isBold:=True, addNewLine:=False)
-        AddTextBlock($"следующим образом:")
-        AddTextBlock($"Отказы 1 категории - {NY.Where(Function(o) o.Kat = 1).Count} {EndOfSluch_TXT(NY.Where(Function(o) o.Kat = 1).Count)} ({y1} - {NY1.Where(Function(o) o.Kat = 1).Count} {EndOfSluch_TXT(NY1.Where(Function(o) o.Kat = 1).Count)}) {Rost(NY.Where(Function(o) o.Kat = 1).Count - NY1.Where(Function(o) o.Kat = 1).Count)}.
-Отказы 2 категории - {NY.Where(Function(o) o.Kat = 2).Count} {EndOfSluch_TXT(NY.Where(Function(o) o.Kat = 2).Count)} ({y1} - {NY1.Where(Function(o) o.Kat = 2).Count} {EndOfSluch_TXT(NY1.Where(Function(o) o.Kat = 2).Count)}) {Rost(NY.Where(Function(o) o.Kat = 2).Count - NY1.Where(Function(o) o.Kat = 2).Count)}.
-Отказы 3 категории - {NY.Where(Function(o) o.Kat = 3).Count} {EndOfSluch_TXT(NY.Where(Function(o) o.Kat = 3).Count)} ({y1} - {NY1.Where(Function(o) o.Kat = 3).Count} {EndOfSluch_TXT(NY1.Where(Function(o) o.Kat = 3).Count)}) {Rost(NY.Where(Function(o) o.Kat = 3).Count - NY1.Where(Function(o) o.Kat = 3).Count)}.")
+           $"на СЛД отнесено {Kat123TXT(SLD)} ({y1} - {Kat123TXT(SLD1)}), " &
+           $"на заводы и прочие предприятия - {Kat123TXT(ZAV)} ({y1} - {Kat123TXT(ZAV1)})."
+        paras.Add(New WordPara(str) With {.FirstLineIndent = 35})
 
+        paras.Add(New WordPara())
+        paras.Add(New WordPara(
+        $"За рассматриваемый период отнесенные на локомотивный комплекс отказы технических средств распределились " &
+        $"по категориям следующим образом:") With {.FirstLineIndent = 35})
+
+        paras.Add(New WordPara(
+        $"Отказы 1 категории - {NY.Where(Function(o) o.Kat = 1).Count} {EndOfSluch_TXT(NY.Where(Function(o) o.Kat = 1).Count)} " &
+        $"({y1} - {NY1.Where(Function(o) o.Kat = 1).Count} {EndOfSluch_TXT(NY1.Where(Function(o) o.Kat = 1).Count)}) " &
+        $"{Rost(NY.Where(Function(o) o.Kat = 1).Count - NY1.Where(Function(o) o.Kat = 1).Count)}"))
+
+        paras.Add(New WordPara(
+        $"Отказы 2 категории - {NY.Where(Function(o) o.Kat = 2).Count} {EndOfSluch_TXT(NY.Where(Function(o) o.Kat = 2).Count)} " &
+        $"({y1} - {NY1.Where(Function(o) o.Kat = 2).Count} {EndOfSluch_TXT(NY1.Where(Function(o) o.Kat = 2).Count)}) " &
+        $"{Rost(NY.Where(Function(o) o.Kat = 2).Count - NY1.Where(Function(o) o.Kat = 2).Count)}"))
+
+        paras.Add(New WordPara(
+        $"Отказы 3 категории - {NY.Where(Function(o) o.Kat = 3).Count} {EndOfSluch_TXT(NY.Where(Function(o) o.Kat = 3).Count)} " &
+        $"({y1} - {NY1.Where(Function(o) o.Kat = 3).Count} {EndOfSluch_TXT(NY1.Where(Function(o) o.Kat = 3).Count)}) " &
+        $"{Rost(NY.Where(Function(o) o.Kat = 3).Count - NY1.Where(Function(o) o.Kat = 3).Count)}"))
+
+        ' === Комплексы ===
         Dim kmp = {
-            GetPoKompl(NY, NY1, "ТЧЭ-1", "ТРПУ-11", "слд1", $"{y1}"),
-            GetPoKompl(NY, NY1, "ТЧЭ-2", "ТРПУ-4", "слд2", $"{y1}"),
-            GetPoKompl(NY, NY1, "ТЧЭ-3", "ТРПУ-9", "слд3", $"{y1}"),
-            GetPoKompl(NY, NY1, "ТЧЭ-5", "ТРПУ-12", "слд5", $"{y1}"),
-            GetPoKompl(NY, NY1, "ТЧЭ-7", "ТРПУ-10", "слд7", $"{y1}")
-        }.OrderByDescending(Function(x) CInt(x(1))).ToList()
-        AddTextBlock("")
-        AddTextBlock($"{vbTab}По комплексам эксплуатационных локомотивных депо ", isBold:=True, addNewLine:=False)
-        AddTextBlock($"наибольшее число отказов допущено в {Otkaz.NormalizeName(kmp(0)(0))} - {kmp(0)(1)} ОТС на {kmp(0)(2)}ч. ({kmp(0)(3)} - {kmp(0)(4)} ОТС на {kmp(0)(5)}ч.), {kmp(0)(6)}, {kmp(0)(7)}")
+        GetPoKompl(NY, NY1, "ТЧЭ-1", "ТРПУ-11", "слд1", $"{y1}"),
+        GetPoKompl(NY, NY1, "ТЧЭ-2", "ТРПУ-4", "слд2", $"{y1}"),
+        GetPoKompl(NY, NY1, "ТЧЭ-3", "ТРПУ-9", "слд3", $"{y1}"),
+        GetPoKompl(NY, NY1, "ТЧЭ-5", "ТРПУ-12", "слд5", $"{y1}"),
+        GetPoKompl(NY, NY1, "ТЧЭ-7", "ТРПУ-10", "слд7", $"{y1}")
+    }.OrderByDescending(Function(x) CInt(x(1))).ToList()
 
-        AddTextBlock("СПРАВОЧНО:", isItalic:=True, isCenter:=True)
+        paras.Add(New WordPara())
+        paras.Add(New WordPara(
+        $"По комплексам эксплуатационных локомотивных депо ",
+        $"наибольшее число отказов допущено в {Otkaz.NormalizeName(kmp(0)(0))} - {kmp(0)(1)} ОТС на {kmp(0)(2)}ч. " &
+        $"({kmp(0)(3)} - {kmp(0)(4)} ОТС на {kmp(0)(5)}ч.) {kmp(0)(6)} {kmp(0)(7)}") With {.FirstLineIndent = 35})
+
+        paras.Add(New WordPara($"{vbCrLf}СПРАВОЧНО:", boldOnly:=False, align:=Word.WdParagraphAlignment.wdAlignParagraphCenter) With {
+        .ItalicOnly = True
+    })
         For i = 1 To 4
-            AddTextBlock($"{Otkaz.NormalizeName(kmp(i)(0))} - {kmp(i)(1)} ОТС на {kmp(i)(2)}ч. " &
-                         $"({kmp(i)(3)} - {kmp(i)(4)} ОТС на {kmp(i)(5)}ч.), {kmp(i)(6)}, {kmp(i)(7)}",
-                         isItalic:=True)
+            paras.Add(New WordPara(
+            $"{Otkaz.NormalizeName(kmp(i)(0))} - {kmp(i)(1)} ОТС на {kmp(i)(2)}ч. " &
+            $"({kmp(i)(3)} - {kmp(i)(4)} ОТС на {kmp(i)(5)}ч.) {kmp(i)(6)} {kmp(i)(7)}") With {.ItalicOnly = True})
         Next
 
-
+        ' === Серии локомотивов ===
         Dim serLok = GetSerLokk($"{y1}", NY, NY1).OrderByDescending(Function(x) CInt(x(1))).ToList()
 
         If serLok.Count > 0 Then
-            AddTextBlock("")
-            AddTextBlock($"{vbTab}По сериям локомотивов ", isBold:=True, addNewLine:=False)
-            AddTextBlock($"наибольшее число отказов допущено локомотивами {serLok(0)(0)} - {serLok(0)(1)} ОТС ({serLok(0)(3)} - {serLok(0)(2)} ОТС), {serLok(0)(4)}")
+            paras.Add(New WordPara())
+            paras.Add(New WordPara(
+            $"По сериям локомотивов ",
+            $"наибольшее число отказов допущено локомотивами {serLok(0)(0)} - {serLok(0)(1)} ОТС " &
+            $"({serLok(0)(3)} - {serLok(0)(2)} ОТС). {serLok(0)(4)}") With {.FirstLineIndent = 35})
 
-            AddTextBlock("СПРАВОЧНО:", isItalic:=True, isCenter:=True)
+            paras.Add(New WordPara("СПРАВОЧНО:", boldOnly:=False, align:=Word.WdParagraphAlignment.wdAlignParagraphCenter) With {.ItalicOnly = True})
             For i = 0 To serLok.Count - 1
-                AddTextBlock($"{serLok(i)(0)} - {serLok(i)(1)} ОТС ({serLok(i)(3)} - {serLok(i)(2)} ОТС), {serLok(i)(4)}", isItalic:=True)
+                paras.Add(New WordPara(
+                $"{serLok(i)(0)} - {serLok(i)(1)} ОТС ({serLok(i)(3)} - {serLok(i)(2)} ОТС). {serLok(i)(4)}") With {.ItalicOnly = True})
             Next
         End If
 
-        'Dim serLok = GetSerLokk($"{y1}", NY, NY1).OrderByDescending(Function(x) CInt(x(1))).ToList
-        'AddTextBlock("")
-        'AddTextBlock($"{vbTab}По сериям локомотивов ", isBold:=True, addNewLine:=False)
-        'AddTextBlock($"наибольшее число отказов допущено локомотивами {serLok(0)(0)} - {serLok(0)(1)} ОТС ({serLok(0)(3)} - {serLok(0)(2)} ОТС), {serLok(0)(4)}")
+        ' === Оборудование (сокращённый вид) ===
+        paras.AddRange(WriOBORUD(NY, NY1, y1, Sokr:=True))
 
-        'AddTextBlock("СПРАВОЧНО:", isItalic:=True, isCenter:=True)
-        'For i = 0 To serLok.Count - 1
-        '    AddTextBlock($"{serLok(i)(0)} - {serLok(i)(1)} ОТС ({serLok(i)(3)} - {serLok(i)(2)} ОТС), {serLok(i)(4)}",
-        '                 isItalic:=True)
-        'Next
+        paras.Add(New WordPara())
+        paras.AddRange(FromDrDor(y1, NY, NY1))
+        paras.AddRange(WriKORR())
 
-        WriOBORUD(NY, NY1, $"{y1}", Sokr:=True)
-        AddTextBlock("")
-        FromDrDor($"{y1}", NY, NY1)
-        WriKORR() 'NY)
-        AddTextBlock($"{Chr(12)}")
-        'AddTextBlock($"{vbCrLf}По видам отказавшего оборудования ", isBold:=True, addNewLine:=False)
-        WriOBORUD(NY, NY1, $"{y1}", Sokr:=True)
-        AddTextBlock("")
-    End Sub
+        '' Разрыв страницы перед следующим блоком
+        'paras.Add(New WordPara() With {.PageBreakBefore = True})
+
+        '' Повторный вывод оборудования
+        'paras.AddRange(WriOBORUD(NY, NY1, y1, Sokr:=True))
+        'paras.Add(New WordPara())
+
+        Return paras
+
+    End Function
+
+
 
     Private Function GetPoKompl(NY As IEnumerable(Of Otkaz), NY1 As IEnumerable(Of Otkaz),
                                 DepT As String, DepTR As String, DepSLD As String, OldYe As String) As List(Of String)
@@ -565,43 +597,38 @@ Module ReportToWord
         Return {A, B}
     End Function
 
-    Private Sub WriOBORUD(NY As List(Of Otkaz), NY1 As List(Of Otkaz), OldYE As String,
-                      Optional Sokr As Boolean = False, Optional Ramka As Boolean = True, Optional BezZag As Boolean = False)
+
+    Private Function WriOBORUD(NY As List(Of Otkaz), NY1 As List(Of Otkaz), OldYE As String,
+                           Optional Sokr As Boolean = False,
+                           Optional Ramka As Boolean = True,
+                           Optional BezZag As Boolean = False) As List(Of WordPara)
+
+        Dim paras As New List(Of WordPara)
 
         Dim tgGroups = NY.GroupBy(Function(o) o.MyKlasLev1).OrderByDescending(Function(g) g.Count()).ToList()
         Dim pgDict = NY1.GroupBy(Function(o) o.MyKlasLev1).ToDictionary(Function(g) g.Key, Function(g) g.Count())
 
         If Sokr Then
-            AddTextBlock($"{vbCrLf}{vbTab}По видам отказавшего оборудования ", isBold:=True, addNewLine:=False)
-
-            Dim topGroup = tgGroups.FirstOrDefault()          ' ← было: tgGroups(0)
+            Dim topGroup = tgGroups.FirstOrDefault()
 
             If topGroup Is Nothing Then
-                ' текущий период пустой — аккуратно пишем и выходим из ветки
-                AddTextBlock("— данных за период нет")
+                paras.Add(New WordPara($"По видам отказавшего оборудования — данных за период нет") With {.FirstLineIndent = 35})
             Else
                 Dim prevCount = pgDict.GetValueOrDefault(topGroup.Key, 0)
                 Dim delta = topGroup.Count() - prevCount
-                Dim STR2 = $"наибольшее число неисправностей отнесено на группу {Chr(34)}{topGroup.Key}{Chr(34)} - {topGroup.Count()} {EndOfSluch_TXT(topGroup.Count())} ({OldYE} - {prevCount} {EndOfSluch_TXT(prevCount)}), {Rost(delta)}"
-                AddTextBlock(STR2)
-                AddTextBlock("СПРАВОЧНО:", isItalic:=True, isCenter:=True)
+                paras.Add(New WordPara(
+            $"{vbCrLf}По видам отказавшего оборудования ",
+            $"наибольшее число неисправностей отнесено на группу ""{topGroup.Key}"" - " &
+            $"{topGroup.Count()} {EndOfSluch_TXT(topGroup.Count())} " &
+            $"({OldYE} - {prevCount} {EndOfSluch_TXT(prevCount)}) {Rost(delta)}") With {.FirstLineIndent = 35})
             End If
-            'AddTextBlock($"{vbCrLf}{vbTab}По видам отказавшего оборудования ", isBold:=True, addNewLine:=False)
-            'Dim topGroup = tgGroups(0)
-            'Dim prevCount = pgDict.GetValueOrDefault(topGroup.Key, 0)
-            'Dim delta = topGroup.Count() - prevCount
-            'Dim STR2 = $"наибольшее число неисправностей отнесено на группу {Chr(34)}{topGroup.Key}{Chr(34)} - {topGroup.Count()} {EndOfSluch_TXT(topGroup.Count())} ({OldYE} - {prevCount} {EndOfSluch_TXT(prevCount)}), {Rost(delta)}"
-            'AddTextBlock(STR2)
-            'AddTextBlock("СПРАВОЧНО:", isItalic:=True, isCenter:=True)
         Else
             If Not BezZag Then
-                AddTextBlock(PeriodTitle("Распределение отказов технических средств по оборудованию"), isBold:=True, isCenter:=True)
-                AddTextBlock("")
-                'AddTextBlock($"Распределение отказов технических средств по оборудованию{Chr(11)}за период с {nachPeriod:d MMMM yyyy} г. по {konPeriod:d MMMM yyyy} г.{Chr(11)}в сравнении с периодом от {nachOldPeriod:d MMMM yyyy} г. по {konOldPeriod:d MMMM yyyy} г.", isBold:=True, isCenter:=True)
-                'AddTextBlock("")
-
+                paras.Add(New WordPara(PeriodTitle("Распределение отказов технических средств по оборудованию"),
+                                   boldOnly:=True,
+                                   align:=Word.WdParagraphAlignment.wdAlignParagraphCenter))
+                paras.Add(New WordPara())
             End If
-
         End If
 
         For Each g In tgGroups
@@ -609,109 +636,224 @@ Module ReportToWord
             Dim prevCount = pgDict.GetValueOrDefault(g.Key, 0)
             Dim delta = currCount - prevCount
 
-            ' Строка 1-го уровня
-            AddTextBlock($"{g.Key} - {currCount} {EndOfSluch_TXT(currCount)} " &
-                         $"({OldYE} - {prevCount} {EndOfSluch_TXT(prevCount)}) {Rost(delta)}",
-                         isBold:=Not Sokr, isItalic:=Sokr)
+            ' --- Lev1: отступ 0 ---
+
+            '    If Sokr Then
+            '        ' Не жирным
+            '        paras.Add(New WordPara($"{g.Key} - {currCount} {EndOfSluch_TXT(currCount)} ({OldYE} - {prevCount} {EndOfSluch_TXT(prevCount)}) {Rost(delta)}"))
+            '    Else
+            '        ' Жирным только g.Key
+            '        paras.Add(New WordPara(
+            '$"{g.Key}",
+            '$" - {currCount} {EndOfSluch_TXT(currCount)} ({OldYE} - {prevCount} {EndOfSluch_TXT(prevCount)}) {Rost(delta)}"))
+            '    End If
+
+            paras.Add(New WordPara(
+        $"{g.Key} - {currCount} {EndOfSluch_TXT(currCount)} " &
+        $"({OldYE} - {prevCount} {EndOfSluch_TXT(prevCount)}) {Rost(delta)}",
+        boldOnly:=Not Sokr))
 
             If Not Sokr AndAlso Not String.IsNullOrEmpty(g.Key) Then
-                ' Lev3 напрямую (когда Lev2 = Lev1)
+
+                ' --- Lev3 напрямую (когда Lev2 = Lev1): отступ 36 ---
                 Dim lev3Direct = g.Where(Function(o) o.MyKlasLev2 = g.Key).
-                                    GroupBy(Function(o) o.MyKlasLev3).
-                                    Where(Function(gr) Not String.IsNullOrEmpty(gr.Key)).
-                                    OrderByDescending(Function(gr) gr.Count()).ToList()
+                            GroupBy(Function(o) o.MyKlasLev3).
+                            Where(Function(gr) Not String.IsNullOrEmpty(gr.Key)).
+                            OrderByDescending(Function(gr) gr.Count()).ToList()
 
                 If lev3Direct.Count > 0 Then
                     Dim parts = lev3Direct.Select(Function(lev3)
                                                       Dim cntPrev = NY1.Where(Function(o) o.MyKlasLev3 = lev3.Key).Count()
                                                       Return $"{lev3.Key} ({lev3.Count()}/{cntPrev})"
                                                   End Function).ToArray()
-                    AddTextBlock($"{vbTab}{String.Join(", ", parts)}", "Times New Roman", 12)
+                    paras.Add(New WordPara(String.Join(", ", parts)) With {
+                .FirstLineIndent = 36
+            })
                 End If
 
-                ' Lev2 (≠ Lev1) + их Lev3
+                ' --- Lev2 + их Lev3: отступы 18 и 36 ---
                 Dim g2 = g.GroupBy(Function(o) o.MyKlasLev2).
-                            Where(Function(sub2) sub2.Key <> g.Key).
-                            OrderByDescending(Function(sub2) sub2.Count()).ToList()
+                    Where(Function(sub2) sub2.Key <> g.Key).
+                    OrderByDescending(Function(sub2) sub2.Count()).ToList()
 
                 For Each sub2 In g2
                     Dim pg2Count = NY1.Where(Function(o) o.MyKlasLev2 = sub2.Key).Count()
-                    AddTextBlock($"-     {sub2.Key} {sub2.Count()} {EndOfSluch_TXT(sub2.Count())} " &
-                                 $"({OldYE} - {pg2Count} {EndOfSluch_TXT(pg2Count)})",
-                                 isItalic:=True)
 
+                    ' Lev2 — отступ 18
+                    paras.Add(New WordPara(
+                $"- {sub2.Key} {sub2.Count()} {EndOfSluch_TXT(sub2.Count())} " &
+                $"({OldYE} - {pg2Count} {EndOfSluch_TXT(pg2Count)})") With {
+                .ItalicOnly = True,
+                .FirstLineIndent = 18
+            })
+
+                    ' Lev3 внутри Lev2 — отступ 36
                     Dim lev3InLev2 = sub2.GroupBy(Function(o) o.MyKlasLev3).
-                                        Where(Function(gr) Not String.IsNullOrEmpty(gr.Key)).
-                                        OrderByDescending(Function(gr) gr.Count()).ToList()
+                                Where(Function(gr) Not String.IsNullOrEmpty(gr.Key)).
+                                OrderByDescending(Function(gr) gr.Count()).ToList()
                     If lev3InLev2.Count > 0 Then
                         Dim parts = lev3InLev2.Select(Function(lev3)
                                                           Dim cntPrev = NY1.Where(Function(o) o.MyKlasLev3 = lev3.Key).Count
                                                           Return $"{lev3.Key} ({lev3.Count()}/{cntPrev})"
                                                       End Function).ToArray()
-                        AddTextBlock($"{vbTab}{String.Join(", ", parts)}", "Times New Roman", 12)
+                        paras.Add(New WordPara(String.Join(", ", parts)) With {
+                    .FirstLineIndent = 36
+                })
                     End If
                 Next
 
-                ' Пустая строка ПОСЛЕ рамки (между блоками)
-                AddEmptyLineAfterRange()
+                paras.Add(New WordPara()) ' пустая строка между блоками
             End If
         Next
 
-    End Sub
 
-    Private Sub LokPoKomplexText(NY As List(Of Otkaz), NY1 As List(Of Otkaz))
-        Dim y1 = "за предыдущий период" '
-        WriteMSG_to_TB_Lok(NY, NY1, y1, "ТЧЭ Боготол", 1)
-        WriteMSG_to_TB_Lok(NY, NY1, y1, "ТЧЭ Красноярск", 2)
-        WriteMSG_to_TB_Lok(NY, NY1, y1, "ТЧЭ Иланская", 3)
-        WriteMSG_to_TB_Lok(NY, NY1, y1, "ТЧЭ Ачинск", 5)
-        WriteMSG_to_TB_Lok(NY, NY1, y1, "ТЧЭ Абакан", 7)
-    End Sub
+        '    For Each g In tgGroups
+        '        Dim currCount = g.Count()
+        '        Dim prevCount = pgDict.GetValueOrDefault(g.Key, 0)
+        '        Dim delta = currCount - prevCount
 
-    Private Sub WriteMSG_to_TB_Lok(NY As List(Of Otkaz), NY1 As List(Of Otkaz), y1 As String,
-                                   kmpName As String, kmpInt As Integer)
+        '        paras.Add(New WordPara(
+        '        $"{g.Key} - {currCount} {EndOfSluch_TXT(currCount)} " &
+        '        $"({OldYE} - {prevCount} {EndOfSluch_TXT(prevCount)}) {Rost(delta)}",
+        '        boldOnly:=Not Sokr))
+
+        '        If Not Sokr AndAlso Not String.IsNullOrEmpty(g.Key) Then
+        '            ' Lev3 напрямую
+        '            Dim lev3Direct = g.Where(Function(o) o.MyKlasLev2 = g.Key).
+        '                            GroupBy(Function(o) o.MyKlasLev3).
+        '                            Where(Function(gr) Not String.IsNullOrEmpty(gr.Key)).
+        '                            OrderByDescending(Function(gr) gr.Count()).ToList()
+
+        '            If lev3Direct.Count > 0 Then
+        '                Dim parts = lev3Direct.Select(Function(lev3)
+        '                                                  Dim cntPrev = NY1.Where(Function(o) o.MyKlasLev3 = lev3.Key).Count()
+        '                                                  Return $"{lev3.Key} ({lev3.Count()}/{cntPrev})"
+        '                                              End Function).ToArray()
+        '                paras.Add(New WordPara(String.Join(", ", parts)) With {.FirstLineIndent = 18})
+        '            End If
+
+        '            ' Lev2 + их Lev3
+        '            Dim g2 = g.GroupBy(Function(o) o.MyKlasLev2).
+        '                    Where(Function(sub2) sub2.Key <> g.Key).
+        '                    OrderByDescending(Function(sub2) sub2.Count()).ToList()
+
+        '            For Each sub2 In g2
+        '                Dim pg2Count = NY1.Where(Function(o) o.MyKlasLev2 = sub2.Key).Count()
+
+        '                paras.Add(New WordPara($"- {sub2.Key} {sub2.Count()} {EndOfSluch_TXT(sub2.Count())} " &
+        '$"({OldYE} - {pg2Count} {EndOfSluch_TXT(pg2Count)})") With {.ItalicOnly = True, .FirstLineIndent = 18})
+
+
+        '                '    paras.Add(New WordPara(
+        '                '    $"-     {sub2.Key} {sub2.Count()} {EndOfSluch_TXT(sub2.Count())} " &
+        '                '    $"({OldYE} - {pg2Count} {EndOfSluch_TXT(pg2Count)})") With {
+        '                '    .ItalicOnly = True
+        '                '})
+
+
+        '                Dim lev3InLev2 = sub2.GroupBy(Function(o) o.MyKlasLev3).
+        '                                Where(Function(gr) Not String.IsNullOrEmpty(gr.Key)).
+        '                                OrderByDescending(Function(gr) gr.Count()).ToList()
+        '                If lev3InLev2.Count > 0 Then
+        '                    Dim parts = lev3InLev2.Select(Function(lev3)
+        '                                                      Dim cntPrev = NY1.Where(Function(o) o.MyKlasLev3 = lev3.Key).Count
+        '                                                      Return $"{lev3.Key} ({lev3.Count()}/{cntPrev})"
+        '                                                  End Function).ToArray()
+        '                    paras.Add(New WordPara(String.Join(", ", parts)) With {.FirstLineIndent = 18})
+        '                End If
+        '            Next
+
+        '            paras.Add(New WordPara()) ' пустая строка между блоками
+        '        End If
+        '    Next
+
+        Return paras
+
+    End Function
+
+
+
+
+    Private Function LokPoKomplexText(NY As List(Of Otkaz), NY1 As List(Of Otkaz)) As List(Of WordPara)
+
+        Dim paras As New List(Of WordPara)
+        Dim y1 = "за предыдущий период"
+
+        paras.AddRange(WriteMSG_to_TB_Lok(NY, NY1, y1, "ТЧЭ Боготол", 1))
+        paras.AddRange(WriteMSG_to_TB_Lok(NY, NY1, y1, "ТЧЭ Красноярск", 2))
+        paras.AddRange(WriteMSG_to_TB_Lok(NY, NY1, y1, "ТЧЭ Иланская", 3))
+        paras.AddRange(WriteMSG_to_TB_Lok(NY, NY1, y1, "ТЧЭ Ачинск", 5))
+        paras.AddRange(WriteMSG_to_TB_Lok(NY, NY1, y1, "ТЧЭ Абакан", 7))
+
+        Return paras
+
+    End Function
+
+
+    Private Function WriteMSG_to_TB_Lok(NY As List(Of Otkaz), NY1 As List(Of Otkaz), y1 As String,
+                                    kmpName As String, kmpInt As Integer) As List(Of WordPara)
+
+        Dim paras As New List(Of WordPara)
+
         Dim tg = NY.Where(Function(o) o.GetKomplexOTS() = kmpInt).ToList()
         Dim pg = NY1.Where(Function(o) o.GetKomplexOTS() = kmpInt).ToList()
 
-        'AddTextBlock($"Распределение отказов технических средств по сериям локомотивов{Chr(11)}за период с {My.Settings.NachPeriod:d MMMM yyyy} г. по {My.Settings.KonPeriod:d MMMM yyyy} г.{Chr(11)}в сравнении с периодом от {My.Settings.nachOLDPeriod:d MMMM yyyy} г. по {My.Settings.konOLDPeriod:d MMMM yyyy} г.{Chr(11)}в локомотивном комплексе {kmpName}", isBold:=True, isCenter:=True)
-        AddTextBlock($"В локомотивном комплексе {kmpName}", isBold:=True, isCenter:=True)
+        paras.Add(New WordPara($"В локомотивном комплексе {kmpName}",
+                           boldOnly:=True,
+                           align:=Word.WdParagraphAlignment.wdAlignParagraphCenter))
 
         Dim serList = GetSerLokk(y1, tg, pg)
         For Each item In serList
             If CInt(item(1)) > 0 OrElse CInt(item(2)) > 0 Then
-                AddTextBlock($"{item(0)} - {item(1)} ОТС ({item(3)} - {item(2)} ОТС), {item(4)}")
+                paras.Add(New WordPara($"{item(0)} - {item(1)} ОТС ({item(3)} - {item(2)} ОТС), {item(4)}"))
             End If
         Next
-        AddTextBlock("")
-    End Sub
+        paras.Add(New WordPara())
 
-    Private Sub OborudPoKomplexText(NY As List(Of Otkaz), NY1 As List(Of Otkaz))
+        Return paras
+
+    End Function
+
+
+
+    Private Function OborudPoKomplexText(NY As List(Of Otkaz), NY1 As List(Of Otkaz)) As List(Of WordPara)
+
+        Dim paras As New List(Of WordPara)
         Dim y1 = "за предыдущий период"
-        'AddTextBlock($"Распределение отказов технических средств по оборудованию{Chr(11)}за период с {My.Settings.NachPeriod:d MMMM yyyy} г. по {My.Settings.KonPeriod:d MMMM yyyy} г.{Chr(11)}в сравнении с периодом от {My.Settings.nachOLDPeriod:d MMMM yyyy} г.", isBold:=True, isCenter:=True)
+
+        paras.AddRange(WriteMSG_to_TB(NY, NY1, y1, "ТЧЭ Боготол", 1))
+        paras.AddRange(WriteMSG_to_TB(NY, NY1, y1, "ТЧЭ Красноярск", 2))
+        paras.AddRange(WriteMSG_to_TB(NY, NY1, y1, "ТЧЭ Иланская", 3))
+        paras.AddRange(WriteMSG_to_TB(NY, NY1, y1, "ТЧЭ Ачинск", 5))
+        paras.AddRange(WriteMSG_to_TB(NY, NY1, y1, "ТЧЭ Абакан", 7))
+
+        paras.Add(New WordPara() With {.PageBreakBefore = True})
+
+        Return paras
+
+    End Function
 
 
-        WriteMSG_to_TB(NY, NY1, y1, "ТЧЭ Боготол", 1)
-        'AddTextBlock($"{vbCrLf}")
-        WriteMSG_to_TB(NY, NY1, y1, "ТЧЭ Красноярск", 2)
-        'AddTextBlock($"{vbCrLf}")
-        WriteMSG_to_TB(NY, NY1, y1, "ТЧЭ Иланская", 3)
-        'AddTextBlock($"{vbCrLf}")
-        WriteMSG_to_TB(NY, NY1, y1, "ТЧЭ Ачинск", 5)
-        'AddTextBlock($"{vbCrLf}")
-        WriteMSG_to_TB(NY, NY1, y1, "ТЧЭ Абакан", 7)
-        AddTextBlock($"{Chr(12)}")
-    End Sub
 
-    Private Sub WriteMSG_to_TB(NY As List(Of Otkaz), NY1 As List(Of Otkaz), y1 As String,
-                               kmpName As String, kmpInt As Integer)
+
+    Private Function WriteMSG_to_TB(NY As List(Of Otkaz), NY1 As List(Of Otkaz), y1 As String,
+                                kmpName As String, kmpInt As Integer) As List(Of WordPara)
+
+        Dim paras As New List(Of WordPara)
+
         Dim tg = NY.Where(Function(o) o.GetKomplexOTS() = kmpInt).ToList()
         Dim pg = NY1.Where(Function(o) o.GetKomplexOTS() = kmpInt).ToList()
 
-        AddTextBlock($"В локомотивном комплексе {kmpName}", isBold:=True, isCenter:=True)
-        AddTextBlock("")
+        paras.Add(New WordPara($"В локомотивном комплексе {kmpName}",
+                           boldOnly:=True,
+                           align:=Word.WdParagraphAlignment.wdAlignParagraphCenter))
+        paras.Add(New WordPara())
 
-        WriOBORUD(tg, pg, y1, Ramka:=False, BezZag:=True)
-    End Sub
+        paras.AddRange(WriOBORUD(tg, pg, y1, Ramka:=False, BezZag:=True))
+
+        Return paras
+
+    End Function
 
 
 
@@ -719,46 +861,45 @@ Module ReportToWord
     ''' <summary>
     ''' Глобальное распределение отказавшего оборудования в разрезе ВСЕХ серий локомотивов
     ''' </summary>
-    Private Sub OborudPoSerLokText(NY As List(Of Otkaz), NY1 As List(Of Otkaz))
+    Private Function OborudPoSerLokText(NY As List(Of Otkaz), NY1 As List(Of Otkaz)) As List(Of WordPara)
+
+        Dim paras As New List(Of WordPara)
         Dim y1 = "за предыдущий период"
 
-        Dim Ff As String = PeriodTitle("Распределение отказавшего оборудования по сериям локомотивов")
-        AddTextBlock(Ff, isCenter:=True, isBold:=True)
-        AddTextBlock("")
-        'Dim Ff As String = $"Распределение отказавшего оборудования по сериям локомотивов{Chr(11)}за период с {My.Settings.NachPeriod:d MMMM yyyy} г. по {My.Settings.KonPeriod:d MMMM yyyy} г.{Chr(11)}в сравнении с периодом от {My.Settings.nachOLDPeriod:d MMMM yyyy} г. по {My.Settings.konOLDPeriod:d MMMM yyyy} г."
-        'AddTextBlock(Ff, isCenter:=True, isBold:=True)
-        'AddTextBlock("")
+        paras.Add(New WordPara(PeriodTitle("Распределение отказавшего оборудования по сериям локомотивов"),
+                           boldOnly:=True,
+                           align:=Word.WdParagraphAlignment.wdAlignParagraphCenter))
+        paras.Add(New WordPara())
 
-
-
-        ' 1. Собираем уникальный список ВСЕХ серий (SerLokExact) из обоих периодов
         Dim allSeries = NY.Select(Function(o) o.SerLok) _
-                          .Concat(NY1.Select(Function(o) o.SerLok)) _
-                          .Where(Function(s) Not String.IsNullOrWhiteSpace(s)) _
-                          .Distinct() _
-                          .OrderBy(Function(s) s) _
-                          .ToList()
-        ' 2. Проходим по каждой серии
+                      .Concat(NY1.Select(Function(o) o.SerLok)) _
+                      .Where(Function(s) Not String.IsNullOrWhiteSpace(s)) _
+                      .Distinct() _
+                      .OrderBy(Function(s) s) _
+                      .ToList()
+
         For Each ser In allSeries
-            ' Фильтруем глобальные списки под конкретную серию
             Dim tgSer = NY.Where(Function(o) o.SerLok = ser).ToList()
             Dim pgSer = NY1.Where(Function(o) o.SerLok = ser).ToList()
 
-            '' Если по какой-то причине в обоих периодах пусто - пропускаем
-            'If Not tgSer.Any() AndAlso Not pgSer.Any() Then Continue For
-
-            ' Исключаем серии, у которых в текущем году нет отказов
+            If Not tgSer.Any() AndAlso Not pgSer.Any() Then Continue For
             If Not tgSer.Any() Then Continue For
 
-            ' Заголовок для конкретной серии
-            AddTextBlock($"СЕРИЯ ЛОКОМОТИВОВ {ser} ({tgSer.Count} / {pgSer.Count})", isBold:=True, isCenter:=True)
+            paras.Add(New WordPara($"СЕРИЯ ЛОКОМОТИВОВ {ser} ({tgSer.Count} / {pgSer.Count})",
+                               boldOnly:=True,
+                               align:=Word.WdParagraphAlignment.wdAlignParagraphCenter))
 
-            ' Вызываем вашу готовую функцию сборки оборудования (3 уровня)
-            WriOBORUD(tgSer, pgSer, y1, Ramka:=False, BezZag:=True)
-
-            AddTextBlock("") ' Пустая строка между сериями
+            paras.AddRange(WriOBORUD(tgSer, pgSer, y1, Ramka:=False, BezZag:=True))
+            paras.Add(New WordPara())
         Next
-    End Sub
+
+        Return paras
+
+    End Function
+
+
+
+
 
 
 
@@ -902,8 +1043,6 @@ Module ReportToWord
             End Try
         End Using
     End Sub
-
-
 
 
 End Module

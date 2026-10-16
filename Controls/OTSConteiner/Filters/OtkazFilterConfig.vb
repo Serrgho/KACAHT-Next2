@@ -664,8 +664,8 @@
                     Dim itemStr = item?.ToString()
                     If Not String.IsNullOrEmpty(itemStr) Then
                         ' Ищем "Да [...]" или "Нет [...]"
-                        Dim match = allValues.FirstOrDefault(Function(v) (itemStr.Equals("True", StringComparison.OrdinalIgnoreCase) AndAlso v.StartsWith("Да [")) OrElse
-                        (itemStr.Equals("False", StringComparison.OrdinalIgnoreCase) AndAlso v.StartsWith("Нет ["))
+                        Dim match = allValues.FirstOrDefault(Function(v) (itemStr.Equals("True", StringComparison.OrdinalIgnoreCase) AndAlso v.StartsWith("Да (")) OrElse
+                        (itemStr.Equals("False", StringComparison.OrdinalIgnoreCase) AndAlso v.StartsWith("Нет ("))
                     )
                         If match IsNot Nothing Then SafeAddToSelection(popupCtrl.FilterListBox, match)
                     End If

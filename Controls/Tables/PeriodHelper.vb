@@ -92,12 +92,6 @@ Module PeriodHelper
                              End Function).ToList()
 
 
-        'Return combined.GroupBy(Function(o) o.Id) _
-        '               .Select(Function(g) g.First()) _
-        '               .Where(Function(o)
-        '                          Dim d = o.Nach.Date
-        '                          Return d >= periodStart.Date AndAlso d <= periodEnd.Date
-        '                      End Function).ToList()
     End Function
 
     Public Function GetYearToDateOtkazy(otsList As List(Of Otkaz), oldY As List(Of Otkaz)) As List(Of Otkaz)

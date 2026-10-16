@@ -145,7 +145,7 @@ Namespace Kas
 
                 For Each item As String In selectedItems
                     ' Парсим элемент вида "Название (число)"
-                    Dim match = System.Text.RegularExpressions.Regex.Match(item, "^(.*?)\s*\((\d+)\)$")
+                    Dim match = System.Text.RegularExpressions.Regex.Match(item, "^(.*?)\s*\((\d+)\s+ОТС")
 
                     If match.Success Then
                         Dim name = match.Groups(1).Value.Trim()

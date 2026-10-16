@@ -787,8 +787,7 @@ Namespace Kas
 
                 ' Собираем часть: "ТР-1 проходил 10.02.2026 СЛД Дальневосточное, пробег 25661 км"
                 Dim line = $"{r.RepairType} проходил {r.RepairPlace}"
-                If Not String.IsNullOrEmpty(mileagePart) Then line &= $", пробег {mileagePart}"
-
+                If Not String.IsNullOrEmpty(mileagePart) Then line &= $", {mileagePart}"
                 parts.Add(line)
             Next
 

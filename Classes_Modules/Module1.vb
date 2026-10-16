@@ -583,7 +583,7 @@ Namespace Kas
 
 
             'Dim elapsedTime, elapsedTime1 As TimeSpan
-            Dim TempLST As New List(Of Otkaz)
+            Dim TempLST As List(Of Otkaz)
 
             If Not IsNothing(PointedYarlyk) AndAlso Not IsNothing(PointedYarlyk.Zapros) Then
                 'Stopwatch.Reset()
@@ -605,8 +605,8 @@ Namespace Kas
 
             ' === КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: ОЧИСТКА СТАРОГО СПИСКА ПЕРЕД ЗАГРУЗКОЙ НОВОГО ===
 
-            ' 1. Сбрасываем ItemsSource в Nothing, чтобы WPF начал уничтожать старые OTSRowControl
-            MW.TRowsContainer.ItemsSource = Nothing
+            '' 1. Сбрасываем ItemsSource в Nothing, чтобы WPF начал уничтожать старые OTSRowControl
+            'MW.TRowsContainer.ItemsSource = Nothing
 
             ' 2. Принудительно собираем мусор ПОСЛЕ сброса, но ДО создания нового списка
             '    Это освобождает память от старых контролов и фильтрованного TempLST предыдущего вызова
@@ -667,8 +667,8 @@ Namespace Kas
         Sub ResetPeriodSUB()
             ' 1. Сбрасываем период в настройках
             With My.Settings
-                .NachPeriod = Date.MinValue
-                .KonPeriod = Date.MinValue
+                .NachPeriod = Fetcher.NachDat
+                .KonPeriod = Fetcher.KonDat
                 .nachOLDPeriod = Date.MinValue
                 .konOLDPeriod = Date.MinValue
                 .TimeMode = "From00To2359"
@@ -683,9 +683,9 @@ Namespace Kas
             ' 3. Обновляем UI
 
             InitFirst()                  ' ← ваша глобальная инициализация
-            'YarCon.UpdateYarlykInfo()   ' ← обновление ярлыков
+            YarCon.UpdateYarlykInfo()   ' ← обновление ярлыков
 
-            'MW.InfoBLOK.ScrollToEnd()
+            MW.InfoBLOK.ScrollToEnd()
 
 
         End Sub

@@ -661,8 +661,8 @@ Namespace Kas
             If Not Directory.Exists(folderPath) Then
                 Directory.CreateDirectory(folderPath)
             End If
-
-            Dim filePath As String = Path.Combine(folderPath, $"Справка по комплексам_{DateTime.Now:yyyyMMdd_HHmmss}.pdf")
+            Dim monthName = Ru.DateTimeFormat.GetMonthName(_periodEnd.Value.Month)
+            Dim filePath As String = Path.Combine(folderPath, $"{monthName} Справка по комплексам {DateTime.Now:MM.dd.yy HH-mm-ss}.pdf")
 
             ButtonSPanel.Visibility = Visibility.Collapsed
             Me.UpdateLayout()

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:KACAHT_Next2.Kas"
+			 xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
              Background="Transparent"
              mc:Ignorable="d" 
               TextOptions.TextFormattingMode="Display"
@@ -12,7 +13,30 @@
              
              d:DesignHeight="30" d:DesignWidth="400">
 	<UserControl.Resources>
-		<Style x:Key="BaseStyle" TargetType="TextBlock">
+
+		<Style x:Key="EmoBaseStyle" TargetType="emoji:TextBlock">
+			<Setter Property="Height" Value="24"/>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="FontSize" Value="16"/>
+			<Setter Property="FontWeight" Value="SemiBold"/>
+			<Setter Property="TextAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Foreground" Value="{StaticResource SplitterBrush}"/>
+		</Style>
+
+		 <!--Стиль Лупы автоматически наследует поддержку эмодзи--> 
+		<Style x:Key="Lupa" TargetType="emoji:TextBlock" BasedOn="{StaticResource EmoBaseStyle}">
+			<Setter Property="Width" Value="24"/>
+			<Setter Property="Margin" Value="1 0"/>
+			<Setter Property="Cursor" Value="Hand"/>
+			<Style.Triggers>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Property="Foreground" Value="DarkBlue"/>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+
+		<!--<Style x:Key="BaseStyle" TargetType="TextBlock">
 			<Setter Property="Height" Value="24"/>
 			<Setter Property="Background" Value="Transparent"/>
 			<Setter Property="FontSize" Value="16"/>
@@ -30,7 +54,7 @@
 					<Setter Property="Foreground" Value="DarkBlue"/>
 				</Trigger>
 			</Style.Triggers>
-		</Style>
+		</Style>-->
 	</UserControl.Resources>
 
 	<Border BorderThickness="1" BorderBrush="{StaticResource SplitterBrush}" CornerRadius="4" Padding="2" Background="Transparent">
@@ -41,7 +65,7 @@
 				<ColumnDefinition Width="*"/>
 			</Grid.ColumnDefinitions>
 
-			<TextBlock x:Name="BtnFilter" 
+			<emoji:TextBlock x:Name="BtnFilter" 
                        Grid.Column="0"
                        ToolTip="Найти по № ОТС"
 					   FontSize="17"
@@ -49,7 +73,7 @@
                        Text="🔎"
                        MouseUp="BtnFilter_MouseUp"/>
 
-			<TextBlock x:Name="BtnFndLok"   
+			<emoji:TextBlock x:Name="BtnFndLok"   
                        Grid.Column="1" 
                        ToolTip="Найти по № локомотива" 
 					   FontSize="17"

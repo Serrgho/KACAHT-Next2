@@ -29,7 +29,7 @@
 					 
 					 <Border BorderBrush="{StaticResource SplitterBrush}" BorderThickness="1" CornerRadius="4" Padding="2" Margin="2" MaxWidth="250">
 						<StackPanel Orientation="Vertical">
-							<Button x:Name="BtnOldYeFileSet" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="BtnOldYeFileSet_Click" Content="📁 Указать файл прошлого года"/>
+						<Button x:Name="BtnOldYeFileSet" Style="{StaticResource PopupStyleButton}" Click="BtnOldYeFileSet_Click" Tag="📁" Content="Указать файл прошлого года"/>
 
 							<TextBlock FontSize="12" FontWeight="Normal" Foreground="Black" TextWrapping="Wrap" Text="{Binding Source={x:Static properties:MySettings.Default}, Path=OldYJSON}"/>
 						</StackPanel>
@@ -37,7 +37,7 @@
 					
 					<Border BorderBrush="{StaticResource SplitterBrush}" BorderThickness="1" CornerRadius="4" Padding="2" Margin="2" MaxWidth="250">
 						<StackPanel Orientation="Vertical">
-							<Button x:Name="BtnThisYeFileSet" Foreground="DarkRed" Style="{StaticResource PopupStyleButton}" Click="BtnThisYeFileSet_Click" Content="📁 Указать файл текущего года"/>
+						<Button x:Name="BtnThisYeFileSet" Style="{StaticResource PopupStyleButton}" Click="BtnThisYeFileSet_Click" Tag="📁" Content="Указать файл текущего года"/>
 
 							<TextBlock FontSize="12" FontWeight="Normal" Foreground="Black" TextWrapping="Wrap" Text="{Binding Source={x:Static properties:MySettings.Default}, Path=THISYJSON}"/>
 						</StackPanel>
@@ -47,11 +47,11 @@
 				
 				
 				<WrapPanel Orientation="Horizontal" Background="{StaticResource ScrolBarBrush}" VerticalAlignment="Center">
-					<Button x:Name="BtnResetSettings" Style="{StaticResource PopupStyleButtonOrange}" Click="BtnResetSettings_Click">📁Сброс установок для папок</Button>
-				
-				<Button x:Name="BtnGoalsEditor"  Style="{StaticResource PopupStyleButtonGreen}" Click="BtnGoalsEditor_Click">📝Редактор ЦП ОТС</Button>
-				<Button x:Name="BtnGoalsHoursEditor"  Style="{StaticResource PopupStyleButtonGreen}" Click="BtnGoalsHoursEditor_Click">📝Редактор ЦП П/Ч</Button>
-				<Button x:Name="BtnGoalsOtherRailsEditor"  Style="{StaticResource PopupStyleButtonGreen}" Click="BtnGoalsOtherRailsEditor_Click">📝Редактор ЦП дорог ВП</Button>
+				<Button x:Name="BtnResetSettings" Style="{StaticResource PopupStyleButtonOrange}" Tag="🛠️" Click="BtnResetSettings_Click">Сброс установок для папок</Button>
+
+				<Button x:Name="BtnGoalsEditor"  Style="{StaticResource PopupStyleButtonGreen}" Tag="✏️📜" Click="BtnGoalsEditor_Click">Редактор ЦП ОТС</Button>
+				<Button x:Name="BtnGoalsHoursEditor"  Style="{StaticResource PopupStyleButtonGreen}" Tag="✏️📜" Click="BtnGoalsHoursEditor_Click">Редактор ЦП П/Ч</Button>
+				<Button x:Name="BtnGoalsOtherRailsEditor"  Style="{StaticResource PopupStyleButtonGreen}" Tag="✏️📜" Click="BtnGoalsOtherRailsEditor_Click">Редактор ЦП дорог ВП</Button>
 				</WrapPanel>
 			</StackPanel>
 	</Expander>

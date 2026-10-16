@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:KACAHT_Next2.Kas" 
 		xmlns:properties="clr-namespace:KACAHT_Next2.My"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+		xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
         mc:Ignorable="d"
         Title="KAC_AHT Next 2" 
         Icon="favicon.ico"
@@ -60,7 +61,7 @@
 			  Background="{StaticResource AppBackBrush}" >
 
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition x:Name="LeftColumn" MinWidth="530" MaxWidth="800" />
+				<ColumnDefinition x:Name="LeftColumn" MinWidth="530" MaxWidth="850" />
 				<ColumnDefinition Width="*"/>
 			</Grid.ColumnDefinitions>
 
@@ -68,7 +69,6 @@
 			<Grid Grid.Column="0">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="auto"/>
-					
 					<RowDefinition Height="*"/>
 					<RowDefinition Height="auto"/>
 				</Grid.RowDefinitions>
@@ -101,9 +101,9 @@
 					</Grid>
 
 					<!-- Подстрока 1: Остальные контролы -->
-					<StackPanel Grid.Row="1">
+					<StackPanel Grid.Row="1" Width="Auto">
 						<local:KasAuthControl x:Name="AuthCtrl" Margin="2" />
-						<local:UstanowkiCTL x:Name="Ustanovki" Margin="2"/>
+						<local:UstanowkiCTL x:Name="Ustanovki" Margin="2" />
 						<local:KasJournalParamControl x:Name="JourParam" Margin="2"/>
 						<local:MainDataCTL x:Name="expDataWork" Margin="2" />
 						<local:PoyasnilkaCTL x:Name="expPoyasnilka" Margin="2"/>
@@ -111,14 +111,9 @@
 					</StackPanel>
 				</Grid>
 
-
-
 				<local:YarlykContainerControl  Grid.Row="1" Grid.Column="0" x:Name="YarlykContainer" />
 
-
-
-				<local:InfoLBoxControl  Grid.Row="3" x:Name="InfoBLOK" MaxHeight="300" Margin="2 2 7 2"/>
-				
+				<local:InfoLBoxControl  Grid.Row="2" x:Name="InfoBLOK" MaxHeight="300" Margin="2 2 7 2"/>
 			</Grid>
 			
 
@@ -127,13 +122,6 @@
 
 
 			<Grid Grid.Column="1">
-
-				<Grid.RowDefinitions>
-					<!--<RowDefinition Height="auto"/>-->
-					<!-- Панель управления -->
-					<!--<RowDefinition Height="*"/>-->
-					<!-- Основной контент -->
-				</Grid.RowDefinitions>
 
 				<!-- Многостраничный контейнер -->
 				<TabControl x:Name="MainTabControl"

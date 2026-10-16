@@ -8,49 +8,62 @@ Namespace Kas
 
 #Region "Основные запросы"
         ' Базовая проверка по периоду
-        Public BaseFilter As Func(Of Otkaz, Boolean) = Function(o) IsWithinPeriod(o.Nach)
+
+        Public BaseFilter As Func(Of Otkaz, Boolean) = Function(o) True
 
 
         Public AllOTS As Func(Of Otkaz, Boolean) = Function(o) BaseFilter(o)
 
-
-
         Public OTSInKomplex As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.Uchet)
+
         Public OTSOutNotPeredanKomplex As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso (Not o.Uchet AndAlso (Not o.ZaKemCode?.ToLower Like "*дорог*") AndAlso (Not o.ZaKemCode?.ToLower Like "*ехнолог*")))
 
         Public UpTo10DaysRassled As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso (o.DaysOnRassled > 10 And o.Uchet And o.ZaKem?.ToLower <> "тр"))
+
         Public UpTo10DaysZakryt As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso ((o.Zakryt - o.Nach).Days > 10 And o.Uchet And o.ZaKem?.ToLower <> "тр"))
+
         Public UpTo10DaysonCreateZakryt As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso ((o.Zakryt - o.Sozdan).Days > 10 And o.Uchet And o.ZaKem?.ToLower <> "тр"))
 
-
-
         Public VRassForTCH As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso (o.VRassled))
+
         Public Sohranen As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso (o.IsSaved))
 
         'здесь на дату расследования можно не проверять
         Public SignedOnTCH As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.ZaKem?.ToLower = ("тчэ"))
+
         Public SignedOnTRPU As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.KtoZakryl?.ToLower Like "трпу*" AndAlso o.Uchet)
         Public SignedOnSLD As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.ZaKemCode?.ToLower Like "слд*")
+
         Public SignedOnZav As Func(Of Otkaz, Boolean) = Function(o) BaseFilter(o) AndAlso (Not String.IsNullOrEmpty(o.ZaKemCode) AndAlso ({"окорем", "окострой"}.Any(Function(k) o.ZaKemCode?.ToLower().Contains(k)) OrElse o.ZaKemCode?.ToLower() = "прочие"))
 
         Public IsPFB As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.IsPFB AndAlso o.AlienSLD = "")
 
         'именно *дорога - чтобы др дорога/П и т.п. не попадали сюда
         Public ToOtherRails As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.ZaKemCode?.ToLower Like "*дорога")
+
         Public ToTechnoOTS As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.ZaKemCode?.ToLower Like "*ехноло*")
+
         Public ToOtherPredprKras As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.ZaKemCode?.ToLower Like "*дорога/*")
 
         Public OTSOnKras As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.MestoOTS_Dor?.ToLower Like "*расноя*")
+
         Public OTSOnOther As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso (Not (o.MestoOTS_Dor?.ToLower Like "*расноя*")))
 
         'Public RassOver As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso ((o.Uslovie2 Or o.ZaKemCode?.ToLower = "тч") And o.Zakryt > Date.MinValue))
         Public DangerOTS As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.ISDanger)
+
         Public OkaPomOTS As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.OkaPom)
+
         Public WithPass As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.HasPass AndAlso (Not o.KtoZakryl?.ToLower Like "трпу*"))
+
         Public WithAlienSLD As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.AlienSLD <> "")
+
         Public Sobyti As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.ISSobyt)
+
         Public Korporativ As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.ISKorp)
+
         Public KorrectPCH As Func(Of Otkaz, Boolean) = (Function(o) BaseFilter(o) AndAlso o.IsKorrect AndAlso o.KtoZakryl.ToLower.Contains("тч") AndAlso (o.Uslovie4))
+
         Public NarushSroka As Func(Of Otkaz, Boolean) = Function(u) BaseFilter(u) AndAlso u.NarushSroka
 #End Region
 
@@ -59,13 +72,13 @@ Namespace Kas
 #Region "Запросы для суточ отчета"
         'в отчеты еще добавлять существующие - ПФБ, ПАСС/ПРИГ
         Public PostupilZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) (o.Postup.IsInPeriod OrElse o.VernulsaOTS.IsInPeriod) AndAlso o.Uchet AndAlso (Not o.KtoZakryl?.ToLower Like "трпу*"))
-        Public ZakrytZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.Zakryt.IsInPeriod AndAlso (Not o.KtoZakryl?.ToLower Like "трпу*"))
-        Public ToTechnoZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.ZaKemCode?.ToLower Like "*ехноло*" AndAlso ZakrytZaPeriod(o))
-        Public PeredanZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.Peredan.IsInPeriod)
-        Public KorrZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.KorDate.IsInPeriod)
-        Public WithPassZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.HasPass AndAlso ((o.VRassled) OrElse (o.IsSaved)) AndAlso (Not (o.MestoOTS_Dor?.ToLower Like "*расноя*") AndAlso (Not o.KtoZakryl?.ToLower Like "трпу*")))
+                                                           Public ZakrytZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.Zakryt.IsInPeriod AndAlso (Not o.KtoZakryl?.ToLower Like "трпу*"))
+                                                           Public ToTechnoZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.ZaKemCode?.ToLower Like "*ехноло*" AndAlso ZakrytZaPeriod(o))
+                                                           Public PeredanZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.Peredan.IsInPeriod)
+                                                           Public KorrZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.KorDate.IsInPeriod)
+                                                           Public WithPassZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.HasPass AndAlso ((o.VRassled) OrElse (o.IsSaved)) AndAlso (Not (o.MestoOTS_Dor?.ToLower Like "*расноя*") AndAlso (Not o.KtoZakryl?.ToLower Like "трпу*")))
 
-        Public UpTo10DaysZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.DaysOnRassled > 9 AndAlso o.ZaKem?.ToLower <> "тр")
+                                                           Public UpTo10DaysZaPeriod As Func(Of Otkaz, Boolean) = (Function(o) o.DaysOnRassled > 9 AndAlso o.ZaKem?.ToLower <> "тр")
 
 
         'Функция, которая создаёт предикат под конкретный KtoRass
@@ -86,11 +99,11 @@ Namespace Kas
         Private Function IsWithinPeriod(dateToCheck As Date?) As Boolean
             If dateToCheck.HasValue Then
                 ' Дата существует — проверяем её на соответствие периоду
-                With My.Settings
-                    If .NachPeriod = Date.MinValue OrElse .KonPeriod = Date.MinValue Then
+                With Fetcher
+                    If .NachDat = Date.MinValue OrElse .KonDat = Date.MinValue Then
                         Return True ' Период не установлен — пропускаем проверку
                     Else
-                        Return dateToCheck.Value >= .NachPeriod AndAlso dateToCheck.Value <= .KonPeriod
+                        Return dateToCheck.Value >= .NachDat AndAlso dateToCheck.Value <= .KonDat
                     End If
                 End With
             Else

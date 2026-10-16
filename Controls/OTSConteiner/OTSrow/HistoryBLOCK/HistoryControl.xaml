@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
              xmlns:local="HistoryControl.Kas"
              
              Width="45" Height="auto">
@@ -40,7 +41,7 @@
 				<StackPanel>
 
 
-					<TextBlock Text="📋" FontSize="25" Foreground="DarkGreen"
+					<emoji:TextBlock Text="📋" FontSize="25" Foreground="DarkGreen"
 							   TextAlignment="Center" VerticalAlignment="Center"
 							   PreviewMouseLeftButtonDown="BtnCopy_PreviewMouseLeftButtonDown"/>
 
@@ -52,7 +53,7 @@
 						
 						<CheckBox.Template>
 							<ControlTemplate TargetType="CheckBox">
-								<TextBlock x:Name="BoxSymbol"
+								<emoji:TextBlock x:Name="BoxSymbol"
 										   Text="☐"
 										   FontSize="23"
 										   MaxHeight="27"
@@ -70,7 +71,7 @@
 						</CheckBox.Template>
 					</CheckBox>
 
-					<TextBlock Text="❌" FontSize="25" Foreground="DarkRed"
+					<emoji:TextBlock Text="❌" FontSize="25" Foreground="DarkRed"
                        TextAlignment="Center" VerticalAlignment="Center"
                        PreviewMouseLeftButtonDown="BtnDel_PreviewMouseLeftButtonDown"/>
 					
@@ -79,19 +80,19 @@
 			</Border>
 
 			<Border Style="{StaticResource Brdr}"  Height="20">
-				<TextBlock Text="▲" FontSize="29"
+				<emoji:TextBlock Text="▲" FontSize="29"
                                    TextAlignment="Center" VerticalAlignment="Center"  MinHeight="41"
                                    PreviewMouseLeftButtonDown="BtnDOWN_PreviewMouseLeftButtonDown"
                                    RenderTransformOrigin="0.5,0.5">
-					<TextBlock.RenderTransform>
+					<emoji:TextBlock.RenderTransform>
 						<TransformGroup>
 							<ScaleTransform ScaleY="-1"/>
 							<SkewTransform/>
 							<RotateTransform/>
 							<TranslateTransform/>
 						</TransformGroup>
-					</TextBlock.RenderTransform>
-				</TextBlock>
+					</emoji:TextBlock.RenderTransform>
+				</emoji:TextBlock>
 			</Border>
 		</StackPanel>
 	</Border>

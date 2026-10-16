@@ -72,7 +72,8 @@ Namespace Kas
                 End If
 
                 .KonDat = Today.Date
-
+                My.Settings.NachPeriod = Fetcher.NachDat
+                My.Settings.KonPeriod = Fetcher.KonDat
                 ' Проверяем существование MW и вложенных элементов перед обращением
                 If MW.JourParam IsNot Nothing AndAlso MW.JourParam.ParamTimeCTL IsNot Nothing Then
                     MW.JourParam.ParamTimeCTL.But23.IsChecked = True
@@ -82,7 +83,7 @@ Namespace Kas
             If DorTBlock IsNot Nothing Then
                 DorTBlock.SelectedIndex = 12
             End If
-
+            MW.TRowsContainer.UpdateTotal()
 
             'With Fetcher
             '    If Today.Day < 13 Then

@@ -102,33 +102,51 @@ Namespace Kas
         End Sub
 
         Private Sub Label_PreviewMouseRightButtonUp(sender As Object, e As MouseButtonEventArgs)
-
-
-            If PointedOtkaz IsNot Nothing Then
-
-                ' 1. Ищем среди открытых окон уже существующее окно инспектора
-                Dim existingWin As OtkazInspectorWindow = Nothing
-                For Each w In Application.Current.Windows
-                    If TypeOf w Is OtkazInspectorWindow Then
-                        existingWin = CType(w, OtkazInspectorWindow)
-                        Exit For
-                    End If
-                Next
-
-                ' 2. Если окно УЖЕ открыто — просто обновляем данные и выводим его на передний план
-                If existingWin IsNot Nothing Then
-                    existingWin.UpdateData(PointedOtkaz)
-                    existingWin.Activate() ' Делает окно активным и выводит его поверх остальных
-                Else
-                    ' 3. Если окна НЕТ — создаем и показываем новое (оно встанет по центру, как и положено при первом открытии)
-                    Dim win As New OtkazInspectorWindow(PointedOtkaz)
-                    win.Owner = Application.Current.MainWindow
-                    win.Show()
-                End If
-
-            Else
+            If PointedOtkaz Is Nothing Then
                 ShowMSG(MW, "Отказ не выбран", "Внимание", MessageBoxButton.OK)
+                Return
             End If
+
+            ' Ищем среди открытых окон уже существующее окно инспектора
+            Dim existingWin As OtkazInspectorWindow = Application.Current.Windows _
+                .OfType(Of OtkazInspectorWindow)() _
+                .FirstOrDefault()
+
+            If existingWin IsNot Nothing Then
+                ' Если окно УЖЕ открыто — обновляем данные и выводим его на передний план
+                existingWin.UpdateData(PointedOtkaz)
+                existingWin.Activate()
+            Else
+                ' Если окна НЕТ — создаем и показываем новое
+                Dim win As New OtkazInspectorWindow(PointedOtkaz) With {.Owner = MW}
+                win.Show()
+            End If
+
+            'If PointedOtkaz IsNot Nothing Then
+
+            '    ' 1. Ищем среди открытых окон уже существующее окно инспектора
+            '    Dim existingWin As OtkazInspectorWindow = Nothing
+            '    For Each w In Application.Current.Windows
+            '        If TypeOf w Is OtkazInspectorWindow Then
+            '            existingWin = CType(w, OtkazInspectorWindow)
+            '            Exit For
+            '        End If
+            '    Next
+
+            '    ' 2. Если окно УЖЕ открыто — просто обновляем данные и выводим его на передний план
+            '    If existingWin IsNot Nothing Then
+            '        existingWin.UpdateData(PointedOtkaz)
+            '        existingWin.Activate() ' Делает окно активным и выводит его поверх остальных
+            '    Else
+            '        ' 3. Если окна НЕТ — создаем и показываем новое (оно встанет по центру, как и положено при первом открытии)
+            '        Dim win As New OtkazInspectorWindow(PointedOtkaz)
+            '        win.Owner = Application.Current.MainWindow
+            '        win.Show()
+            '    End If
+
+            'Else
+            '    ShowMSG(MW, "Отказ не выбран", "Внимание", MessageBoxButton.OK)
+            'End If
 
         End Sub
 

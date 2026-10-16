@@ -26,7 +26,7 @@
     <!-- Стиль для текстБлоков -->
     <!--Равномерный по-вертикали только 25,17 размер шрифта-->
     <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource LCDFont}"/>
+		<Setter Property="FontFamily" Value="{StaticResource LCDFont}"/>
         <Setter Property="FontSize" Value="17"/>
         <Setter Property="Foreground" Value="GreenYellow"/>
     </Style>

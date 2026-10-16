@@ -7,8 +7,8 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <!--<ResourceDictionary Source="templates/TitleBarStyle.xaml"/>-->
-                <ResourceDictionary Source="templates/Colors.xaml"/>
-                <ResourceDictionary Source="templates/TableRowStyle.xaml"/>
+				<ResourceDictionary Source="/Templates/Colors.xaml"/>
+				<ResourceDictionary Source="/Templates/TableRowStyle.xaml"/>
                 <ResourceDictionary Source="/Templates/OTSContrStyles.xaml"/>
                 <ResourceDictionary Source="/Templates/PopupButtonStyle.xaml"/>
                 <ResourceDictionary Source="/Templates/StylesForControls.xaml"/>

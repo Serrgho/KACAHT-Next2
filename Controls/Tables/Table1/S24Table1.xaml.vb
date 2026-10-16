@@ -399,55 +399,6 @@ Namespace Kas
 
 
 
-            '_highlightGroup.Clear()
-            '_cellToGroupIndex.Clear()
-
-            '' === ДОБАВИТЬ: Подписка на уход мыши со ВСЕГО Grid'а ===
-            'AddHandler MainGrid.MouseLeave, AddressOf MainGrid_MouseLeave
-            '' =======================================================
-
-            'For g As Integer = 0 To HighlightGroups.GetUpperBound(0)
-            '    Dim gridR1 = HighlightGroups(g, 0)
-            '    Dim gridC1 = HighlightGroups(g, 1)
-            '    Dim gridR2 = HighlightGroups(g, 2)
-            '    Dim gridC2 = HighlightGroups(g, 3)
-
-            '    ' Перевод координат Grid в индексы RowCellsMap
-            '    Dim mapR1 = gridR1 + 1
-            '    Dim mapR2 = gridR2 + 1
-            '    Dim mapC1 = gridC1 - 2
-            '    Dim mapC2 = gridC2 - 2
-
-            '    Dim groupCells As New List(Of TextBlock)()
-
-            '    For mapRow As Integer = mapR1 To mapR2
-            '        If RowCellsMap.ContainsKey(mapRow) Then
-            '            Dim cellsInRow = RowCellsMap(mapRow)
-            '            For idx As Integer = mapC1 To mapC2
-            '                If idx >= 0 AndAlso idx < cellsInRow.Length Then
-            '                    Dim tb = cellsInRow(idx)
-            '                    If tb IsNot Nothing Then
-            '                        ' Защита от дубликатов
-            '                        If Not _cellToGroupIndex.ContainsKey(tb) Then
-            '                            tb.Background = Brushes.Transparent
-            '                            AddHandler tb.MouseEnter, AddressOf Group_MouseEnter
-            '                            AddHandler tb.MouseLeave, AddressOf Group_MouseLeave
-            '                            AddHandler tb.MouseRightButtonDown, AddressOf CopyGroupToClipboard_Click
-
-
-
-            '                            ' =========================================================
-
-            '                        End If
-
-            '                        groupCells.Add(tb)
-            '                        _cellToGroupIndex(tb) = g ' Запоминаем ИНДЕКС ГРУППЫ
-            '                    End If
-            '                End If
-            '            Next
-            '        End If
-            '    Next
-            'Next
         End Sub
 
         ''' <summary>
@@ -463,14 +414,6 @@ Namespace Kas
             _currentGroupBounds = Nothing
 
 
-
-
-            'If _highlightGroup.Count = 0 Then Return
-
-            'For Each cell In _highlightGroup
-            '    cell.Background = DefaultBrush
-            'Next
-            '_highlightGroup.Clear()
         End Sub
 
         ''' <summary>
@@ -492,17 +435,6 @@ Namespace Kas
             End If
 
 
-            'If _highlightGroup.Count = 0 Then Return
-
-            'Dim tb = TryCast(e.OriginalSource, TextBlock)
-
-            '' Если мышь не над TextBlock ИЛИ этот TextBlock не входит в текущую подсвеченную группу - гасим
-            'If tb Is Nothing OrElse Not _highlightGroup.Contains(tb) Then
-            '    For Each cell In _highlightGroup
-            '        cell.Background = DefaultBrush
-            '    Next
-            '    _highlightGroup.Clear()
-            'End If
         End Sub
 
 
@@ -563,41 +495,6 @@ Namespace Kas
 
 
 
-
-
-
-            'Dim tb = TryCast(sender, TextBlock)
-            'If tb Is Nothing Then Return
-
-            'Dim groupIdx As Integer = -1
-            'If _cellToGroupIndex.TryGetValue(tb, groupIdx) Then
-            '    ' Гасим предыдущую подсветку
-            '    For Each cell In _highlightGroup
-            '        cell.Background = DefaultBrush
-            '    Next
-
-            '    ' Собираем ячейки заново по индексу группы (гарантированно правильный набор)
-            '    _highlightGroup.Clear()
-            '    Dim r1 = HighlightGroups(groupIdx, 0) + 1
-            '    Dim c1 = HighlightGroups(groupIdx, 1) - 2
-            '    Dim r2 = HighlightGroups(groupIdx, 2) + 1
-            '    Dim c2 = HighlightGroups(groupIdx, 3) - 2
-
-            '    For mapRow As Integer = r1 To r2
-            '        If RowCellsMap.ContainsKey(mapRow) Then
-            '            Dim cellsInRow = RowCellsMap(mapRow)
-            '            For idx As Integer = c1 To c2
-            '                If idx >= 0 AndAlso idx < cellsInRow.Length Then
-            '                    Dim cellTb = cellsInRow(idx)
-            '                    If cellTb IsNot Nothing Then
-            '                        cellTb.Background = GroupHighlightBrush
-            '                        _highlightGroup.Add(cellTb)
-            '                    End If
-            '                End If
-            '            Next
-            '        End If
-            '    Next
-            'End If
         End Sub
 
         ''' <summary>
@@ -782,34 +679,6 @@ Namespace Kas
             Dim percentData As TableRowNumericData = CalculatePercentChanges(rowCurrent, rowPrevious)
             FillRowNumeric(9, percentData)
 
-
-
-            '' ▼▼▼ Строка 10 - ПОЛНЫЙ МЕСЯЦ ПРОШЛОГО ГОДА (КАК БЫЛО РАНЬШЕ) НЕ ССЫЛОЧНЫЕ ДАННЫЕ ▼▼▼
-            'If _periodEnd IsNot Nothing AndAlso _previousYearOtkazyRaw IsNot Nothing Then
-            '    Dim oldP = GetPrevPeriod(If(_periodStart, _periodEnd).Value.Date,
-            '         _periodEnd.Value.Date,
-            '         _previousYearOtkazyRaw)
-
-            '    Dim actualPrevYear As Integer = oldP.End.Year
-            '    Dim targetMon As Integer = oldP.End.Month
-
-            '    Dim monthStart As New Date(actualPrevYear, targetMon, 1)
-            '    Dim monthEnd As Date = monthStart.AddMonths(1).AddDays(-1)
-
-            '    ' Фильтруем сырые данные за ВЕСЬ этот месяц
-            '    Dim fullMonthOtkazy = _previousYearOtkazyRaw.Where(Function(o)
-            '                                                           Return o.Nach.Year = actualPrevYear AndAlso
-            '                                                          o.Nach.Date >= monthStart.Date AndAlso
-            '                                                          o.Nach.Date <= monthEnd.Date
-            '                                                       End Function).ToList()
-
-            '    Dim rowFullMonth As TableRowData = BuildTableRowData(
-            'fullMonthOtkazy, tchCombined, SignedOnTRPU, SignedOnSLD, SignedOnZav,
-            'isCat1, isCat2, isCat3)
-
-            '    FillRowMerged(10, rowFullMonth, allNormal:=True)
-            'End If
-
             ' ▼▼▼ Строка 10 - ПОЛНЫЙ МЕСЯЦ/ПЕРИОД ПРОШЛОГО ГОДА ▼▼▼
             If _periodEnd IsNot Nothing AndAlso _previousYearOtkazyRaw IsNot Nothing Then
                 Dim oldP = GetPrevPeriod(If(_periodStart, _periodEnd).Value.Date,
@@ -966,11 +835,7 @@ Namespace Kas
         ''' <summary>
         ''' Возвращает суммарную цель за все месяцы, попавшие в период startDate...endDate
         ''' </summary>
-        Private Function GetGoalForPeriod(
-    goals As List(Of MonthlyGoal),
-    startDate As Date,
-    endDate As Date
-) As MonthlyGoal
+        Private Function GetGoalForPeriod(goals As List(Of MonthlyGoal), startDate As Date, endDate As Date) As MonthlyGoal
 
             Dim result As New MonthlyGoal()
 

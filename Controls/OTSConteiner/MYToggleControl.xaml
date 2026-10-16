@@ -11,7 +11,7 @@
 			<Setter Property="Template">
 				<Setter.Value>
 					<ControlTemplate TargetType="ToggleButton">
-						<Grid Margin="2">
+						<Grid >
 							<Grid.RowDefinitions>
 								<RowDefinition Height="Auto"/>
 								<RowDefinition Height="15"/>
@@ -150,8 +150,31 @@
 			</Setter>
 		</Style>
 	</UserControl.Resources>
+	<Grid VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="80">
+		<Grid.RowDefinitions>
+			<!-- Строка 0: Заголовок (занимает столько, сколько нужно тексту) -->
+			<RowDefinition Height="Auto"/>
+			<!-- Строка 1: Переключатель (занимает свое место) -->
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
 
-	<StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="80">
+		<!-- Заголовок в первой строке -->
+		<TextBlock x:Name="Zagolovok"
+                   Grid.Row="0"
+                   VerticalAlignment="Bottom" 
+                   Margin="0,0,0,2"
+                   TextWrapping="Wrap"
+                   TextAlignment="Center"/>
+
+		<!-- Переключатель во второй строке -->
+		<ToggleButton Grid.Row="1"
+                      Style="{StaticResource CustomToggleStyle}"
+                      Name="MYToggle"
+                      IsChecked="{Binding IsChecked, ElementName=RootControl, Mode=TwoWay}"
+                      Checked="MYToggle_Checked"
+                      Unchecked="MYToggle_Unchecked"/>
+	</Grid>
+	<!--<StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="80">
 		<TextBlock x:Name="Zagolovok"
                    VerticalAlignment="Center"
                    TextWrapping="Wrap"
@@ -162,5 +185,5 @@
                       IsChecked="{Binding IsChecked, ElementName=RootControl, Mode=TwoWay}"
                       Checked="MYToggle_Checked"
                       Unchecked="MYToggle_Unchecked"/>
-	</StackPanel>
+	</StackPanel>-->
 </UserControl>

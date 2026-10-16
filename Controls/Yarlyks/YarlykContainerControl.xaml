@@ -11,97 +11,98 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="LemonChiffon"/>
-            <Setter Property="FontSize"  Value="17"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize"  Value="21"/>
             <Setter Property="FontWeight"  Value="SemiBold"/>
-            <Setter Property="FontStyle"  Value="Italic"/>
-            <Setter Property="Background">
-                <Setter.Value>
+            <Setter Property="FontStyle"  Value="Normal"/>
+			<Setter Property="Background" Value="{StaticResource ScrolBarBrush}"/>
+			<!--<Setter.Value>
                     <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5" ColorInterpolationMode="SRgbLinearInterpolation" MappingMode="RelativeToBoundingBox">
                         <GradientStop Color="{StaticResource AppBackColor}" Offset="0.1"/>
                         <GradientStop Color="{StaticResource SplitterColor}" Offset="0.5"/>
                         <GradientStop Color="{StaticResource AppBackColor}" Offset="0.9"/>
                     </LinearGradientBrush>
-                </Setter.Value>
-            </Setter>
-            
-            
-            <Setter Property="Height" Value="auto"/>
-            <Setter Property="Padding" Value="2"/>
-            
-        </Style>
+                </Setter.Value>-->
+
+			<Setter Property="Height" Value="auto"/>
+			<Setter Property="Padding" Value="2"/>
+		</Style>
 
     </UserControl.Resources>
-    
-    
-    <Border Background="{StaticResource AppBackBrush}" Width="auto" Height="auto">
-        
-        
-        <ScrollViewer Grid.Row="1"
-                  HorizontalScrollBarVisibility="Disabled"
-                  VerticalScrollBarVisibility="Auto"
-                  Background="Transparent"
-                  Padding="1" >
-        
-        <ScrollViewer.Resources>
-            <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
-        </ScrollViewer.Resources>
 
-            <StackPanel Orientation="Vertical" >
-                <Label Style="{StaticResource LabSty}" Content="Общее количество" />
-                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" MinWidth="120" >
-                    <local:Yarlyk x:Name="AllOTSYAR" HeaderText="ОТС ВСЕГО" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="OnKRASRail" HeaderText="Допущ. на КРАС" MouseDown="YarlykPressHandler" />
-                    <local:Yarlyk x:Name="OnOtherRails" HeaderText="Допущ. на др. дор." MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="SohrYAR" HeaderText="Сохранено" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="OTSOutKomplNotPeredanYAR" HeaderText="НЕ учт. в компл. и_не_перед." MouseDown="YarlykPressHandler"/>
-                </WrapPanel>
-                <Label Style="{StaticResource LabSty}" Content="Комплекс" />
-                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" MinWidth="120" >
-                    <local:Yarlyk x:Name="OTSInKomplYAR" HeaderText="Учт. в комплексе" MouseDown="YarlykPressHandler"/>
-					
-					<local:Yarlyk x:Name="RassForTCH" HeaderText="В расслед. на ТЧЭ" MouseDown="YarlykPressHandler"/>
-					
-                    <local:Yarlyk x:Name="OTS_ON_TCH" HeaderText="Учт. за ТЧ" MouseDown="YarlykPressHandler"/>
-					<local:Yarlyk x:Name="OTS_ON_TRPU" HeaderText="Учт. за ТРПУ" MouseDown="YarlykPressHandler"/>
-					<local:Yarlyk x:Name="OTS_ON_Zavod_and_Proch" HeaderText="Учт. за Заводы_и_Проч." MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="OTS_ON_SLD" HeaderText="Учт. за СЛД" MouseDown="YarlykPressHandler"/>
-					
-                    
-                </WrapPanel>
+	<Border Background="{StaticResource AppBackBrush}" Width="auto" Height="auto">
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<!-- Верхняя часть без скролла -->
+				<RowDefinition Height="*"/>
+				<!-- ScrollViewer займёт оставшееся место -->
+			</Grid.RowDefinitions>
 
-                <!--<local:Yarlyk x:Name="Over10CreateZakr" HeaderText="Свыше 10сут. закр. (от созд. ОТС)" MouseDown="YarlykPressHandler"/>-->
-                <Label Style="{StaticResource LabSty}" Content="Расследование" />
-                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" MinWidth="120" >
-                    <local:Yarlyk x:Name="Over10Days" HeaderText="Свыше 10 сут. в_рассл." MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="Over10Zakr" HeaderText="Свыше 10сут. закр. (от нач. ОТС)" MouseDown="YarlykPressHandler"/>
-                    
-                    <local:Yarlyk x:Name="InOthRail" HeaderText="Перед. на др_дороги" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="ToOthPredKras" HeaderText="Перед. на предпр._КРАС" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="ToTechnology" HeaderText="Переведены в ТН" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="KorrP" HeaderText="Корректировки" MouseDown="YarlykPressHandler"/>
-                    
-                    
+			<!-- Верхняя секция (без скролла) -->
+			<Border BorderThickness="1" BorderBrush="{StaticResource ScrolBarBrush}" Margin="2 1 7 1">
+				<StackPanel Orientation="Vertical" Grid.Row="0"  Margin="0 0 0 10">
+					<Label Style="{StaticResource LabSty}" Content="Общее количество" />
+					<WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" MinWidth="120">
+						<local:Yarlyk x:Name="AllOTSYAR" HeaderText="ОТС ВСЕГО" MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="OnKRASRail" HeaderText="ОТС на КРАС" MouseDown="YarlykPressHandler" />
+						<local:Yarlyk x:Name="OnOtherRails" HeaderText="ОТС не на КРАС" MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="OTSOutKomplNotPeredanYAR" HeaderText="на КРАС не в компл." MouseDown="YarlykPressHandler"/>
+					</WrapPanel>
+				</StackPanel>
+			</Border>
+			
 
-                </WrapPanel>
+			<!-- ScrollViewer занимает оставшееся пространство -->
+			<ScrollViewer 
+            Grid.Row="1"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto"
+            Background="Transparent"
+            Padding="1">
 
+				<ScrollViewer.Resources>
+					<Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
+				</ScrollViewer.Resources>
 
-                <Label Style="{StaticResource LabSty}" Content="Обратить внимание" Background="#FFF9B703" Foreground="Black" />
-                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" MinWidth="120" Background="#FFF9B703">
-                    <local:Yarlyk x:Name="SobytiYar" HeaderText="События" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="KorporativYar" HeaderText="Корп наруш" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="DangerOTSYar" HeaderText="Опасные отказы" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="NarushSrokYar" HeaderText="Принятые с нарушением срока" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="OkaPomOTSYar" HeaderText="Оказание помощи" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="HasAlienSLD" HeaderText="Закр. за чужим СЛД" MouseDown="YarlykPressHandler"/>
-                    <local:Yarlyk x:Name="HasPasYar" HeaderText="Факты пасс. приг." MouseDown="YarlykPressHandler"/>
-					<local:Yarlyk x:Name="HasPFB" HeaderText="ПФБ-шные" MouseDown="YarlykPressHandler"/>
-                </WrapPanel>
-            </StackPanel>
-       
-    </ScrollViewer>
-    </Border>
-    
+				<StackPanel Orientation="Vertical">
+					<Label Style="{StaticResource LabSty}" Content="Комплекс" />
+					<WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" MinWidth="120" >
+						<local:Yarlyk x:Name="OTS_ON_TRPU" HeaderText="ТРПУ" MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="RassForTCH" HeaderText="В расслед." MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="OTS_ON_TCH" HeaderText="ТЧ" MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="OTS_ON_Zavod_and_Proch" HeaderText="ТМХ Лок / Проч." MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="OTS_ON_SLD" HeaderText="СЛД" MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="OTSInKomplYAR" HeaderText="КОМПЛЕКС" MouseDown="YarlykPressHandler"/>
+					</WrapPanel>
 
+					<Label Style="{StaticResource LabSty}" Content="Расследование" />
+					<WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" MinWidth="120">
+						<local:Yarlyk x:Name="SohrYAR" HeaderText="Сохранены" MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="Over10Days" HeaderText="> 10 сут. в_рассл." MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="Over10Zakr" HeaderText="> 10сут. закр." MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="InOthRail" HeaderText="➡️ др дороги" MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="ToOthPredKras" HeaderText="➡️ на предпр. КРАС" MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="ToTechnology" HeaderText="➡️ в ТН" MouseDown="YarlykPressHandler"/>
+						<local:Yarlyk x:Name="KorrP" HeaderText="Корректир." MouseDown="YarlykPressHandler"/>
+					</WrapPanel>
+
+					<Label Style="{StaticResource LabSty}" Content="Обратить внимание" FontFamily="{StaticResource DiabloFont}" FontStyle="Normal" FontSize="21" Background="#FFF9B703" Foreground="LemonChiffon" />
+					<WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" MinWidth="120" Background="#FFF9B703" >
+						<local:Yarlyk x:Name="HasPasYar" HeaderText="Факты пасс. приг." MouseDown="YarlykPressHandler" />
+						<local:Yarlyk x:Name="HasPFB" HeaderText="ПФБ-шные" MouseDown="YarlykPressHandler" />
+						<local:Yarlyk x:Name="OkaPomOTSYar" HeaderText="Оказ. помощи" MouseDown="YarlykPressHandler" />
+						<local:Yarlyk x:Name="SobytiYar" HeaderText="События" MouseDown="YarlykPressHandler" />
+						<local:Yarlyk x:Name="KorporativYar" HeaderText="Корп наруш" MouseDown="YarlykPressHandler" />
+						<local:Yarlyk x:Name="DangerOTSYar" HeaderText="Опасные отказы" MouseDown="YarlykPressHandler" />
+						<local:Yarlyk x:Name="NarushSrokYar" HeaderText="С наруш. срока" MouseDown="YarlykPressHandler" />
+						<local:Yarlyk x:Name="HasAlienSLD" HeaderText="За чужим СЛД" MouseDown="YarlykPressHandler" />
+					</WrapPanel>
+				</StackPanel>
+			</ScrollViewer>
+		</Grid>
+	</Border>
+	
 
 </UserControl>

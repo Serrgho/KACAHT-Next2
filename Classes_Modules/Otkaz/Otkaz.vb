@@ -1777,7 +1777,7 @@ Namespace Kas
         Public ReadOnly Property Uslovie4() As Boolean
             Get
                 'это короткая запись
-                Dim s As String = If(ZaKemCode, "").ToLower()
+                Dim s As String = If(ZaKem, "").ToLower()
                 Return Not {"ублика", "ехнолог", "п.5.15"}.Any(Function(w) s.Contains(w))
             End Get
         End Property

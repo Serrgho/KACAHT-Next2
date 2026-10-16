@@ -34,34 +34,23 @@
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="auto"/>
+				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="*" />
 				<RowDefinition Height="auto"/>
 			</Grid.RowDefinitions>
-			<local:WarningFiltersControl x:Name="WarningFilters" Grid.Row="0"
-                             ItemsSource="{Binding ItemsSource, ElementName=OTSContainer}" 
-                             FilterApplied="WarningFilters_FilterApplied"/>
+
+			<local:WarningFiltersControl x:Name="WarningFilters" Grid.Row="0" ItemsSource="{Binding ItemsSource, ElementName=OTSContainer}" FilterApplied="WarningFilters_FilterApplied"/>
 
 			<local:NumOTSUserTB x:Name="FindOTS" Grid.Row="1" FilterRequested="NumOTSUserTB_FilterRequested" Cleared="NumOTSUserTB_Cleared" LokRequested="FindOTS_LokRequested"/>
 
-
-
-
-
-			<Grid Grid.Row="2"  Background="{StaticResource AppBackBrush}" Height="80" Margin="2 0 2 0">
+			<Grid Grid.Row="2"  Background="{StaticResource AppBackBrush}" Margin="2 0">
 				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="auto"/>
 					<ColumnDefinition Width="auto"/>
 					<ColumnDefinition Width="auto"/>
 					<ColumnDefinition Width="*"/>
 				</Grid.ColumnDefinitions>
-
-				<!--пока невидимый переключатель видимости для поиска по №№ ОТС-->
-				<!--<local:MYToggleControl x:Name="NumSearchToggleUC"  MYToggleZagolovok="Поиск по №№ ОТС" IsChecked="False" Click="NumSearchToggleUC_Click" Visibility="Collapsed"/>-->
-				<!--=================================================================-->
-
-				<!--<local:MYToggleControl Grid.Column="1" x:Name="TableItemVisToggleUC" Width="80" MYToggleZagolovok="Статистика" Margin="5 1" IsChecked="False" Click="TableVisToggleUC_Click"/>-->
-				<local:MYToggleControl Grid.Column="2" x:Name="SortOrderToggleUC" Width="80" MYToggleZagolovok="Сорт. фильтры" Margin="5 1" IsChecked="False"/>
+								
+				<local:MYToggleControl Grid.Column="0" x:Name="SortOrderToggleUC" Width="80" MYToggleZagolovok="Сорт." Margin="2 1" IsChecked="False"/>
 
 				<!--добавить в !!! OtkazFilterConfig в Public Function GetDisplaySelector !!!
 							 в !!! TableHeader в Private Function BuildStringPredicate !!! 
@@ -71,54 +60,22 @@
 							 !!! имя свойства = +{0LevelIndicator} !!!  -->
 				<!--MestoOTS_Dor-->
 
+				<Border Grid.Column="1" Background="{StaticResource AppBackBrush}" BorderBrush="{StaticResource SplitterBrush}"	BorderThickness="1" CornerRadius="4" Margin="2">
+					<StackPanel Orientation="Horizontal">
+						<!-- Поле поиска -->
+						<TextBox x:Name="SearchOpisBox" Width="100" MaxLines="2" Padding="4,2" Foreground="Blue" FontWeight="SemiBold" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" TextWrapping="Wrap" TextChanged="SearchOpisBox_TextChanged" SelectionBrush="{StaticResource ScrolBarBrush}" SelectionOpacity="0.6" ToolTip="Поиск по описанию отказа"/>
 
+						<!-- Кнопка очистки -->
+						<Button x:Name="ClearSearchButton" Content="❌"  Click="ClearSearchButton_Click" ToolTip="Очистить поиск" Style="{StaticResource StyleCloseButton}" Margin="4 1 1 1"/>
+					</StackPanel>
+				</Border>
 
-				<ScrollViewer Grid.Column="3"  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+				<ScrollViewer Grid.Column="2"  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
 					<ScrollViewer.Resources>
 						<Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
 					</ScrollViewer.Resources>
 
-					<StackPanel Grid.Column="1"  Orientation="Horizontal">
-
-						<Border Background="{StaticResource AppBackBrush}"
-                                BorderBrush="{StaticResource SplitterBrush}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                Margin="2"
-								>
-							<StackPanel Orientation="Horizontal">
-								<!-- Поле поиска -->
-								<TextBox x:Name="SearchOpisBox"
-                                         Width="130"
-                                         MaxLines="2"
-                                         
-                                         Padding="4,2"
-                                         Foreground="Blue"
-                                         FontWeight="SemiBold"
-                                         BorderThickness="0"
-                                         Background="Transparent"
-                                         VerticalAlignment="Center"
-                                         TextWrapping="Wrap"
-                                         TextChanged="SearchOpisBox_TextChanged"
-                                         SelectionBrush="{StaticResource ScrolBarBrush}"
-                                         SelectionOpacity="0.6"
-                                         ToolTip="Поиск по описанию отказа" />
-
-								<!-- Кнопка очистки -->
-								<Button x:Name="ClearSearchButton"
-                                        Content="❌"
-                                        Click="ClearSearchButton_Click"
-                                        ToolTip="Очистить поиск"
-                                        Style="{StaticResource StyleCloseButton}"
-                                        Margin="4 1 1 1"/>
-
-							</StackPanel>
-						</Border>
-
-
-
-
-
+					<StackPanel Orientation="Horizontal">
 						<Border  Style="{StaticResource FiltrTBlock}" PreviewMouseUp="ClearFilters_MouseDown" >
 							<TextBlock x:Name="ClearFilters" Text="❌" Style="{StaticResource TBSTYLE}" Foreground="DarkRed" />
 						</Border>
@@ -584,7 +541,7 @@
 								Tag="KorDate">
 							<Grid>
 								<!-- Оберни в Grid, чтобы можно было наложить элементы -->
-								<TextBlock Text="Дата послед. корр." Style="{StaticResource TBSTYLE}" />
+								<TextBlock Text="Послед. корр." Style="{StaticResource TBSTYLE}" />
 								<local:Level0FilterIndicator	x:Name="KorDate0LevelIndicator"
 																PropertyName="KorDate"
 																HorizontalAlignment="Right"
@@ -604,42 +561,29 @@
 
 
 			<Grid Grid.Row="3" ShowGridLines="True">
-				<ScrollViewer x:Name="ScrollOTSBlockCont"
-						  Grid.Row="1"
-						  HorizontalScrollBarVisibility="Auto"
-						  VerticalScrollBarVisibility="Disabled"
-						  Focusable="False"
-						  BorderThickness="0">
+				
+				<ScrollViewer	x:Name="ScrollOTSBlockCont"
+								HorizontalScrollBarVisibility="Auto"
+								VerticalScrollBarVisibility="Disabled"
+								Focusable="False"
+								BorderThickness="0">
 					<ScrollViewer.Resources>
 						<Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
 					</ScrollViewer.Resources>
 
 					<Grid>
 						<Grid.RowDefinitions>
-
 							<RowDefinition Height="Auto"/>
-
 							<RowDefinition Height="Auto"/>
-
 							<RowDefinition Height="*"/>
-
 							<RowDefinition Height="Auto"/>
 						</Grid.RowDefinitions>
 
 						<local:TableHeader x:Name="THed" Grid.Row="0"/>
 
 						<Button x:Name="ToUpButton" Grid.Row="1" Style="{StaticResource PopupStyleButton}" Click="ToUpButton_Click"  Padding="-1" Content="▲▲▲▲▲▲▲" Foreground="DarkBlue" Height="20"/>
-						<!--VirtualizingStackPanel.ScrollUnit="Pixel"
-         ScrollViewer.CanContentScroll="True"-->
-						<ListBox Grid.Row="2"
-         x:Name="OTSContainer"
-         Margin="2"
-         Background="{StaticResource AppBackBrush}"
-         VirtualizingStackPanel.IsVirtualizing="True"
-         VirtualizingStackPanel.VirtualizationMode="Recycling"
-         ScrollViewer.CanContentScroll="True"
-         PreviewMouseWheel="OTSContainer_PreviewMouseWheel"
-         BorderThickness="0">
+						
+						<ListBox Grid.Row="2" x:Name="OTSContainer"	Margin="2" Background="{StaticResource AppBackBrush}" VirtualizingStackPanel.IsVirtualizing="True"			VirtualizingStackPanel.ScrollUnit="Item" VirtualizingStackPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True"	PreviewMouseWheel="OTSContainer_PreviewMouseWheel" BorderThickness="0">
 							<ListBox.Resources>
 								<Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
 							</ListBox.Resources>
@@ -667,60 +611,13 @@
 
 							<ListBox.Template>
 								<ControlTemplate TargetType="ListBox">
-									<ScrollViewer x:Name="InnerScrollViewer"
-                          CanContentScroll="True"
-                          HorizontalScrollBarVisibility="Disabled"
-                          VerticalScrollBarVisibility="Auto">
+									<ScrollViewer x:Name="InnerScrollViewer" CanContentScroll="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 										<ItemsPresenter />
 									</ScrollViewer>
 								</ControlTemplate>
 							</ListBox.Template>
 						</ListBox>
-
-						<!--<ListBox Grid.Row="2"
-							  x:Name="OTSContainer"
-							  Margin="2"
-							  Background="{StaticResource AppBackBrush}"
-							  VirtualizingStackPanel.IsVirtualizing="True"
-							  VirtualizingStackPanel.VirtualizationMode="Recycling"
-							  PreviewMouseWheel="OTSContainer_PreviewMouseWheel"
-							  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-							  ScrollViewer.VerticalScrollBarVisibility="Auto"
-							  BorderThickness="0">
-							<ListBox.Resources>
-								<Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource CustomScrollBarStyle}" />
-							</ListBox.Resources>
-							<ListBox.ItemContainerStyle>
-								<Style TargetType="ListBoxItem">
-									<Setter Property="Background" Value="Transparent"/>
-									<Setter Property="BorderThickness" Value="0"/>
-									<Setter Property="Focusable" Value="False"/>
-									<Setter Property="Template">
-										<Setter.Value>
-											<ControlTemplate TargetType="ListBoxItem">
-												<ContentPresenter />
-											</ControlTemplate>
-										</Setter.Value>
-									</Setter>
-								</Style>
-							</ListBox.ItemContainerStyle>
-							<ListBox.ItemTemplate>
-								<DataTemplate>
-								
-									<local:OTSRowControl SearchTerm="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=CurrentSearchTerm}" />
-								</DataTemplate>
-							</ListBox.ItemTemplate>
-							<ListBox.Template>
-								<ControlTemplate TargetType="ListBox">
-								
-									<ScrollViewer x:Name="InnerScrollViewer"
-											  HorizontalScrollBarVisibility="Disabled"
-											  VerticalScrollBarVisibility="Auto">
-										<ItemsPresenter />
-									</ScrollViewer>
-								</ControlTemplate>
-							</ListBox.Template>
-						</ListBox>-->
+						
 						<Button x:Name="ToDownButton" Grid.Row="3" Style="{StaticResource PopupStyleButton}" Click="ToDownButton_Click"  Padding="0" Content="▼▼▼▼▼▼▼" VerticalContentAlignment="Top" Foreground="DarkBlue" Height="20"/>
 					</Grid>
 				</ScrollViewer>
@@ -774,9 +671,11 @@
 
 						<TextBlock x:Name="SumKorr" Foreground="Black" MaxWidth="200" />
 
-						<TextBlock x:Name="PeriodOLDOTS" Foreground="BlueViolet"  MaxWidth="200" PreviewMouseLeftButtonDown="PerDOTS_PreviewMouseDown" ToolTip="LKM - Поменять местами с текущим периодом"/>
-
 						<TextBlock x:Name="PeriodOTS" Foreground="BlueViolet" MaxWidth="200" />
+						
+						<TextBlock x:Name="PeriodOLDOTS" Foreground="BlueViolet"  MaxWidth="200" />
+						<!--PreviewMouseLeftButtonDown="PerDOTS_PreviewMouseDown" ToolTip="LKM - Поменять местами с текущим периодом"-->
+
 
 						<TextBlock x:Name="FirstOTS" Foreground="Black" MaxWidth="150" />
 

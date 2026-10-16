@@ -35,19 +35,17 @@
 
             <WrapPanel Orientation="Horizontal">
 
-                <Button  x:Name="btnLoadOnlineJournal" Foreground="DarkRed" Content="🌐Показ. журнал ОТС" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadOnlineJournal_Click" Width="auto"/>
+                <Button  x:Name="btnLoadOnlineJournal" Tag="🛜" Content="Показ. журнал ОТС" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadOnlineJournal_Click" Width="auto"/>
 
-                <Button  x:Name="btnLoadInvestigationReport" Foreground="DarkRed" Content="🌐4 отчет - ТАБЛИЦА" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadInvestigationReport_Click" Width="auto"/>
+				<Button  x:Name="btnLoadInvestigationReport" Tag="🛜" Content="4 отчет - ТАБЛИЦА" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadInvestigationReport_Click" Width="auto"/>
 
-                <!--<Button  x:Name="btnLoadOnlineSLDJournal" Foreground="DarkRed" Content="🌐КАС АНТ СЛД-ПФБ" Style="{StaticResource PopupStyleButton}"  Margin="2" Click="btnLoadOnlineSLDJournal_Click" Width="auto"/>-->
+				<Button  x:Name="btnLoadOverdueJournal" Tag="🛜" Content="С наруш срока" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnLoadOverdueJournal_Click" Width="auto"/>
 
-                <Button  x:Name="btnLoadOverdueJournal" Content="🌐С наруш срока" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnLoadOverdueJournal_Click" Width="auto"/>
+				<Button  x:Name="btnLoadDangerousJournal"  Tag="🛜" Content="Опасные ОТС" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnLoadDangerousJournal_Click" Width="auto"/>
 
-                <Button  x:Name="btnLoadDangerousJournal"  Content="🌐Опасные ОТС" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnLoadDangerousJournal_Click" Width="auto"/>
+				<Button  x:Name="btnCorpViolationJournal"  Tag="🛜" Content="Корп наруш" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnCorpViolationJournal_Click" Width="auto"/>
 
-				<Button  x:Name="btnCorpViolationJournal"  Content="🌐Корп наруш" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnCorpViolationJournal_Click" Width="auto"/>
-
-				<Button  x:Name="btnEvents"  Content="🌐События" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnEvents_Click" Width="auto"/>
+				<Button  x:Name="btnEvents"  Tag="🛜" Content="События" Style="{StaticResource PopupStyleButtonGreen}"  Margin="2" Click="btnEvents_Click" Width="auto"/>
 
 				
             </WrapPanel>

@@ -220,6 +220,9 @@ Namespace Kas
                     'Fetcher.KonMinut = 0
                     ' Логируем (опционально)
                     Tx = $"Период для КАСАНТ обновлен: {Fetcher.NachKon_TXT} {Fetcher.NachTim}-{Fetcher.KonTim}"
+                    My.Settings.NachPeriod = Fetcher.NachDat
+                    My.Settings.KonPeriod = Fetcher.KonDat
+                    MW.TRowsContainer.UpdateTotal()
                     MW.InfoBLOK.AddItem(Tx)
 
 

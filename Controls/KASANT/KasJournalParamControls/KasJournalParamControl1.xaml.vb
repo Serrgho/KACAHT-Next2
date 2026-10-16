@@ -43,11 +43,9 @@
 
 		Private Sub FilterWithTimeOTSList_Click(sender As Object, e As RoutedEventArgs)
             Dim ExclusivePeriod As Func(Of Otkaz, Boolean) = (Function(o) o.Nach.IsInRangeWithTime AndAlso Not (o.KtoZakryl.ToLower.Contains("трп")))
-
-            'MW.expPoyasnilka.btnDailyPoyasnShow.Visibility = Visibility.Visible
-            OTSList = OTSList.Where(ExclusivePeriod).OrderBy(Function(o) o.Nach).ToList
-            'ResetPeriodSUB()
-            InitFirst()
+            Dim OTSLs = OTSList.Where(ExclusivePeriod).OrderBy(Function(o) o.Nach).ToList
+            AddOTSToContainer(OTSLs)
+            MW.TRowsContainer.UpdateTotal()
         End Sub
 	End Class
 End Namespace

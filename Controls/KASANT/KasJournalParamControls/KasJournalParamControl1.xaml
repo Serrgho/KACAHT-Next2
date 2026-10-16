@@ -55,9 +55,11 @@
 		</Border>
 		<Button Grid.Column="1" Grid.Row="1"
 				x:Name="FilterWithTimeOTSList"
+				Tag="🚦"
 				Style="{StaticResource PopupStyleButton}"
+				HorizontalAlignment="Left"
 				Click="FilterWithTimeOTSList_Click">
-				🌪️ Фильтр с учетом времени
+				Фильтр с учетом времени
 		</Button>
 
 

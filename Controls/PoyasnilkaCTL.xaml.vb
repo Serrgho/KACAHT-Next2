@@ -60,15 +60,41 @@ Namespace Kas
             'Dim fullCurY = GetFullCurrentYearOtkazy(OTSList, Fetcher.NachDat, Fetcher.KonDat)
 
             ' период прошлого года с тем же сдвигом, что и в таблицах
-            Dim oldP = GetPrevPeriod(Fetcher.NachDat, Fetcher.KonDat, oldY)
+
+            ' === Период прошлого года: либо из настроек, либо сдвиг ===
+            Dim oldStart As Date
+            Dim oldEnd As Date
+
+            If My.Settings.nachOLDPeriod <> Date.MinValue AndAlso
+       My.Settings.konOLDPeriod <> Date.MinValue Then
+                ' Явно задан пользователем
+                oldStart = My.Settings.nachOLDPeriod
+                oldEnd = My.Settings.konOLDPeriod
+            Else
+                ' Автоматический сдвиг (как было)
+                Dim oldP = GetPrevPeriod(Fetcher.NachDat, Fetcher.KonDat, oldY)
+                oldStart = oldP.Start
+                oldEnd = oldP.End
+            End If
+
+            'Dim oldP = GetPrevPeriod(Fetcher.NachDat, Fetcher.KonDat, oldY)
 
             ' готовые списки с учетом Uchet
             Dim NY = GetUchetOtkazy(fullCurY, Fetcher.NachDat, Fetcher.KonDat)
-            Dim NY1 = GetUchetOtkazy(oldY, oldP.Start, oldP.End)
+            Dim NY1 = GetUchetOtkazy(oldY, oldStart, oldEnd)
 
             ExportFullReport(NY, NY1,
                              Fetcher.NachDat, Fetcher.KonDat,
-                             oldP.Start, oldP.End)
+                             oldStart, oldEnd)
+
+
+            '' готовые списки с учетом Uchet
+            'Dim NY = GetUchetOtkazy(fullCurY, Fetcher.NachDat, Fetcher.KonDat)
+            'Dim NY1 = GetUchetOtkazy(oldY, oldP.Start, oldP.End)
+
+            'ExportFullReport(NY, NY1,
+            '                 Fetcher.NachDat, Fetcher.KonDat,
+            '                 oldP.Start, oldP.End)
 
         End Sub
 
@@ -337,30 +363,6 @@ Namespace Kas
 
             win.Content = scroller
 
-
-            '' === ЯДЕРНАЯ ОЧИСТКА ПЕРЕД ЗАКРЫТИЕМ ОКНА ===
-            '' Гарантируем, что все временные контролы отпишутся от событий
-            '' ДО того, как визуальное дерево будет уничтожено системой
-            'AddHandler win.Closed, Sub(s As Object, e As EventArgs)
-            '                           ' Очищаем каждый переданный контрол
-            '                           For Each ctrl In controls
-            '                               UnsubscribeAllEvents(ctrl)
-            '                           Next
-
-            '                           ' Очищаем сам скроллер (там висит PreviewMouseWheel)
-            '                           UnsubscribeAllEvents(scroller)
-
-            '                           ' Очищаем панель
-            '                           UnsubscribeAllEvents(panel)
-
-            '                           ' Принудительная сборка для временного окна
-            '                           GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking:=True)
-            '                           ResignOTSList(RezervList)
-            '                           RezervList = Nothing
-            '                       End Sub
-            '' ============================================
-
-
             win.Show()
         End Sub
 
@@ -375,12 +377,8 @@ Namespace Kas
         End Sub
 
         Private Sub btnDailyPoyasnShow_Click(sender As Object, e As RoutedEventArgs)
-            'Dim ExclusivePeriod As Func(Of Otkaz, Boolean) = (Function(o) o.Nach.IsInRangeWithTime AndAlso Not (o.KtoZakryl.ToLower.Contains("трп")))
-            'RezervList = OTSList
-            'OTSList = OTSList.Where(ExclusivePeriod).OrderBy(Function(o) o.Nach).ToList
-            'ResetPeriodSUB()
-            'InitFirst()
-            'YarCon.UpdateYarlykInfo()
+
+            DailyPoyasnilka(MW.TRowsContainer.ItemsSource.ToList)
         End Sub
     End Class
 End Namespace
